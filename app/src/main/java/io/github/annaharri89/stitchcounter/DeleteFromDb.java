@@ -20,6 +20,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import java.util.ArrayList;
 
+import io.github.annaharri89.stitchcounter.library.LibraryActivity;
+
 /**
  * Created by ETASpare on 7/3/2017.
  */

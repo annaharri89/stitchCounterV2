@@ -24,7 +24,7 @@
         android:roundIcon="@mipmap/ic_launcher_stitch_counter_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity"
+        <activity android:name=".main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,12 +33,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SingleCounterActivity"
+            android:name=".singleCounter.SingleCounterActivity"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name=".DoubleCounterActivity"
+            android:name=".doubleCounter.DoubleCounterActivity"
             android:windowSoftInputMode="stateHidden" />
-        <activity android:name=".LibraryActivity" />
+        <activity android:name=".library.LibraryActivity" />
         <activity
             android:name=".NewCounterActivity"
             android:theme="@style/Theme.MyDialog" />
@@ -47,7 +47,7 @@
             android:name=".CounterProjectContentProvider"
             android:authorities="io.github.annaharri89.stitchcounter.counterProject"
             android:exported="false" />
-        <activity android:name=".SettingsActivity" />
+        <activity android:name=".settings.SettingsActivity" />
     </application>
 
 </manifest>

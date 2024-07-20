@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package io.github.annaharri89.stitchcounter
+package io.github.annaharri89.stitchcounter.main
 
 import android.content.Intent
 import android.os.Bundle
@@ -21,14 +21,17 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
-import androidx.appcompat.widget.Toolbar
+import android.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.FragmentActivity
+import io.github.annaharri89.stitchcounter.NewCounterActivity
+import io.github.annaharri89.stitchcounter.R
+import io.github.annaharri89.stitchcounter.Utils
 
 class MainActivity : FragmentActivity() {
     @JvmField
     var helpMode: Boolean = false
-    private var helpModeArray: ArrayList<View>? = null
+    private var helpModeArray: ArrayList<View> = arrayListOf()
     private val utils = Utils(this)
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -58,7 +61,7 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val myToolbar = findViewById(R.id.toolbar_main) as Toolbar
-        //setSupportActionBar(myToolbar)
+        setActionBar(myToolbar)
 
         /* Help Mode Setup*/
         val help1 = findViewById(R.id.help_main_activity_1) as TextView
@@ -66,10 +69,10 @@ class MainActivity : FragmentActivity() {
         val tip1 = findViewById(R.id.help_main_activity_1_tip) as View
         val tip2 = findViewById(R.id.help_main_activity_2_tip) as View
         helpModeArray = ArrayList()
-        helpModeArray!!.add(help1)
-        helpModeArray!!.add(help2)
-        helpModeArray!!.add(tip1)
-        helpModeArray!!.add(tip2)
+        helpModeArray.add(help1)
+        helpModeArray.add(help2)
+        helpModeArray.add(tip1)
+        helpModeArray.add(tip2)
 
         /* Closes Help Mode, hides the annotation bubbles */
         val layout = findViewById(R.id.layout) as ConstraintLayout

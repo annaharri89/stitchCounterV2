@@ -14,12 +14,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="io.github.annaharri89.stitchcounter.SingleCounterActivity"
+    tools:context="io.github.annaharri89.stitchcounter.singleCounter.SingleCounterActivity"
     android:id="@+id/layout">
 
     <include
@@ -267,4 +267,4 @@
         app:layout_constraintTop_toTopOf="@+id/help_single_counter_activity_4"
         android:layout_marginTop="8dp" />
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
