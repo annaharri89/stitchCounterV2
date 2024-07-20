@@ -58,23 +58,23 @@ class NewCounterActivity : FragmentActivity() {
         }
 
         /* Single Counter Dialog */
-        val buttonSingleOk = findViewById<View>(R.id.button_single_ok) as Button
-        val textProjectNameSingle = findViewById<View>(R.id.text_project_name_3) as EditText
+        val buttonSingleOk = findViewById<View>(R.id.button_single_ok) as? Button
+        val textProjectNameSingle = findViewById<View>(R.id.text_project_name_3) as? EditText
         if (textProjectNameSingle != null) {
             /* Makes the keyboard appear automatically */
             openKeyboard()
         }
         buttonSingleOk?.setOnClickListener { v ->
             dismissKeyboard()
-            val name = textProjectNameSingle.text.toString()
+            val name = textProjectNameSingle?.text.toString()
             val intent = Intent(v.context, SingleCounterActivity::class.java)
             intent.putExtra("name", name)
             startActivity(intent)
         }
         /* Double Counter Dialog */
-        val buttonDoubleOk = findViewById<View>(R.id.button_double_ok) as Button
-        val textProjectNameDouble = findViewById<View>(R.id.text_project_name_4) as EditText
-        val totalRows = findViewById<View>(R.id.text_total_rows_input_2) as EditText
+        val buttonDoubleOk = findViewById<View>(R.id.button_double_ok) as? Button
+        val textProjectNameDouble = findViewById<View>(R.id.text_project_name_4) as? EditText
+        val totalRows = findViewById<View>(R.id.text_total_rows_input_2) as? EditText
         if (textProjectNameDouble != null) {
             /* Makes the keyboard appear automatically */
             openKeyboard()
@@ -82,11 +82,11 @@ class NewCounterActivity : FragmentActivity() {
         buttonDoubleOk?.setOnClickListener { v ->
             dismissKeyboard()
             val intent = Intent(v.context, DoubleCounterActivity::class.java)
-            val name = textProjectNameDouble.text.toString()
+            val name = textProjectNameDouble?.text.toString()
             intent.putExtra("name", name)
 
-            if (totalRows.text.toString().length > 0) {
-                val total_rows = totalRows.text.toString().toInt()
+            if (totalRows?.text.toString().length > 0) {
+                val total_rows = totalRows?.text.toString().toInt()
                 intent.putExtra("total_rows", total_rows)
             }
             startActivity(intent)

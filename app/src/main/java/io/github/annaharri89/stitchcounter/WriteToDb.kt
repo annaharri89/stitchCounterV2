@@ -19,6 +19,8 @@ import android.content.ContentValues
 import android.content.Context
 import android.os.AsyncTask
 
+// todo stitchCounterV2 bug: when you make a change to a counter and then go to the library screen and back to the project it hasn't saved the last change to the project
+
 class WriteToDb(private val mContext: Context) : AsyncTask<Counter, Void?, Void?>() {//todo stitchCounterV2 redo the async task and get rid of the context that is causing a leak
     override fun doInBackground(vararg counter: Counter): Void? {
         val dbHelper = StitchCounterDbHelper(this.mContext)

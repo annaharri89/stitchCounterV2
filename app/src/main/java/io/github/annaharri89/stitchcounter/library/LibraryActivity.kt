@@ -58,7 +58,7 @@ class LibraryActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor
     protected var mAdapter: CounterAdapter? = null
     private var mListView: ListView? = null
     private var tempCursor: Cursor? = null
-    private val deleteManyArray = ArrayList<String>()
+    private val deleteManyArray = ArrayList<String?>()
     private var deleteManyMode = false
     private var layout: ConstraintLayout? = null
     var helpMode: Boolean = false
@@ -284,7 +284,7 @@ class LibraryActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor
             tempCursor?.let { csr ->
                 val id =
                     csr.getString(csr.getColumnIndexOrThrow(StitchCounterContract.CounterEntry._ID))
-                val ids = ArrayList<String>()
+                val ids = ArrayList<String?>()
                 ids.add(id)
                 v.visibility = View.INVISIBLE
                 val deleteFromDb = DeleteFromDb(context)
