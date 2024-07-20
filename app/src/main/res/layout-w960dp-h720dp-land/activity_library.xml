@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright 2017 Anna Harrison
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="io.github.annaharri89.stitchcounter.library.LibraryActivity"
+    android:descendantFocusability="blocksDescendants"
+    android:id="@+id/layout">
+
+    <include
+        android:id="@+id/toolbar_main"
+        layout="@layout/toolbar" />
+
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_main" />
+
+    <TextView
+        android:id="@+id/empty_list_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:text="@string/library_no_projects"
+        android:visibility="gone"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/delete_many"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintHorizontal_weight="1"
+        android:text="@string/button_delete"
+        android:visibility="invisible"
+        android:layout_marginBottom="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/cancel_many"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/cancel_many"
+        android:layout_marginStart="80dp"
+        android:layout_marginLeft="80dp"
+        app:layout_constraintTop_toTopOf="@+id/cancel_many"
+        android:layout_marginTop="0dp" />
+
+    <Button
+        android:id="@+id/cancel_many"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="0dp"
+        android:text="@string/button_cancel"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintLeft_toRightOf="@+id/delete_many"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginEnd="80dp"
+        app:layout_constraintHorizontal_bias="0.0" />
+
+    <!-- Help Mode -->
+
+    <TextView
+        android:id="@+id/help_library_activity_1"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:background="?attr/themedAnnotationBubbleDrawable"
+        android:padding="5dp"
+        android:text="@string/help_library_delete_many_mode"
+        android:textColor="?attr/themedAnnotationTextColor"
+        android:textSize="20sp"
+        android:visibility="invisible"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_main" />
+
+    <TextView
+        android:id="@+id/help_library_activity_2"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="232dp"
+        android:background="?attr/themedAnnotationBubbleDrawable"
+        android:padding="5dp"
+        android:text="@string/help_library_delete_single"
+        android:textColor="?attr/themedAnnotationTextColor"
+        android:textSize="20sp"
+        android:visibility="invisible"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/help_library_activity_1_tip"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/themedAnnotationArrowDrawable"
+        android:visibility="invisible"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
+        app:layout_constraintLeft_toLeftOf="@+id/help_library_activity_1"
+        app:layout_constraintRight_toRightOf="@+id/help_library_activity_1"
+        app:layout_constraintHorizontal_bias="0.516"
+        android:layout_marginBottom="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/help_library_activity_1" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

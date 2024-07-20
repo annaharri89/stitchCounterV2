@@ -1,0 +1,181 @@
+<!--
+    Copyright 2017 Anna Harrison
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<resources>
+
+    <!-- Default Light application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Theme Colors -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <!-- Menu Drawables-->
+        <item name="themedMenuPlusDrawable">@drawable/ic_add_circle_outline_black_48dp</item>
+        <item name="themedMenuHelpDrawable">@drawable/ic_help_outline_black_48dp</item>
+        <item name="themedMenuDeleteDrawable">@drawable/ic_delete_black_48dp</item>
+        <!-- Annotation Drawables -->
+        <item name="themedAnnotationBubbleDrawable">@drawable/annotation_bubble_default</item>
+        <item name="themedAnnotationArrowDrawable">@drawable/annotation_arrow_default</item>
+        <!-- Annotation Text Color -->
+        <item name="themedAnnotationTextColor">@color/white</item>
+
+    </style>
+
+    <!-- Default Light Dialog theme -->
+    <style name="Theme.MyDialog" parent="@style/Theme.AppCompat.Light.Dialog">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <!-- Default Dark application theme. -->
+    <style name="AppTheme.dark" parent="Theme.AppCompat.NoActionBar">
+        <!-- Theme Colors -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <!-- Menu Drawables-->
+        <item name="themedMenuPlusDrawable">@drawable/ic_add_circle_outline_white_48dp</item>
+        <item name="themedMenuHelpDrawable">@drawable/ic_help_outline_white_48dp</item>
+        <item name="themedMenuDeleteDrawable">@drawable/ic_delete_white_48dp</item>
+        <!-- Annotation Drawables -->
+        <item name="themedAnnotationBubbleDrawable">@drawable/annotation_bubble_default</item>
+        <item name="themedAnnotationArrowDrawable">@drawable/annotation_arrow_default</item>
+        <!-- Annotation Text Color -->
+        <item name="themedAnnotationTextColor">@color/white</item>
+
+    </style>
+
+    <!-- Default Dark Dialog theme -->
+    <style name="Theme.MyDialog.dark" parent="@style/Theme.AppCompat.Dialog">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <!-- Cotton Candy Light application theme. -->
+    <style name="AppTheme.pink" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Theme Colors -->
+        <item name="colorPrimary">@color/colorPrimary2</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark2</item>
+        <item name="colorAccent">@color/colorAccent2</item>
+        <!-- Menu Drawables-->
+        <item name="themedMenuPlusDrawable">@drawable/ic_add_circle_outline_black_48dp</item>
+        <item name="themedMenuHelpDrawable">@drawable/ic_help_outline_black_48dp</item>
+        <item name="themedMenuDeleteDrawable">@drawable/ic_delete_black_48dp</item>
+        <!-- Annotation Drawables -->
+        <item name="themedAnnotationBubbleDrawable">@drawable/annotation_bubble_pink</item>
+        <item name="themedAnnotationArrowDrawable">@drawable/annotation_arrow_pink</item>
+        <!-- Annotation Text Color -->
+        <item name="themedAnnotationTextColor">@color/black</item>
+    </style>
+
+    <!-- Cotton Candy Light Dialog theme -->
+    <style name="Theme.MyDialog.pink" parent="@style/Theme.AppCompat.Light.Dialog">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">@color/colorPrimary2</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark2</item>
+        <item name="colorAccent">@color/colorAccent2</item>
+    </style>
+
+    <!-- Cotton Candy Dark application theme. -->
+    <style name="AppTheme.pink.dark" parent="Theme.AppCompat.NoActionBar">
+        <!-- Theme Colors -->
+        <item name="colorPrimary">@color/colorPrimary2</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark2</item>
+        <item name="colorAccent">@color/colorAccent2</item>
+        <!-- Menu Drawables-->
+        <item name="themedMenuPlusDrawable">@drawable/ic_add_circle_outline_white_48dp</item>
+        <item name="themedMenuHelpDrawable">@drawable/ic_help_outline_white_48dp</item>
+        <item name="themedMenuDeleteDrawable">@drawable/ic_delete_white_48dp</item>
+        <!-- Annotation Drawables -->
+        <item name="themedAnnotationBubbleDrawable">@drawable/annotation_bubble_pink</item>
+        <item name="themedAnnotationArrowDrawable">@drawable/annotation_arrow_pink</item>
+        <!-- Annotation Text Color -->
+        <item name="themedAnnotationTextColor">@color/white</item>
+    </style>
+
+    <!-- Cotton Candy Dark Dialog theme -->
+    <style name="Theme.MyDialog.pink.dark" parent="@style/Theme.AppCompat.Dialog">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">@color/colorPrimary2</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark2</item>
+        <item name="colorAccent">@color/colorAccent2</item>
+    </style>
+
+    <!-- Robins egg blue Light application theme. -->
+    <style name="AppTheme.blue" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Theme Colors -->
+        <item name="colorPrimary">@color/colorPrimary3</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark3</item>
+        <item name="colorAccent">@color/colorAccent3</item>
+        <!-- Menu Drawables-->
+        <item name="themedMenuPlusDrawable">@drawable/ic_add_circle_outline_black_48dp</item>
+        <item name="themedMenuHelpDrawable">@drawable/ic_help_outline_black_48dp</item>
+        <item name="themedMenuDeleteDrawable">@drawable/ic_delete_black_48dp</item>
+        <!-- Annotation Drawables -->
+        <item name="themedAnnotationBubbleDrawable">@drawable/annotation_bubble_blue</item>
+        <item name="themedAnnotationArrowDrawable">@drawable/annotation_arrow_blue</item>
+        <!-- Annotation Text Color -->
+        <item name="themedAnnotationTextColor">@color/black</item>
+    </style>
+
+    <!-- Robins egg blue Light Dialog theme -->
+    <style name="Theme.MyDialog.blue" parent="@style/Theme.AppCompat.Light.Dialog">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">@color/colorPrimary3</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark3</item>
+        <item name="colorAccent">@color/colorAccent3</item>
+    </style>
+
+    <!-- Robins egg blue Dark application theme. -->
+    <style name="AppTheme.blue.dark" parent="Theme.AppCompat.NoActionBar">
+        <!-- Theme Colors -->
+        <item name="colorPrimary">@color/colorPrimary3</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark3</item>
+        <item name="colorAccent">@color/colorAccent3</item>
+        <!-- Menu Drawables-->
+        <item name="themedMenuPlusDrawable">@drawable/ic_add_circle_outline_white_48dp</item>
+        <item name="themedMenuHelpDrawable">@drawable/ic_help_outline_white_48dp</item>
+        <item name="themedMenuDeleteDrawable">@drawable/ic_delete_white_48dp</item>
+        <!-- Annotation Drawables -->
+        <item name="themedAnnotationBubbleDrawable">@drawable/annotation_bubble_blue</item>
+        <item name="themedAnnotationArrowDrawable">@drawable/annotation_arrow_blue</item>
+        <!-- Annotation Text Color -->
+        <item name="themedAnnotationTextColor">@color/black</item>
+    </style>
+
+    <!-- Robins egg blue Dark Dialog theme -->
+    <style name="Theme.MyDialog.blue.dark" parent="@style/Theme.AppCompat.Dialog">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">@color/colorPrimary3</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark3</item>
+        <item name="colorAccent">@color/colorAccent3</item>
+    </style>
+
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+</resources>
