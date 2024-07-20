@@ -20,7 +20,7 @@ import android.content.Intent
 import android.view.View
 import io.github.annaharri89.stitchcounter.doubleCounter.DoubleCounterActivity
 import io.github.annaharri89.stitchcounter.library.LibraryActivity
-import io.github.annaharri89.stitchcounter.main.MainActivity
+import io.github.annaharri89.stitchcounter.main.OldMainActivity
 import io.github.annaharri89.stitchcounter.settings.SettingsActivity
 import io.github.annaharri89.stitchcounter.singleCounter.SingleCounterActivity
 
@@ -169,7 +169,7 @@ class Utils /* Constructor */(private val mContext: Context) {
 
     /* Called when the user taps the "+" button (new counter) in the toolbar */
     fun openMainActivity() {
-        val intent = Intent(this.mContext, MainActivity::class.java)
+        val intent = Intent(this.mContext, OldMainActivity::class.java)
         mContext.startActivity(intent)
     }
 
@@ -180,7 +180,7 @@ class Utils /* Constructor */(private val mContext: Context) {
     fun openHelpMode(activity: String?, helpModeArray: ArrayList<View>) {
         when (activity) {
             "MainActivity" -> {
-                val mainContext = mContext as MainActivity
+                val mainContext = mContext as OldMainActivity
                 if (!mainContext.helpMode) {
                     setViewVisible(helpModeArray)
                     mainContext.helpMode = true

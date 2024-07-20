@@ -19,7 +19,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="io.github.annaharri89.stitchcounter.main.MainActivity"
+    tools:context="io.github.annaharri89.stitchcounter.main.OldMainActivity"
     android:id="@+id/layout">
 
     <include

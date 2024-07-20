@@ -35,7 +35,7 @@ class CounterProjectContentProvider : ContentProvider() {
     /* A callback method which is invoked when the content provider is starting up */
     override fun onCreate(): Boolean {
         dbHelper = StitchCounterDbHelper(context)
-        db = dbHelper!!.readableDatabase
+        db = dbHelper?.readableDatabase
         return true
     }
 
@@ -52,7 +52,7 @@ class CounterProjectContentProvider : ContentProvider() {
         sortOrder: String?
     ): Cursor? {
         return if (uriMatcher.match(uri) == PROJECTS) {
-            dbHelper!!.getAllProjects(db!!, projection, selection, selectionArgs, sortOrder)
+            dbHelper?.getAllProjects(db!!, projection, selection, selectionArgs, sortOrder)
         } else {
             null
         }

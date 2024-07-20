@@ -36,6 +36,9 @@
             android:name=".singleCounter.SingleCounterActivity"
             android:windowSoftInputMode="stateHidden" />
         <activity
+            android:name=".main.OldMainActivity"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
             android:name=".doubleCounter.DoubleCounterActivity"
             android:windowSoftInputMode="stateHidden" />
         <activity android:name=".library.LibraryActivity" />
