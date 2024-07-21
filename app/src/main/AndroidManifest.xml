@@ -43,11 +43,11 @@
             android:windowSoftInputMode="stateHidden" />
         <activity android:name=".library.LibraryActivity" />
         <activity
-            android:name=".NewCounterActivity"
+            android:name=".db.NewCounterActivity"
             android:theme="@style/Theme.MyDialog" />
 
         <provider
-            android:name=".CounterProjectContentProvider"
+            android:name=".db.CounterProjectContentProvider"
             android:authorities="io.github.annaharri89.stitchcounter.counterProject"
             android:exported="false" />
         <activity android:name=".settings.SettingsActivity" />

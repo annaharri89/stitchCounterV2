@@ -13,11 +13,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package io.github.annaharri89.stitchcounter
+package io.github.annaharri89.stitchcounter.utilities
 
 import android.content.Context
 import android.content.Intent
 import android.view.View
+import io.github.annaharri89.stitchcounter.R
 import io.github.annaharri89.stitchcounter.doubleCounter.DoubleCounterActivity
 import io.github.annaharri89.stitchcounter.library.LibraryActivity
 import io.github.annaharri89.stitchcounter.main.OldMainActivity

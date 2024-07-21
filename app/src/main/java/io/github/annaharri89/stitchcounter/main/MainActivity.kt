@@ -5,13 +5,16 @@ package io.github.annaharri89.stitchcounter.main
 
 import android.content.Intent
 import android.database.Cursor
+import android.database.DatabaseUtils
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.FloatingActionButton
@@ -28,12 +32,19 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight.Companion.W900
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.loader.app.LoaderManager
@@ -41,14 +52,17 @@ import androidx.loader.content.CursorLoader
 import androidx.loader.content.Loader
 import io.github.annaharri89.stitchcounter.Consts
 import io.github.annaharri89.stitchcounter.Counter
-import io.github.annaharri89.stitchcounter.CounterProjectContentProvider
+import io.github.annaharri89.stitchcounter.db.CounterProjectContentProvider
 import io.github.annaharri89.stitchcounter.DeleteFromDb
 import io.github.annaharri89.stitchcounter.R
-import io.github.annaharri89.stitchcounter.StitchCounterContract
-import io.github.annaharri89.stitchcounter.Utils
-import io.github.annaharri89.stitchcounter.WriteToDb
+import io.github.annaharri89.stitchcounter.db.StitchCounterContract
+import io.github.annaharri89.stitchcounter.utilities.Utils
+import io.github.annaharri89.stitchcounter.db.WriteToDb
 import io.github.annaharri89.stitchcounter.doubleCounter.DoubleCounterActivity
+import io.github.annaharri89.stitchcounter.enums.DBFields
+import io.github.annaharri89.stitchcounter.enums.ProjectTypes
 import io.github.annaharri89.stitchcounter.singleCounter.SingleCounterActivity
+import io.github.annaharri89.stitchcounter.utilities.capitalized
 
 
 class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
@@ -141,10 +155,17 @@ class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
                     Icon(Icons.Filled.Add, "Add")
                 }
             }, topBar = {
-                Surface(elevation = 8.dp, modifier = Modifier.fillMaxWidth()) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        Text("Stitch Counter V2")
-
+                Surface(
+                    elevation = 16.dp,
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Absolute.Center, modifier = Modifier.fillMaxWidth()) {
+                        val library = stringResource(id = R.string.action_library)
+                        Icon(Icons.Filled.LocalLibrary, contentDescription = library )
+                        Text(
+                            text = library,
+                            style = TextStyle(fontSize = 30.sp)
+                        )
                     }
                 }
             }, bottomBar = {
@@ -156,53 +177,70 @@ class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
                 }
             }) { padding ->
                 val cursorObj = vm.dbCursor.observeAsState()
-
-
                 LazyColumn(modifier = Modifier
                     .fillMaxSize()
                     .padding(bottom = padding.calculateBottomPadding())) {
                     val tempCursor = cursorObj.value?.value
                     tempCursor?.let { cursor: Cursor ->
-                        Log.i("composeLibrary", "LazyColumn, tempCursor $tempCursor")
                         try {
                             val shouldAccessCursor = cursor.moveToFirst()
-                            Log.i("composeLibrary", "LazyColumn, shouldAccessCursor $shouldAccessCursor")
-
+                            Log.i("composeLibrary", "LazyColumn, annaData ${DatabaseUtils.dumpCursorToString(cursor)}")
                             if(shouldAccessCursor) {
                                 do{
-                                    Log.i("composeLibrary", "LazyColumn, typeAnna do while")
-
-                                    val type = cursor.getString(1)
-                                    val projectTitle = cursor.getString(2)
-
+                                    val type = cursor.getString(DBFields.TYPE.index)
+                                    val projectTitle = cursor.getString(DBFields.TITLE.index)
+                                    val rowCounterNumber = cursor.getInt(DBFields.ROW_COUNTER_NUMBER.index)
+                                    val maxRows = cursor.getInt(DBFields.TOTAL_ROWS.index)
+                                    val progress = (rowCounterNumber.toFloat()/maxRows.toFloat())
                                     item {
-                                        Column(modifier = Modifier.fillMaxWidth()) {
-                                            Row(modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable {
-                                                    onListItemClicked(cursor)
-                                                }) {
-
-                                                Log.i("composeLibrary", "LazyColumn, typeCharlotte &$type& yesyesyes")
-
-                                                if (type == "Double") {
-                                                    val maxRows = 111222333//cursor.getInt(7)
-                                                    val progress = 100//cursor.getInt(5)
-                                                    Text("Project: $projectTitle", color = Color.Blue)
-                                                    Text("Max Rows/Rounds: $maxRows")
-                                                    Text("Progress: $progress")
-                                                    Log.i("composeLibrary", "LazyColumn, typeCharlotte $type projectTitle $projectTitle")
-
-                                                } else if (type == "Single") {
-                                                    Text(projectTitle)
-                                                    Log.i("composeLibrary", "LazyColumn, typeCharlotte $type projectTitle $projectTitle")
+                                        Surface(
+                                            elevation = 4.dp,
+                                            shape = RoundedCornerShape(16.dp),
+                                            modifier = Modifier.fillMaxWidth().padding(4.dp)) {
+                                            Column(modifier = Modifier.fillMaxWidth()) {
+                                                Row(modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clickable {
+                                                        onListItemClicked(cursor)
+                                                    }) {
+                                                    Column {
+                                                        Text(
+                                                            text = projectTitle.capitalized(),
+                                                            style = TextStyle(
+                                                                fontSize = 20.sp,
+                                                                fontWeight = W900
+                                                            )
+                                                        )
+                                                        if (type == ProjectTypes.DOUBLE.name) {
+                                                            Text(
+                                                                text = "Total Rows: $maxRows",
+                                                                style = TextStyle(
+                                                                    fontSize = 14.sp,
+                                                                    fontWeight = W900
+                                                                )
+                                                            )
+                                                            Text(
+                                                                "Progress: $progress",
+                                                                style = TextStyle(
+                                                                    fontSize = 14.sp,
+                                                                    fontWeight = W900
+                                                                )
+                                                            )
+                                                        }
+                                                    }
 
                                                 }
+                                                Divider()
                                             }
-                                            Divider()
                                         }
                                     }
                                 } while(cursor.moveToNext());
+                            } else {
+                                item {
+                                    Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()) {
+                                        Text("You have no projects yet.", style = TextStyle(fontSize = 50.sp))
+                                    }
+                                }
                             }
                         } finally {
                             cursor.close();
@@ -322,7 +360,7 @@ class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
 
                     val extras = Bundle()
                     when (type) {
-                        "Double" -> {
+                        ProjectTypes.DOUBLE.name -> {
                             extras.putInt("_id", _id)
                             extras.putString("name", name)
                             extras.putInt("stitch_counter_number", stitch_counter_number)
@@ -337,7 +375,7 @@ class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
                             startActivityForResult(intentDouble, 1)
                         }
 
-                        "Single" -> {
+                        ProjectTypes.SINGLE.name -> {
                             extras.putInt("_id", _id)
                             extras.putString("name", name)
                             extras.putInt("stitch_counter_number", stitch_counter_number)

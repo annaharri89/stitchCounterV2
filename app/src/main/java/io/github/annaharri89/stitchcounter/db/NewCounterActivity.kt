@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package io.github.annaharri89.stitchcounter
+package io.github.annaharri89.stitchcounter.db
 
 import android.content.Intent
 import android.os.Bundle
@@ -23,8 +23,11 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.FragmentActivity
+import io.github.annaharri89.stitchcounter.R
 import io.github.annaharri89.stitchcounter.doubleCounter.DoubleCounterActivity
+import io.github.annaharri89.stitchcounter.enums.ProjectTypes
 import io.github.annaharri89.stitchcounter.singleCounter.SingleCounterActivity
+import io.github.annaharri89.stitchcounter.utilities.Utils
 
 class NewCounterActivity : FragmentActivity() {
     private val utils = Utils(this)
@@ -50,9 +53,9 @@ class NewCounterActivity : FragmentActivity() {
         val extras = intent.extras
         if (extras != null) {
             val value = extras.getString("Layout")
-            if (value == "single") {
+            if (value == ProjectTypes.SINGLE.name) {
                 setContentView(R.layout.activity_dialog_new_single_counter)
-            } else if (value == "double") {
+            } else if (value == ProjectTypes.DOUBLE.name) {
                 setContentView(R.layout.activity_dialog_new_double_counter)
             }
         }

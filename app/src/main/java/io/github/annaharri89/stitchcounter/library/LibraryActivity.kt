@@ -15,7 +15,6 @@
  */
 package io.github.annaharri89.stitchcounter.library
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
@@ -41,13 +40,14 @@ import androidx.loader.app.LoaderManager
 import androidx.loader.content.CursorLoader
 import androidx.loader.content.Loader
 import io.github.annaharri89.stitchcounter.Counter
-import io.github.annaharri89.stitchcounter.CounterProjectContentProvider
+import io.github.annaharri89.stitchcounter.db.CounterProjectContentProvider
 import io.github.annaharri89.stitchcounter.DeleteFromDb
 import io.github.annaharri89.stitchcounter.R
-import io.github.annaharri89.stitchcounter.StitchCounterContract
-import io.github.annaharri89.stitchcounter.Utils
-import io.github.annaharri89.stitchcounter.WriteToDb
+import io.github.annaharri89.stitchcounter.db.StitchCounterContract
+import io.github.annaharri89.stitchcounter.utilities.Utils
+import io.github.annaharri89.stitchcounter.db.WriteToDb
 import io.github.annaharri89.stitchcounter.doubleCounter.DoubleCounterActivity
+import io.github.annaharri89.stitchcounter.enums.ProjectTypes
 import io.github.annaharri89.stitchcounter.singleCounter.SingleCounterActivity
 
 class LibraryActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
@@ -197,7 +197,7 @@ class LibraryActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor
 
                         val extras = Bundle()
                         when (type) {
-                            "Double" -> {
+                            ProjectTypes.DOUBLE.name -> {
                                 extras.putInt("_id", _id)
                                 extras.putString("name", name)
                                 extras.putInt("stitch_counter_number", stitch_counter_number)
@@ -212,7 +212,7 @@ class LibraryActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor
                                 startActivityForResult(intentDouble, 1)
                             }
 
-                            "Single" -> {
+                            ProjectTypes.SINGLE.name -> {
                                 extras.putInt("_id", _id)
                                 extras.putString("name", name)
                                 extras.putInt("stitch_counter_number", stitch_counter_number)
@@ -475,13 +475,13 @@ class LibraryActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor
             counterCursor = mAdapter?.getCursor()
             counterCursor?.moveToPosition(position)
             val type = counterCursor?.getString(1)
-            if (type == "Double" && !deleteManyMode) {
+            if (type == ProjectTypes.DOUBLE.name && !deleteManyMode) {
                 return 0
-            } else if (type == "Single" && !deleteManyMode) {
+            } else if (type == ProjectTypes.SINGLE.name && !deleteManyMode) {
                 return 1
-            } else if (type == "Double" && deleteManyMode) {
+            } else if (type == ProjectTypes.DOUBLE.name && deleteManyMode) {
                 return 2
-            } else if (type == "Single" && deleteManyMode) {
+            } else if (type == ProjectTypes.SINGLE.name && deleteManyMode) {
                 return 3
             }
             return 0

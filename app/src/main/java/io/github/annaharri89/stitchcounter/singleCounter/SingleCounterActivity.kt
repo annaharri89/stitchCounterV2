@@ -29,7 +29,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.FragmentActivity
 import io.github.annaharri89.stitchcounter.Counter
 import io.github.annaharri89.stitchcounter.R
-import io.github.annaharri89.stitchcounter.Utils
+import io.github.annaharri89.stitchcounter.utilities.Utils
 import io.github.annaharri89.stitchcounter.library.LibraryActivity
 
 class SingleCounterActivity : FragmentActivity() {

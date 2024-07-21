@@ -24,9 +24,10 @@ import android.widget.TextView
 import android.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.FragmentActivity
-import io.github.annaharri89.stitchcounter.NewCounterActivity
+import io.github.annaharri89.stitchcounter.db.NewCounterActivity
 import io.github.annaharri89.stitchcounter.R
-import io.github.annaharri89.stitchcounter.Utils
+import io.github.annaharri89.stitchcounter.utilities.Utils
+import io.github.annaharri89.stitchcounter.enums.ProjectTypes
 
 class OldMainActivity : FragmentActivity() {
     @JvmField
@@ -90,14 +91,14 @@ class OldMainActivity : FragmentActivity() {
     /* Called when the user taps the "New Basic Counter" button in the main activity */
     fun createNewSingleCounter(view: View?) {
         val intent = Intent(this, NewCounterActivity::class.java)
-        intent.putExtra("Layout", "single")
+        intent.putExtra("Layout", ProjectTypes.SINGLE.name)
         startActivity(intent)
     }
 
     /* Called when the user taps the "New Advanced Counter" button in the main activity */
     fun createNewDoubleCounter(view: View?) {
         val intent = Intent(this, NewCounterActivity::class.java)
-        intent.putExtra("Layout", "double")
+        intent.putExtra("Layout", ProjectTypes.DOUBLE.name)
         startActivity(intent)
     }
 }

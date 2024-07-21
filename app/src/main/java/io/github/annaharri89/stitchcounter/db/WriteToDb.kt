@@ -13,11 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package io.github.annaharri89.stitchcounter
+package io.github.annaharri89.stitchcounter.db
 
 import android.content.ContentValues
 import android.content.Context
 import android.os.AsyncTask
+import io.github.annaharri89.stitchcounter.Counter
+import io.github.annaharri89.stitchcounter.enums.ProjectTypes
 
 // todo stitchCounterV2 bug: when you make a change to a counter and then go to the library screen and back to the project it hasn't saved the last change to the project
 
@@ -53,7 +55,7 @@ class WriteToDb(private val mContext: Context) : AsyncTask<Counter, Void?, Void?
         if (counter[0].ID > 0) {
             values.put(StitchCounterContract.CounterEntry._ID, counter[0].ID)
         }
-        values.put(StitchCounterContract.CounterEntry.COLUMN_TYPE, "Single")
+        values.put(StitchCounterContract.CounterEntry.COLUMN_TYPE, ProjectTypes.SINGLE.name)
         values.put(StitchCounterContract.CounterEntry.COLUMN_TITLE, counter[0].projectName)
         values.put(
             StitchCounterContract.CounterEntry.COLUMN_STITCH_COUNTER_NUM,
@@ -76,7 +78,7 @@ class WriteToDb(private val mContext: Context) : AsyncTask<Counter, Void?, Void?
         if (counter[0].ID > 0) {
             values.put(StitchCounterContract.CounterEntry._ID, counter[0].ID)
         }
-        values.put(StitchCounterContract.CounterEntry.COLUMN_TYPE, "Double")
+        values.put(StitchCounterContract.CounterEntry.COLUMN_TYPE, ProjectTypes.DOUBLE.name)
         values.put(StitchCounterContract.CounterEntry.COLUMN_TITLE, counter[1].projectName)
         values.put(
             StitchCounterContract.CounterEntry.COLUMN_STITCH_COUNTER_NUM,

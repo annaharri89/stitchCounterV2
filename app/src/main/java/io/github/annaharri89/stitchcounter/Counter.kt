@@ -27,6 +27,8 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import io.github.annaharri89.stitchcounter.db.WriteToDb
+import io.github.annaharri89.stitchcounter.utilities.Utils
 
 /**
  * Created by ETASpare on 6/8/2017.

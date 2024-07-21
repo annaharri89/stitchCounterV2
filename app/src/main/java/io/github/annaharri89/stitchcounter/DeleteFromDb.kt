@@ -17,6 +17,8 @@ package io.github.annaharri89.stitchcounter
 
 import android.content.Context
 import android.os.AsyncTask
+import io.github.annaharri89.stitchcounter.db.StitchCounterContract
+import io.github.annaharri89.stitchcounter.db.StitchCounterDbHelper
 import io.github.annaharri89.stitchcounter.library.LibraryActivity
 
 /**

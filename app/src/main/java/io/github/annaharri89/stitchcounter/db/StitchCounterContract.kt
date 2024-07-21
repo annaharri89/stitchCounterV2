@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package io.github.annaharri89.stitchcounter
+package io.github.annaharri89.stitchcounter.db
 
 import android.provider.BaseColumns
 

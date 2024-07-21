@@ -33,7 +33,7 @@ import android.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import io.github.annaharri89.stitchcounter.R
-import io.github.annaharri89.stitchcounter.Utils
+import io.github.annaharri89.stitchcounter.utilities.Utils
 
 class SettingsActivity : FragmentActivity() {
     private var mListView: ExpandableListView? = null
