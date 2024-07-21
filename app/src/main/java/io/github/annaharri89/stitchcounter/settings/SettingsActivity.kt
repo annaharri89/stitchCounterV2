@@ -271,7 +271,7 @@ class SettingsActivity : FragmentActivity() {
 
         override fun getChildView(
             groupPosition: Int, childPosition: Int, isLastChild: Boolean,
-            convertView: View, parent: ViewGroup
+            convertView: View?, parent: ViewGroup
         ): View {
             var row =
                 super.getChildView(groupPosition, childPosition, isLastChild, convertView, parent)

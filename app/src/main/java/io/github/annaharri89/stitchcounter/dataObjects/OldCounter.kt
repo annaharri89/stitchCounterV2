@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package io.github.annaharri89.stitchcounter
+package io.github.annaharri89.stitchcounter.dataObjects
 
 import android.content.Context
 import android.content.res.Resources
@@ -27,13 +27,14 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import io.github.annaharri89.stitchcounter.R
 import io.github.annaharri89.stitchcounter.db.WriteToDb
 import io.github.annaharri89.stitchcounter.utilities.Utils
 
 /**
  * Created by ETASpare on 6/8/2017.
  */
-class Counter: Parcelable {
+class OldCounter: Parcelable {
     @JvmField
     var ID: Int = 0
     @JvmField
@@ -363,12 +364,12 @@ class Counter: Parcelable {
     }
 
     /* Save Counter */
-    fun saveCounter(counter1: Counter?, counter2: Counter?) {
+    fun saveCounter(oldCounter1: OldCounter?, oldCounter2: OldCounter?) {
         val writeToDb = WriteToDb(this.context)
-        if (counter2 != null) {
-            writeToDb.execute(counter1, counter2)
+        if (oldCounter2 != null) {
+            writeToDb.execute(oldCounter1, oldCounter2)
         } else {
-            writeToDb.execute(counter1)
+            writeToDb.execute(oldCounter1)
         }
     }
 
@@ -378,12 +379,12 @@ class Counter: Parcelable {
     create new objects, individually or as arrays
     */
         @JvmField
-        val CREATOR: Parcelable.Creator<Counter> = object : Parcelable.Creator<Counter> {
-            override fun createFromParcel(`in`: Parcel): Counter {
-                return Counter(`in`)
+        val CREATOR: Parcelable.Creator<OldCounter> = object : Parcelable.Creator<OldCounter> {
+            override fun createFromParcel(`in`: Parcel): OldCounter {
+                return OldCounter(`in`)
             }
 
-            override fun newArray(size: Int) =  arrayOfNulls<Counter>(size)
+            override fun newArray(size: Int) =  arrayOfNulls<OldCounter>(size)
         }
     }
 }

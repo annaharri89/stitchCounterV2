@@ -27,13 +27,13 @@ import android.widget.TextView
 import android.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.FragmentActivity
-import io.github.annaharri89.stitchcounter.Counter
+import io.github.annaharri89.stitchcounter.dataObjects.OldCounter
 import io.github.annaharri89.stitchcounter.R
 import io.github.annaharri89.stitchcounter.utilities.Utils
 import io.github.annaharri89.stitchcounter.library.LibraryActivity
 
 class SingleCounterActivity : FragmentActivity() {
-    private var counter: Counter? = null
+    private var oldCounter: OldCounter? = null
     var helpMode: Boolean = false
     private var helpModeArray: ArrayList<View> = arrayListOf()
     private val utils = Utils(this)
@@ -104,7 +104,7 @@ class SingleCounterActivity : FragmentActivity() {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 projectName = textProjectName.text.toString()
                 if (projectName.length > 0) {
-                    counter!!.setProjectName(projectName)
+                    oldCounter!!.setProjectName(projectName)
                 }
                 //Sets textProjectName's cursor invisible
                 textProjectName.isCursorVisible = false
@@ -127,7 +127,7 @@ class SingleCounterActivity : FragmentActivity() {
         val buttonCapsuleMiddle = findViewById<View>(R.id.button_capsule_middle) as Button
         val buttonCapsuleRight = findViewById<View>(R.id.button_capsule_right) as Button
 
-        counter = Counter(
+        oldCounter = OldCounter(
             this,
             textCounter,
             R.string.counter_number_basic,
@@ -136,12 +136,12 @@ class SingleCounterActivity : FragmentActivity() {
             buttonCapsuleRight
         )
 
-        buttonPlus.setOnClickListener { counter!!.incrementCounter() }
-        buttonMinus.setOnClickListener { counter!!.decrementCounter() }
-        buttonReset.setOnClickListener { counter!!.resetCounterCheck("counter") }
-        buttonCapsuleLeft.setOnClickListener { counter!!.changeAdjustment(1) }
-        buttonCapsuleMiddle.setOnClickListener { counter!!.changeAdjustment(5) }
-        buttonCapsuleRight.setOnClickListener { counter!!.changeAdjustment(10) }
+        buttonPlus.setOnClickListener { oldCounter!!.incrementCounter() }
+        buttonMinus.setOnClickListener { oldCounter!!.decrementCounter() }
+        buttonReset.setOnClickListener { oldCounter!!.resetCounterCheck("counter") }
+        buttonCapsuleLeft.setOnClickListener { oldCounter!!.changeAdjustment(1) }
+        buttonCapsuleMiddle.setOnClickListener { oldCounter!!.changeAdjustment(5) }
+        buttonCapsuleRight.setOnClickListener { oldCounter!!.changeAdjustment(10) }
 
         /*
         + If savedInstanceState bundle is not null, gets all pertinent counter data from
@@ -159,8 +159,8 @@ class SingleCounterActivity : FragmentActivity() {
         }
 
         /* Save Counter project to DB if counter project doesn't already exist in the db*/
-        if (counter!!.ID == 0) {
-            counter!!.saveCounter(counter, null)
+        if (oldCounter!!.ID == 0) {
+            oldCounter!!.saveCounter(oldCounter, null)
         }
     }
 
@@ -175,21 +175,21 @@ class SingleCounterActivity : FragmentActivity() {
         val stitch_adjustment = bundle.getInt("stitch_adjustment")
 
         if (_id > 0) {
-            counter!!.ID = _id
+            oldCounter!!.ID = _id
         }
         if (name != null && name.length > 0) {
-            counter!!.setProjectName(name)
+            oldCounter!!.setProjectName(name)
             projectName.text = name
         }
         if (stitch_adjustment > 0) {
-            counter!!.changeAdjustment(stitch_adjustment)
+            oldCounter!!.changeAdjustment(stitch_adjustment)
         } else {
             /* Sets default colors for adjustment buttons */
-            counter!!.changeAdjustment(1)
+            oldCounter!!.changeAdjustment(1)
         }
         if (stitch_counter_number > 0) {
-            counter!!.counterNumber = stitch_counter_number
-            counter!!.setCounter()
+            oldCounter!!.counterNumber = stitch_counter_number
+            oldCounter!!.setCounter()
         }
     }
 
@@ -214,9 +214,9 @@ class SingleCounterActivity : FragmentActivity() {
 
     /* Adds stitchCounter and rowCounter as extras in a parcelable array to the passed intent. */
     protected fun setUpExtras(i: Intent) {
-        val counterList = ArrayList<Counter?>()
-        counterList.add(counter)
-        i.putParcelableArrayListExtra("counters", counterList)
+        val oldCounterList = ArrayList<OldCounter?>()
+        oldCounterList.add(oldCounter)
+        i.putParcelableArrayListExtra("counters", oldCounterList)
     }
 
     /* Starts a new activity/sends results/extras to new activity when back button is pressed. */
@@ -229,22 +229,22 @@ class SingleCounterActivity : FragmentActivity() {
     populate the activity if orientation change occurs.
     */
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
-        savedInstanceState.putInt("_id", counter!!.ID)
-        savedInstanceState.putString("name", counter!!.projectName)
-        savedInstanceState.putInt("stitch_counter_number", counter!!.counterNumber)
-        savedInstanceState.putInt("stitch_adjustment", counter!!.adjustment)
+        savedInstanceState.putInt("_id", oldCounter!!.ID)
+        savedInstanceState.putString("name", oldCounter!!.projectName)
+        savedInstanceState.putInt("stitch_counter_number", oldCounter!!.counterNumber)
+        savedInstanceState.putInt("stitch_adjustment", oldCounter!!.adjustment)
         super.onSaveInstanceState(savedInstanceState)
     }
 
     override fun onStop() {
         /* Save Counter to DB */
-        counter!!.saveCounter(counter, null)
+        oldCounter!!.saveCounter(oldCounter, null)
         super.onStop()
     }
 
     override fun onDestroy() {
         /* Save Counter to DB */
-        counter!!.saveCounter(counter, null)
+        oldCounter!!.saveCounter(oldCounter, null)
         super.onDestroy()
     }
 }

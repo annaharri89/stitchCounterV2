@@ -28,14 +28,14 @@ import android.widget.TextView
 import android.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.FragmentActivity
-import io.github.annaharri89.stitchcounter.Counter
+import io.github.annaharri89.stitchcounter.dataObjects.OldCounter
 import io.github.annaharri89.stitchcounter.R
 import io.github.annaharri89.stitchcounter.utilities.Utils
 import io.github.annaharri89.stitchcounter.library.LibraryActivity
 
 class DoubleCounterActivity : FragmentActivity() {
-    private var stitchCounter: Counter? = null
-    private var rowCounter: Counter? = null
+    private var stitchOldCounter: OldCounter? = null
+    private var rowOldCounter: OldCounter? = null
     var helpMode: Boolean = false
     private var helpModeArray: ArrayList<View> = arrayListOf()
     private val utils = Utils(this)
@@ -124,7 +124,7 @@ class DoubleCounterActivity : FragmentActivity() {
                     0
                 }
                 if (totalRowsValueInt > 0) {
-                    rowCounter!!.setProgressBarMax(totalRowsValueInt)
+                    rowOldCounter!!.setProgressBarMax(totalRowsValueInt)
                 }
                 //Sets totalRows' cursor invisible
                 totalRows.isCursorVisible = false
@@ -143,7 +143,7 @@ class DoubleCounterActivity : FragmentActivity() {
             if (actionId == EditorInfo.IME_ACTION_NEXT) {
                 projectName = textProjectName.text.toString()
                 if (projectName.length > 0) {
-                    rowCounter!!.setProjectName(projectName)
+                    rowOldCounter!!.setProjectName(projectName)
                 }
                 //Sets textProjectName's cursor invisible
                 textProjectName.isCursorVisible = false
@@ -177,7 +177,7 @@ class DoubleCounterActivity : FragmentActivity() {
             findViewById<View>(R.id.button_capsule_bottom_stitch) as Button
         val buttonResetStitch = findViewById<View>(R.id.button_counter_reset_stitch) as Button
 
-        stitchCounter = Counter(
+        stitchOldCounter = OldCounter(
             this,
             textCounterStitch,
             null,
@@ -188,12 +188,12 @@ class DoubleCounterActivity : FragmentActivity() {
             null
         )
 
-        buttonPlusStitch.setOnClickListener { stitchCounter!!.incrementCounter() }
-        buttonMinusStitch.setOnClickListener { stitchCounter!!.decrementCounter() }
-        buttonResetStitch.setOnClickListener { stitchCounter!!.resetCounterCheck("stitch counter") }
-        buttonCapsuleTopStitch.setOnClickListener { stitchCounter!!.changeAdjustment(1) }
-        buttonCapsuleMiddleStitch.setOnClickListener { stitchCounter!!.changeAdjustment(5) }
-        buttonCapsuleBottomStitch.setOnClickListener { stitchCounter!!.changeAdjustment(10) }
+        buttonPlusStitch.setOnClickListener { stitchOldCounter!!.incrementCounter() }
+        buttonMinusStitch.setOnClickListener { stitchOldCounter!!.decrementCounter() }
+        buttonResetStitch.setOnClickListener { stitchOldCounter!!.resetCounterCheck("stitch counter") }
+        buttonCapsuleTopStitch.setOnClickListener { stitchOldCounter!!.changeAdjustment(1) }
+        buttonCapsuleMiddleStitch.setOnClickListener { stitchOldCounter!!.changeAdjustment(5) }
+        buttonCapsuleBottomStitch.setOnClickListener { stitchOldCounter!!.changeAdjustment(10) }
 
         /* Row Counter */
         val textCounterRow = findViewById<View>(R.id.text_counter_row) as TextView
@@ -206,7 +206,7 @@ class DoubleCounterActivity : FragmentActivity() {
         val buttonCapsuleBottomRow = findViewById<View>(R.id.button_capsule_bottom_row) as Button
         val progress = findViewById<View>(R.id.progress_bar) as ProgressBar
 
-        rowCounter = Counter(
+        rowOldCounter = OldCounter(
             this,
             textCounterRow,
             textProgress,
@@ -217,12 +217,12 @@ class DoubleCounterActivity : FragmentActivity() {
             progress
         )
 
-        buttonPlusRow.setOnClickListener { rowCounter!!.incrementCounter() }
-        buttonMinusRow.setOnClickListener { rowCounter!!.decrementCounter() }
-        buttonResetRow.setOnClickListener { rowCounter!!.resetCounterCheck("row counter") }
-        buttonCapsuleTopRow.setOnClickListener { rowCounter!!.changeAdjustment(1) }
-        buttonCapsuleMiddleRow.setOnClickListener { rowCounter!!.changeAdjustment(5) }
-        buttonCapsuleBottomRow.setOnClickListener { rowCounter!!.changeAdjustment(10) }
+        buttonPlusRow.setOnClickListener { rowOldCounter!!.incrementCounter() }
+        buttonMinusRow.setOnClickListener { rowOldCounter!!.decrementCounter() }
+        buttonResetRow.setOnClickListener { rowOldCounter!!.resetCounterCheck("row counter") }
+        buttonCapsuleTopRow.setOnClickListener { rowOldCounter!!.changeAdjustment(1) }
+        buttonCapsuleMiddleRow.setOnClickListener { rowOldCounter!!.changeAdjustment(5) }
+        buttonCapsuleBottomRow.setOnClickListener { rowOldCounter!!.changeAdjustment(10) }
 
         /*
         + If savedInstanceState bundle is not null, gets all pertinent counter data from
@@ -240,8 +240,8 @@ class DoubleCounterActivity : FragmentActivity() {
         }
 
         /* Save Counter project to DB if counter project doesn't already exist in the db*/
-        if (stitchCounter!!.ID == 0) {
-            stitchCounter!!.saveCounter(stitchCounter, rowCounter)
+        if (stitchOldCounter!!.ID == 0) {
+            stitchOldCounter!!.saveCounter(stitchOldCounter, rowOldCounter)
         }
     }
 
@@ -264,39 +264,39 @@ class DoubleCounterActivity : FragmentActivity() {
         val total_rows = bundle.getInt("total_rows")
 
         if (_id > 0) {
-            stitchCounter!!.ID = _id
+            stitchOldCounter!!.ID = _id
         }
         if (name != null && name.length > 0) {
-            rowCounter!!.setProjectName(name)
+            rowOldCounter!!.setProjectName(name)
             projectName.text = name
         }
         if (stitch_adjustment > 0) {
-            stitchCounter!!.changeAdjustment(stitch_adjustment)
+            stitchOldCounter!!.changeAdjustment(stitch_adjustment)
         } else {
             /* Sets default colors for adjustment buttons */
-            stitchCounter!!.changeAdjustment(1)
+            stitchOldCounter!!.changeAdjustment(1)
         }
         if (row_adjustment > 0) {
-            rowCounter!!.changeAdjustment(row_adjustment)
+            rowOldCounter!!.changeAdjustment(row_adjustment)
         } else {
             /* Sets default colors for adjustment buttons */
-            rowCounter!!.changeAdjustment(1)
+            rowOldCounter!!.changeAdjustment(1)
         }
         if (stitch_counter_number > 0) {
-            stitchCounter!!.counterNumber = stitch_counter_number
-            stitchCounter!!.setCounter()
+            stitchOldCounter!!.counterNumber = stitch_counter_number
+            stitchOldCounter!!.setCounter()
         }
         if (row_counter_number > 0) {
-            rowCounter!!.counterNumber = row_counter_number
-            rowCounter!!.setCounter()
+            rowOldCounter!!.counterNumber = row_counter_number
+            rowOldCounter!!.setCounter()
         }
         if (total_rows > 0) {
-            rowCounter!!.setProgressBarMax(total_rows)
-            rowCounter!!.totalRows = total_rows
+            rowOldCounter!!.setProgressBarMax(total_rows)
+            rowOldCounter!!.totalRows = total_rows
             totalRows.text = total_rows.toString()
         } else {
             /* Sets default progress percent */
-            val formattedProgressNumber = String.format(rowCounter?.strResProgress ?: "", "0.0")
+            val formattedProgressNumber = String.format(rowOldCounter?.strResProgress ?: "", "0.0")
             progress.text = formattedProgressNumber
         }
     }
@@ -322,10 +322,10 @@ class DoubleCounterActivity : FragmentActivity() {
 
     /* Adds stitchCounter and rowCounter as extras in a parcelable array to the passed intent. */
     protected fun setUpExtras(i: Intent) {
-        val counterList = ArrayList<Counter?>()
-        counterList.add(stitchCounter)
-        counterList.add(rowCounter)
-        i.putParcelableArrayListExtra("counters", counterList)
+        val oldCounterList = ArrayList<OldCounter?>()
+        oldCounterList.add(stitchOldCounter)
+        oldCounterList.add(rowOldCounter)
+        i.putParcelableArrayListExtra("counters", oldCounterList)
     }
 
     /* Starts a new activity/sends results/extras to new activity when back button is pressed. */
@@ -338,25 +338,25 @@ class DoubleCounterActivity : FragmentActivity() {
     populate the activity if orientation change occurs.
     */
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
-        savedInstanceState.putInt("_id", stitchCounter!!.ID)
-        savedInstanceState.putString("name", rowCounter!!.projectName)
-        savedInstanceState.putInt("stitch_counter_number", stitchCounter!!.counterNumber)
-        savedInstanceState.putInt("stitch_adjustment", stitchCounter!!.adjustment)
-        savedInstanceState.putInt("row_counter_number", rowCounter!!.counterNumber)
-        savedInstanceState.putInt("row_adjustment", rowCounter!!.adjustment)
-        savedInstanceState.putInt("total_rows", rowCounter!!.totalRows)
+        savedInstanceState.putInt("_id", stitchOldCounter!!.ID)
+        savedInstanceState.putString("name", rowOldCounter!!.projectName)
+        savedInstanceState.putInt("stitch_counter_number", stitchOldCounter!!.counterNumber)
+        savedInstanceState.putInt("stitch_adjustment", stitchOldCounter!!.adjustment)
+        savedInstanceState.putInt("row_counter_number", rowOldCounter!!.counterNumber)
+        savedInstanceState.putInt("row_adjustment", rowOldCounter!!.adjustment)
+        savedInstanceState.putInt("total_rows", rowOldCounter!!.totalRows)
         super.onSaveInstanceState(savedInstanceState)
     }
 
     override fun onStop() {
         /* Save Counters to DB */
-        stitchCounter!!.saveCounter(stitchCounter, rowCounter)
+        stitchOldCounter!!.saveCounter(stitchOldCounter, rowOldCounter)
         super.onStop()
     }
 
     override fun onDestroy() {
         /* Save Counters to DB */
-        stitchCounter!!.saveCounter(stitchCounter, rowCounter)
+        stitchOldCounter!!.saveCounter(stitchOldCounter, rowOldCounter)
         super.onDestroy()
     }
 }

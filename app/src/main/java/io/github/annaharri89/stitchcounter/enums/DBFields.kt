@@ -1,6 +1,7 @@
 package io.github.annaharri89.stitchcounter.enums
 
 enum class DBFields(val index: Int) {
+    ID(0),
     TYPE(1),
     TITLE(2),
     STITCH_COUNTER_NUMBER(3),

@@ -39,9 +39,9 @@ import androidx.fragment.app.FragmentActivity
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.CursorLoader
 import androidx.loader.content.Loader
-import io.github.annaharri89.stitchcounter.Counter
+import io.github.annaharri89.stitchcounter.dataObjects.OldCounter
 import io.github.annaharri89.stitchcounter.db.CounterProjectContentProvider
-import io.github.annaharri89.stitchcounter.DeleteFromDb
+import io.github.annaharri89.stitchcounter.db.DeleteFromDb
 import io.github.annaharri89.stitchcounter.R
 import io.github.annaharri89.stitchcounter.db.StitchCounterContract
 import io.github.annaharri89.stitchcounter.utilities.Utils
@@ -151,7 +151,7 @@ class LibraryActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor
         */
         val extras = intent.extras
         if (extras != null) {
-            val extractedData = extras.getParcelableArrayList<Counter>("counters")
+            val extractedData = extras.getParcelableArrayList<OldCounter>("counters")
             saveCounter(extractedData)
         }
 
@@ -388,15 +388,15 @@ class LibraryActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor
     Saves counters to the db when the library is accessed, either through the back button from a
     counter or through the library menu item from a counter.
     */
-    protected fun saveCounter(extractedData: ArrayList<Counter>?) {
+    protected fun saveCounter(extractedData: ArrayList<OldCounter>?) {
         val stitchCounter = extractedData!![0]
-        var rowCounter: Counter? = null
+        var rowOldCounter: OldCounter? = null
         if (extractedData.size > 1) {
-            rowCounter = extractedData[1]
+            rowOldCounter = extractedData[1]
         }
         val writeToDb = WriteToDb(this.context)
-        if (stitchCounter != null && rowCounter != null) {
-            writeToDb.execute(stitchCounter, rowCounter)
+        if (stitchCounter != null && rowOldCounter != null) {
+            writeToDb.execute(stitchCounter, rowOldCounter)
         } else if (stitchCounter != null) {
             writeToDb.execute(stitchCounter)
         }
@@ -414,7 +414,7 @@ class LibraryActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
                 if (data != null) {
-                    val extractedData = data.getParcelableArrayListExtra<Counter>("counters")
+                    val extractedData = data.getParcelableArrayListExtra<OldCounter>("counters")
                     saveCounter(extractedData)
                 }
             }

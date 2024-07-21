@@ -16,14 +16,14 @@
 -->
 <resources>
     <!-- Default Colors -->
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#77E4C8</color>
+    <color name="colorPrimaryDark">#36C2CE</color>
+    <color name="colorAccent">#4535C1</color>
 
     <!-- Cotton Candy Colors -->
-    <color name="colorPrimary2">#F48FB1</color>
-    <color name="colorPrimaryDark2">#F06292</color>
-    <color name="colorAccent2">#CE93D8</color>
+    <color name="colorPrimary2">#F4A261</color>
+    <color name="colorPrimaryDark2">#E76F51</color>
+    <color name="colorAccent2">#36BA98</color>
 
     <!-- Robins Egg Blue Colors -->
     <color name="colorPrimary3">#00E5FF</color>
