@@ -17,12 +17,11 @@
     <string name="app_name">StitchTr@cker</string>
     <string name="app_desc_1">You have no saved projects.</string>
     <string name="app_desc_2">\n\nWith </string>
-    <string name="app_desc_3">, you are able to create different projects to keep track of stitches and rows/rounds while knitting or crocheting. These projects are saved automatically when you leave the </string>
+    <string name="app_desc_3">, you are able to create different projects to keep track of stitches and rows or rounds while knitting or crocheting. These projects are saved automatically when you leave the </string>
     <string name="app_desc_4"> and you can access them again later from the </string>
     <string name="app_desc_5"> . \n\nPress the floating plus button to create a new project and get ready to discover all of the wonderful features</string>
     <string name="app_desc_6">has to offer.</string>
     <string name="action_new_counter">New Counter</string>
-    <string name="old_app">Go to Old App</string>
     <string name="action_help">Help</string>
     <string name="action_delete">Delete</string>
     <string name="action_current_counter">Current Counter</string>
