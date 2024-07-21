@@ -29,3 +29,5 @@ This is an app I previously wrote in Java and have now rewritten in Kotlin and C
 - let them export their library (that they can load back into the app)
 - let them export their individual projects (that they can load back into the app)
 - provide an FAQ
+- add progress bar, description, and photo preview to library preview
+- handle horizontal vs portrait in compose
