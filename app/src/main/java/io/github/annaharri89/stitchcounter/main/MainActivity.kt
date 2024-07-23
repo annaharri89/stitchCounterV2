@@ -61,6 +61,7 @@ import io.github.annaharri89.stitchcounter.theme.LocalColors
 import io.github.annaharri89.stitchcounter.theme.STTheme
 import io.github.annaharri89.stitchcounter.theme.seaCottageDarkColors
 import io.github.annaharri89.stitchcounter.theme.seaCottageLightColors
+import io.github.annaharri89.stitchcounter.utilities.setNavBarColor
 
 
 class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
@@ -202,7 +203,7 @@ class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     private fun setup() {
-        setNavBarColor()
+        setNavBarColor(R.color.colorPrimary)//todo stitchCounterV2
 
         libraryViewModel = ViewModelProvider(this)[LibraryViewModel::class.java]
         vm = ViewModelProvider(this)[MainViewModel::class.java]
@@ -449,13 +450,5 @@ class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
         }*/
         super.onDestroy()
     }
-
-    @Suppress("DEPRECATION")
-    private fun setNavBarColor() {
-        ViewCompat.getWindowInsetsController(window.decorView)?.isAppearanceLightNavigationBars = true
-        window.navigationBarColor = ContextCompat.getColor(this, R.color.colorPrimary)
-        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-    }
-
 }
 

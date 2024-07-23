@@ -50,25 +50,6 @@ fun Theme(
         LocalSpaces provides spaces, content = content)
 }
 
-/*
-@Composable
-fun STTheme(darkTheme: Boolean = isSystemInDarkTheme(),
-            content: @Composable () -> Unit) {
-    val colors = if (darkTheme) {
-        seaCottageDarkColors()
-    } else {
-        seaCottageLightColors()
-    }
-
-    Theme(
-        colors = colors,
-        spaces = Spaces,
-        typography = Typography,
-        shapes = Shapes,
-        content = content
-    )
-}*/
-
 @Composable
 fun AppThemeProvider(darkTheme: Boolean = isSystemInDarkTheme(),
                      darkColors: AppColors,
@@ -88,16 +69,3 @@ fun AppThemeProvider(darkTheme: Boolean = isSystemInDarkTheme(),
         content = content
     )
 }
-
-/*
-@Composable
-fun AppThemeProvider(
-    colors: AppColors = LocalColors.current,
-    content: @Composable () -> Unit
-) = CompositionLocalProvider(
-
-    LocalColors     provides colors,
-    LocalShapes     provides AppShapes(),
-    LocalTypography provides AppTypography(),
-    content = content
-)*/
