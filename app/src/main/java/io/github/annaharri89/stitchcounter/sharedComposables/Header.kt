@@ -10,7 +10,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material.icons.outlined.LocalLibrary
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import io.github.annaharri89.stitchcounter.theme.STTheme
 
 @Composable
-fun NavBar(titleId: Int, textColor: Color = STTheme.colors.cBlack, imageVector: ImageVector = Icons.Outlined.LocalLibrary) {
+fun Header(titleId: Int, textColor: Color = STTheme.colors.cBlack, imageVector: ImageVector = Icons.Outlined.LocalLibrary) {
     Surface(
         elevation = STTheme.spaces.xxL,
         shape = STTheme.shapes.l,

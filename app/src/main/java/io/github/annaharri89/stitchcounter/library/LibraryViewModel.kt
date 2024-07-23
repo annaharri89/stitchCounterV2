@@ -1,14 +1,13 @@
-package io.github.annaharri89.stitchcounter.main
+package io.github.annaharri89.stitchcounter.library
 
 import android.database.Cursor
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class MainViewModel : ViewModel() {
+class LibraryViewModel : ViewModel() {
 
     val dbCursor: LiveData<MutableState<Cursor?>>
         get() = dbCursorItem

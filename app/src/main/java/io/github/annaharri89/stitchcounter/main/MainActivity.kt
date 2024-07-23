@@ -5,64 +5,54 @@ package io.github.annaharri89.stitchcounter.main
 
 import android.content.Intent
 import android.database.Cursor
-import android.database.DatabaseUtils
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.CursorLoader
 import androidx.loader.content.Loader
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
+import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
+import com.ramcosta.composedestinations.manualcomposablecalls.composable
 import io.github.annaharri89.stitchcounter.Consts
+import io.github.annaharri89.stitchcounter.NavGraphs
 import io.github.annaharri89.stitchcounter.dataObjects.OldCounter
 import io.github.annaharri89.stitchcounter.db.CounterProjectContentProvider
 import io.github.annaharri89.stitchcounter.db.DeleteFromDb
 import io.github.annaharri89.stitchcounter.R
 import io.github.annaharri89.stitchcounter.dataObjects.Counter
-import io.github.annaharri89.stitchcounter.dataObjects.StyledTextData
 import io.github.annaharri89.stitchcounter.db.StitchCounterContract
 import io.github.annaharri89.stitchcounter.utilities.Utils
 import io.github.annaharri89.stitchcounter.db.WriteToDb
+import io.github.annaharri89.stitchcounter.destinations.LibraryScreenDestination
+import io.github.annaharri89.stitchcounter.destinations.PortScreenDestination
+import io.github.annaharri89.stitchcounter.destinations.SettingsScreenDestination
 import io.github.annaharri89.stitchcounter.doubleCounter.DoubleCounterActivity
-import io.github.annaharri89.stitchcounter.enums.DBFields
 import io.github.annaharri89.stitchcounter.enums.ProjectTypes
-import io.github.annaharri89.stitchcounter.sharedComposables.Card
-import io.github.annaharri89.stitchcounter.sharedComposables.NavBar
-import io.github.annaharri89.stitchcounter.sharedComposables.StyledText
+import io.github.annaharri89.stitchcounter.library.LibraryScreen
+import io.github.annaharri89.stitchcounter.library.LibraryViewModel
+import io.github.annaharri89.stitchcounter.navigation.BottomBar
+import io.github.annaharri89.stitchcounter.port.PortScreen
+import io.github.annaharri89.stitchcounter.settings.SettingsScreen
 import io.github.annaharri89.stitchcounter.singleCounter.SingleCounterActivity
 import io.github.annaharri89.stitchcounter.theme.STTheme
-import io.github.annaharri89.stitchcounter.theme.loraRegular
-import io.github.annaharri89.stitchcounter.utilities.capitalized
 
 
 class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
@@ -73,8 +63,8 @@ class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
     private val deleteManyArray = ArrayList<String?>()
     private var deleteManyMode = false
     private val utils = Utils(this)
-    private lateinit var vm: MainViewModel
-
+    private lateinit var libraryViewModel: LibraryViewModel
+    private var composeNavController: NavHostController? = null
 
     /*
     Defines a projection that specifies which columns from the database will actually
@@ -101,17 +91,17 @@ class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
     unused because of the CounterAdapter method getView overrides them. Still needed to pass
     to mAdpter when it's initialized.
     */
-    var mFrom: IntArray? = null
+    var mFrom: IntArray? = null//todo stitchCounterV2 remove
     var fromColumns: Array<String> = arrayOf(StitchCounterContract.CounterEntry.COLUMN_TITLE)//todo stitchCounterV2 remove
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {//todo stitchCounter remove
         val inflater = menuInflater
         inflater.inflate(R.menu.menu, menu)
         menu.findItem(R.id.action_delete).setVisible(true)
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {//todo stitchCounter remove
         when (item.title) {
             resources.getString(R.string.action_new_counter) -> utils.openMainActivity()
             resources.getString(R.string.action_help) -> utils.openHelpMode(
@@ -128,7 +118,7 @@ class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        utils.updateTheme(false)
+        utils.updateTheme(false)//todo stitchCounter remove
         super.onCreate(savedInstanceState)
 
         setup()
@@ -138,165 +128,52 @@ class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
         }
     }
 
-    @Preview
+    @OptIn(ExperimentalMaterialNavigationApi::class, ExperimentalAnimationApi::class)
     @Composable
     private fun Preview() {
         STTheme {
+            composeNavController = rememberNavController()
             Box(modifier = Modifier.fillMaxSize()) {
-                Scaffold(backgroundColor = STTheme.colors.background, floatingActionButton = {
-                    FloatingActionButton(
-                        onClick = {
-                            val i = Intent(this@MainActivity, OldMainActivity::class.java)
-                            this@MainActivity.startActivity(i)
-                        },
-                        backgroundColor = STTheme.colors.accentDark,
-                        contentColor = STTheme.colors.cWhite
-                    ) {
-                        Icon(Icons.Filled.Add, "Add")
-                    }
-                }, topBar = {
-                    NavBar(titleId = R.string.action_library)
-                }) { padding ->
-                    val cursorObj = vm.dbCursor.observeAsState()
-                    LazyColumn(modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = padding.calculateBottomPadding())) {
-                        val tempCursor = cursorObj.value?.value
-                        tempCursor?.let { cursor: Cursor ->
-                            try {
-                                val shouldAccessCursor = cursor.moveToFirst()
-                                Log.i("composeLibrary", "LazyColumn, annaData ${DatabaseUtils.dumpCursorToString(cursor)}")
-                                if(shouldAccessCursor) {
-                                    do{
-                                        val id = cursor.getInt(DBFields.ID.index)
-                                        val type = cursor.getString(DBFields.TYPE.index)
-                                        val projectTitle = cursor.getString(DBFields.TITLE.index)
-                                        val stitchCounterNumber = cursor.getInt(DBFields.STITCH_COUNTER_NUMBER.index)
-                                        val stitchAdjustment = cursor.getInt(DBFields.STITCH_ADJUSTMENT.index)
-                                        val rowCounterNumber = cursor.getInt(DBFields.ROW_COUNTER_NUMBER.index)
-                                        val rowAdjustment = cursor.getInt(DBFields.ROW_ADJUSTMENT.index)
-                                        val maxRows = cursor.getInt(DBFields.TOTAL_ROWS.index)
-                                        val counter = Counter(
-                                            id = id,
-                                            type = type,
-                                            name = projectTitle,
-                                            rowCounterNumber = rowCounterNumber,
-                                            stitchCounterNumber = stitchCounterNumber,
-                                            stitchAdjustment = stitchAdjustment,
-                                            rowAdjustment = rowAdjustment,
-                                            totalRows = maxRows)
-                                        val progress = (rowCounterNumber.toFloat() / maxRows.toFloat()) * 100
-                                        item {
-                                            STTheme {//todo stitchCounterV2 I don't think this is needed
-                                                Card {
-                                                    Column(modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .padding(STTheme.spaces.l)) {
-                                                        Row(modifier = Modifier
-                                                            .fillMaxWidth()
-                                                            .clickable {
-                                                                onListItemClicked(counter)
-                                                            }) {
-                                                            Column {
-                                                                Text(
-                                                                    text = projectTitle.capitalized(),
-                                                                    style = STTheme.typography.subtitle3,
-                                                                    color = STTheme.colors.textPrimary
-                                                                )
-                                                                if (type == ProjectTypes.DOUBLE.name) {
-                                                                    Text(
-                                                                        text = "Total Rows: $maxRows",
-                                                                        style = STTheme.typography.body5,
-                                                                        color = STTheme.colors.textSecondary
-                                                                    )
-                                                                    Text(
-                                                                        text = "Progress: $progress%",
-                                                                        style = STTheme.typography.body5,
-                                                                        color = STTheme.colors.textSecondary
-                                                                    )
-                                                                }
-                                                            }
-
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    } while(cursor.moveToNext());
-                                } else {
-                                    item {
-                                        Card {
-                                            Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
-                                                .fillMaxSize()
-                                                .padding(STTheme.spaces.xxL)) {
-                                                val loraSubtitle = SpanStyle(
-                                                    fontFamily = STTheme.typography.subtitle1.fontFamily,
-                                                    fontSize = STTheme.typography.subtitle1.fontSize,
-                                                    color = STTheme.colors.textPrimary,
-                                                    fontWeight = STTheme.typography.subtitle1.fontWeight)
-                                                val dancingSubtitle = SpanStyle(
-                                                    fontFamily = STTheme.typography.h4.fontFamily,
-                                                    color = STTheme.colors.textPrimary,
-                                                    fontSize = STTheme.typography.h4.fontSize,
-                                                    fontWeight = FontWeight.W900)
-                                                StyledText(data = listOf(
-                                                    StyledTextData(
-                                                        text = stringResource(id = R.string.app_desc_1),
-                                                        style = loraSubtitle
-                                                    ),
-                                                    StyledTextData(
-                                                        text = stringResource(id = R.string.app_desc_2),
-                                                        style = loraSubtitle
-                                                    ),
-                                                    StyledTextData(
-                                                        text = stringResource(id = R.string.app_name),
-                                                        style = dancingSubtitle
-                                                    ),
-                                                    StyledTextData(
-                                                        text = stringResource(id = R.string.app_desc_3),
-                                                        style = loraSubtitle
-                                                    ),
-                                                    StyledTextData(
-                                                        text = stringResource(id = R.string.app_name),
-                                                        style = dancingSubtitle
-                                                    ),
-                                                    StyledTextData(
-                                                        text = stringResource(id = R.string.app_desc_4),
-                                                        style = loraSubtitle
-                                                    ),
-                                                    StyledTextData(
-                                                        text = stringResource(id = R.string.action_library),
-                                                        style = dancingSubtitle
-                                                    ),
-                                                    StyledTextData(
-                                                        text = stringResource(id = R.string.app_desc_5),
-                                                        style = loraSubtitle
-                                                    ),
-                                                    StyledTextData(
-                                                        text = stringResource(id = R.string.app_name),
-                                                        style = dancingSubtitle
-                                                    ),
-                                                    StyledTextData(
-                                                        text = stringResource(id = R.string.app_desc_6),
-                                                        style = loraSubtitle
-                                                    ),
-                                                ))
-                                            }
-                                        }
-                                    }
-                                }
-                            } finally {
-                                cursor.close();
-                            }
+                Scaffold(
+                    backgroundColor = STTheme.colors.background,
+                    bottomBar = {
+                        composeNavController?.let { navController ->
+                            BottomBar(navController = navController)
                         }
                     }
+                ) { padding ->
+                    val cursorObj = libraryViewModel.dbCursor.observeAsState()
+                    val cursor = cursorObj.value?.value
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = padding.calculateBottomPadding())) {
+                    val navHostEngine = rememberAnimatedNavHostEngine()
+
+                    composeNavController?.let { nav ->
+                        DestinationsNavHost(
+                            navController = nav,
+                            navGraph = NavGraphs.stitchTracker,
+                            engine = navHostEngine,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            composable(LibraryScreenDestination) {
+                                LibraryScreen(cursor)
+                            }
+                            composable(PortScreenDestination) {
+                                PortScreen()
+                            }
+                            composable(SettingsScreenDestination) {
+                                SettingsScreen()
+                            }
+                        }
+                    }}
                 }
             }
         }
     }
 
     private fun setup() {
-        vm = ViewModelProvider(this)[MainViewModel::class.java]
+        libraryViewModel = ViewModelProvider(this)[LibraryViewModel::class.java]
 
         /* This statement invokes the method onCreatedLoader() */
         LoaderManager.getInstance(this).initLoader(0, null, this)
@@ -510,16 +387,16 @@ class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
     override fun onLoadFinished(loader: Loader<Cursor>, cursor: Cursor) {
         Log.i("composeLibrary", "onLoadFinished cursor $cursor, loader $loader")
 
-        vm.setDBCursor(cursor)
+        libraryViewModel.setDBCursor(cursor)
     }
 
     override fun onLoaderReset(loader: Loader<Cursor>) {
         Log.i("composeLibrary", "onLoaderReset, loader $loader")
 
-        vm.setDBCursor(null)
+        libraryViewModel.setDBCursor(null)
     }
 
-    public override fun onResume() {
+    override fun onResume() {
         /* Allows list to function properly when accessed through back button */
         LoaderManager.getInstance(this).restartLoader(0, null, this)
         super.onResume()
