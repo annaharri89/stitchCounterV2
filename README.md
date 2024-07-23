@@ -49,3 +49,4 @@ This is an app I previously wrote in Java and have now rewritten in Kotlin and C
 - make sure each file has the copy right Anna Harrison stuff
 - make the theme changing screen have a boxes with the colors like on the website you found the colors on and when you tap them they change the theme
 - if colors need to be different between the themes, you can do a getXColor function that returns the right colors (like if the gradient needs to be different than the norm or whatever)
+- make enum for all theme names and use it to get custom colors if needed and also to load up the correct color on app launch
