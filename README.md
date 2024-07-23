@@ -17,9 +17,7 @@ This is an app I previously wrote in Java and have now rewritten in Kotlin and C
 - allow users to add a description to their project/ instructions
 - you can import/export projects or your whole library (can back things)
 
-
 # IN GITHUB ISSUES
-- Do bottom navigation with library, settings, and import projects/library
 - rewrite single counter into compose screen
 - rewrite double counter into compose screen
 - rewrite settings into compose screen
@@ -44,3 +42,5 @@ This is an app I previously wrote in Java and have now rewritten in Kotlin and C
 - make it so you can delete a project or multiple projects after confirming you want to delete them
 - make it so the user can select if it's "Rows" or "Rounds for each project"
 - bug: the counter projects lose progress if you go directly to the library page
+- once you've solidified the color scheme, make sure three button navigation phones looks right
+- make sure you're handling the db correctly, does it need closed at any point?
