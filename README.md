@@ -24,6 +24,13 @@ This is an app I previously wrote in Java and have now rewritten in Kotlin and C
 - make a new screen that lets you enter a description/instructions for your project and also let you keep pictures of your project (let them know they can have unlimited pictures, but that it will take up more space on your own phone and be harder to restore)
 - be able to save photos to your project
 - make it so you can import/export projects or the whole library so they can back up their projects.
+- handle theme changing
+- - color theme using compose themes, you can choose your theme
+- once you've solidified the color scheme, make sure three button navigation phones looks right
+-  make the theme changing screen have a boxes with the colors like on the website you found the colors on and when you tap them they change the theme
+- if colors need to be different between the themes, you can do a getXColor function that returns the right colors (like if the gradient needs to be different than the norm or whatever)
+- make enum for all theme names and use it to get custom colors if needed and also to load up the correct color on app launch
+- maybe I should have a set up intro for new users where they get to choose whether to use the default color scheme or to choose their own color scheme?
 
 # TODOS
 - seems crappy that you have to leave the page to get the tracker to save. look into how to do this better. Maybe I could save changes to shared preferences and then save them to the db when they get back to the app and delete them from shared preferences when you save to the db successfully.
@@ -34,21 +41,14 @@ This is an app I previously wrote in Java and have now rewritten in Kotlin and C
 - provide an FAQ in the settings
 - add progress bar, description, and photo preview to library preview
 - handle horizontal vs portrait in compose
-- color theme using compose themes, you can choose your theme
 - share your project to social media (can I do this without a server? considering I want to add photos)
-- color theme using compose themes, you can choose your theme
 - lots of accessibility features
 - allow users to sort by more than project title, more than ascending, also descending
 - make it so you can delete a project or multiple projects after confirming you want to delete them
 - make it so the user can select if it's "Rows" or "Rounds for each project"
 - bug: the counter projects lose progress if you go directly to the library page
-- once you've solidified the color scheme, make sure three button navigation phones looks right
 - make sure you're handling the db correctly, does it need closed at any point?
-- maybe I should have a set up intro for new users where they get to choose whether to use the default color scheme or to choose their own color scheme?
 - do I need shared preferences at all in different view models or anything like that? If so I should implement dagger injection and provide the shared preferences stuff
 - make sure each file has the copy right Anna Harrison stuff
-- make the theme changing screen have a boxes with the colors like on the website you found the colors on and when you tap them they change the theme
-- if colors need to be different between the themes, you can do a getXColor function that returns the right colors (like if the gradient needs to be different than the norm or whatever)
-- make enum for all theme names and use it to get custom colors if needed and also to load up the correct color on app launch
 - put the clickable on the surface of the list items, instead of the colum or whereever it is, so the whole thing highlights
 - put the old app on the nav bar (not permanently)
