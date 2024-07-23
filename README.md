@@ -25,12 +25,12 @@ This is an app I previously wrote in Java and have now rewritten in Kotlin and C
 - be able to save photos to your project
 - make it so you can import/export projects or the whole library so they can back up their projects.
 - handle theme changing
-- - color theme using compose themes, you can choose your theme
-- once you've solidified the color scheme, make sure three button navigation phones looks right
--  make the theme changing screen have a boxes with the colors like on the website you found the colors on and when you tap them they change the theme
-- if colors need to be different between the themes, you can do a getXColor function that returns the right colors (like if the gradient needs to be different than the norm or whatever)
-- make enum for all theme names and use it to get custom colors if needed and also to load up the correct color on app launch
-- maybe I should have a set up intro for new users where they get to choose whether to use the default color scheme or to choose their own color scheme?
+  - color theme using compose themes, you can choose your theme
+  - once you've solidified the color scheme, make sure three button navigation phones looks right
+  -  make the theme changing screen have a boxes with the colors like on the website you found the colors on and when you tap them they change the theme
+  - if colors need to be different between the themes, you can do a getXColor function that returns the right colors (like if the gradient needs to be different than the norm or whatever)
+  - make enum for all theme names and use it to get custom colors if needed and also to load up the correct color on app launch
+  - maybe I should have a set up intro for new users where they get to choose whether to use the default color scheme or to choose their own color scheme?
 
 # TODOS
 - seems crappy that you have to leave the page to get the tracker to save. look into how to do this better. Maybe I could save changes to shared preferences and then save them to the db when they get back to the app and delete them from shared preferences when you save to the db successfully.
