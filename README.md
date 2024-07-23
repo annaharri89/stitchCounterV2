@@ -44,3 +44,6 @@ This is an app I previously wrote in Java and have now rewritten in Kotlin and C
 - bug: the counter projects lose progress if you go directly to the library page
 - once you've solidified the color scheme, make sure three button navigation phones looks right
 - make sure you're handling the db correctly, does it need closed at any point?
+- maybe I should have a set up intro for new users where they get to choose whether to use the default color scheme or to choose their own color scheme?
+- do I need shared preferences at all in different view models or anything like that? If so I should implement dagger injection and provide the shared preferences stuff
+- make sure each file has the copy right Anna Harrison stuff
