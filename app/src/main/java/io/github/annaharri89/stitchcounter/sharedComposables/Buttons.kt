@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import io.github.annaharri89.stitchcounter.theme.STTheme
+import kotlinx.coroutines.flow.asFlow
 
 @Composable
 fun Button(titleId: Int, onClick: () -> Unit, color: Color) {
@@ -39,7 +40,7 @@ fun Button(titleId: Int, onClick: () -> Unit, color: Color) {
             val title = stringResource(id = titleId)
             Text(
                 text = title,
-                style = STTheme.typography.h6,
+                style = STTheme.typography.subtitle4,
                 color = STTheme.colors.cWhite
             )
         }

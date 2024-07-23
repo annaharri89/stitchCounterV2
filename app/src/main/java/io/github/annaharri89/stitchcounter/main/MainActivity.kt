@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
@@ -55,7 +56,11 @@ import io.github.annaharri89.stitchcounter.navigation.BottomBar
 import io.github.annaharri89.stitchcounter.port.PortScreen
 import io.github.annaharri89.stitchcounter.settings.SettingsScreen
 import io.github.annaharri89.stitchcounter.singleCounter.SingleCounterActivity
+import io.github.annaharri89.stitchcounter.theme.AppThemeProvider
+import io.github.annaharri89.stitchcounter.theme.LocalColors
 import io.github.annaharri89.stitchcounter.theme.STTheme
+import io.github.annaharri89.stitchcounter.theme.seaCottageDarkColors
+import io.github.annaharri89.stitchcounter.theme.seaCottageLightColors
 
 
 class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
@@ -67,6 +72,7 @@ class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
     private var deleteManyMode = false
     private val utils = Utils(this)
     private lateinit var libraryViewModel: LibraryViewModel
+    private lateinit var vm: MainViewModel
     private var composeNavController: NavHostController? = null
 
     /*
@@ -134,7 +140,27 @@ class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
     @OptIn(ExperimentalMaterialNavigationApi::class, ExperimentalAnimationApi::class)
     @Composable
     private fun Preview() {
-        STTheme {
+        /*
+        val currentColors = LocalColors.current
+        LaunchedEffect(Unit) {
+            if (currentColors == seaCottageLightColors() || currentColors == seaCottageDarkColors()) {
+                vm.addLightColors(seaCottageLightColors())
+                vm.addDarkColors(seaCottageDarkColors())
+            }
+        }*/
+        val darkColorsObj = vm.appDarkColors.observeAsState()
+        val darkColors = darkColorsObj.value?.value ?: seaCottageDarkColors()
+            /*todo based on shared prefs load the color
+            ?: if (currentColors == seaCottageLightColors()) {
+            seaCottageLightColors()
+        } else {
+            seaCottageDarkColors()
+        }*/
+
+        val lightColorsObj = vm.appLightColors.observeAsState()
+        val lightColors = lightColorsObj.value?.value ?: seaCottageLightColors()
+
+        AppThemeProvider(darkColors = darkColors, lightColors = lightColors) {
             composeNavController = rememberNavController()
             Box(modifier = Modifier.fillMaxSize()) {
                 Scaffold(
@@ -166,7 +192,7 @@ class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
                                 PortScreen()
                             }
                             composable(SettingsScreenDestination) {
-                                SettingsScreen()
+                                SettingsScreen(mainViewModel = vm)
                             }
                         }
                     }}
@@ -179,6 +205,7 @@ class MainActivity : FragmentActivity(), LoaderManager.LoaderCallbacks<Cursor> {
         setNavBarColor()
 
         libraryViewModel = ViewModelProvider(this)[LibraryViewModel::class.java]
+        vm = ViewModelProvider(this)[MainViewModel::class.java]
 
         /* This statement invokes the method onCreatedLoader() */
         LoaderManager.getInstance(this).initLoader(0, null, this)

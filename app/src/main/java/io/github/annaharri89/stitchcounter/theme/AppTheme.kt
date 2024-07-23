@@ -1,6 +1,7 @@
 package io.github.annaharri89.stitchcounter.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.Colors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
@@ -40,7 +41,7 @@ fun Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    val currentColor = remember { if (darkColors != null && darkTheme) darkColors else colors }
+    val currentColor = if (darkColors != null && darkTheme) darkColors else colors
     val rememberedColors = remember { currentColor.copy() }.apply { updateColorsFrom(currentColor) }
     CompositionLocalProvider(
         LocalColors provides rememberedColors,
@@ -49,6 +50,7 @@ fun Theme(
         LocalSpaces provides spaces, content = content)
 }
 
+/*
 @Composable
 fun STTheme(darkTheme: Boolean = isSystemInDarkTheme(),
             content: @Composable () -> Unit) {
@@ -65,4 +67,37 @@ fun STTheme(darkTheme: Boolean = isSystemInDarkTheme(),
         shapes = Shapes,
         content = content
     )
+}*/
+
+@Composable
+fun AppThemeProvider(darkTheme: Boolean = isSystemInDarkTheme(),
+                     darkColors: AppColors,
+                     lightColors: AppColors,
+                     content: @Composable () -> Unit) {
+    val colors = if (darkTheme) {
+        darkColors
+    } else {
+        lightColors
+    }
+
+    Theme(
+        colors = colors,
+        spaces = Spaces,
+        typography = Typography,
+        shapes = Shapes,
+        content = content
+    )
 }
+
+/*
+@Composable
+fun AppThemeProvider(
+    colors: AppColors = LocalColors.current,
+    content: @Composable () -> Unit
+) = CompositionLocalProvider(
+
+    LocalColors     provides colors,
+    LocalShapes     provides AppShapes(),
+    LocalTypography provides AppTypography(),
+    content = content
+)*/

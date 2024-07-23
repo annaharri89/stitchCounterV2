@@ -25,7 +25,6 @@ import io.github.annaharri89.stitchcounter.theme.STTheme
 @Destination(style = DestinationStyle.Default::class)
 @Composable
 fun PortScreen() {
-    STTheme {
         Box(modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.BottomEnd) {
             Column(modifier = Modifier
@@ -43,6 +42,5 @@ fun PortScreen() {
 
             }
         }
-    }
 }
 

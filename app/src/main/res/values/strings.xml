@@ -31,6 +31,8 @@
     <string name="action_single_counter_btn">New Stitch Counter</string>
     <string name="action_double_counter_btn">New Stitch and Row Counter</string>
     <string name="button_ok">OK</string>
+    <string name="themes">Themes</string>
+    <string name="change">Change</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_delete">Delete</string>
     <string name="button_yes">Yes</string>

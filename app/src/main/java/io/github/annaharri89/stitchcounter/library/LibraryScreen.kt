@@ -53,7 +53,6 @@ fun LibraryScreen(tempCursor: Cursor? = null) {
         "composeLibrary",
         "tempCursor $tempCursor"
     )
-    STTheme {
         Box(modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.BottomEnd) {
             Column(modifier = Modifier
@@ -104,7 +103,6 @@ fun LibraryScreen(tempCursor: Cursor? = null) {
                                     val progress =
                                         (rowCounterNumber.toFloat() / maxRows.toFloat()) * 100
                                     item {
-                                        STTheme {//todo stitchCounterV2 I don't think this is needed
                                             Card {
                                                 Column(
                                                     modifier = Modifier
@@ -139,7 +137,6 @@ fun LibraryScreen(tempCursor: Cursor? = null) {
                                                     }
                                                 }
                                             }
-                                        }
                                     }
                                 } while (cursor.moveToNext())
                             } else {
@@ -233,6 +230,6 @@ fun LibraryScreen(tempCursor: Cursor? = null) {
                 Icon(Icons.Filled.Add, "Add")
             }
         }
-    }
+
 }
 
