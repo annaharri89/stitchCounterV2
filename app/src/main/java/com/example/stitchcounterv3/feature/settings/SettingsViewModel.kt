@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.stitchcounterv3.data.repo.ThemePreferencesRepository
 import com.example.stitchcounterv3.domain.model.AppTheme
+import com.example.stitchcounterv3.feature.theme.LauncherIconManager
 import com.example.stitchcounterv3.feature.theme.ThemeColor
 import com.example.stitchcounterv3.feature.theme.ThemeManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val themePreferencesRepository: ThemePreferencesRepository,
-    private val themeManager: ThemeManager
+    private val themeManager: ThemeManager,
+    private val launcherIconManager: LauncherIconManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -43,6 +45,8 @@ class SettingsViewModel @Inject constructor(
     fun onThemeSelected(theme: AppTheme) {
         viewModelScope.launch {
             themePreferencesRepository.setTheme(theme)
+            launcherIconManager.updateLauncherIcon(theme)
+            themePreferencesRepository.setShouldNavigateToSettings(true)
         }
     }
 }

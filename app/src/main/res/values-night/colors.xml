@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sea Cottage Theme - Dark -->
+    <color name="icon_sea_cottage_depth_darkest">#FF2A5A8A</color>
+    <color name="icon_sea_cottage_depth_dark">#FF478CCF</color>
+    <color name="icon_sea_cottage_depth_medium">#FF36C2CE</color>
+    <color name="icon_sea_cottage_depth_light">#FF4DD2DE</color>
+    <color name="icon_sea_cottage_depth_lightest">#FF77E4C8</color>
+    <color name="icon_sea_cottage_depth_very_dark">#FF4535C1</color>
+    <color name="icon_sea_cottage_depth_very_light">#FFB5F0E0</color>
+    <color name="icon_sea_cottage_accent">#FF6B7BC7</color>
+    <color name="icon_sea_cottage_base">#FF36C2CE</color>
+    
+    <!-- Retro Summer Theme - Dark -->
+    <color name="icon_retro_summer_depth_darkest">#FF9B4A2A</color>
+    <color name="icon_retro_summer_depth_dark">#FFC86A2A</color>
+    <color name="icon_retro_summer_depth_medium">#FFE76F51</color>
+    <color name="icon_retro_summer_depth_light">#FFF4A261</color>
+    <color name="icon_retro_summer_depth_lightest">#FFE9C46A</color>
+    <color name="icon_retro_summer_depth_very_dark">#FF7A3A1A</color>
+    <color name="icon_retro_summer_depth_very_light">#FFFFD4A0</color>
+    <color name="icon_retro_summer_accent">#FFC47A5A</color>
+    <color name="icon_retro_summer_base">#FFE76F51</color>
+    
+    <!-- Purple Theme - Dark -->
+    <color name="icon_purple_depth_darkest">#FF4A2C3A</color>
+    <color name="icon_purple_depth_dark">#FF7D5260</color>
+    <color name="icon_purple_depth_medium">#FFB88FA3</color>
+    <color name="icon_purple_depth_light">#FFCCC2DC</color>
+    <color name="icon_purple_depth_lightest">#FFD0BCFF</color>
+    <color name="icon_purple_depth_very_dark">#FF3A1C2A</color>
+    <color name="icon_purple_depth_very_light">#FFE8D4F8</color>
+    <color name="icon_purple_accent">#FF4F378B</color>
+    <color name="icon_purple_base">#FFD0BCFF</color>
+    
+    <!-- Text colors -->
+    <color name="icon_text_color">#333333</color>
+    <color name="icon_text_bg">#F5F5F5</color>
+</resources>

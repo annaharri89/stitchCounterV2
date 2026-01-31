@@ -5,15 +5,15 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     
-    <!-- Background - Sea Cottage theme colors -->
-    <!-- Light theme: Mint background -->
+    <!-- Background - Purple theme colors -->
+    <!-- Light theme: Purple background -->
     <path
-        android:fillColor="@color/icon_sea_cottage_depth_medium"
+        android:fillColor="@color/icon_purple_accent"
         android:pathData="M0,0h108v108h-108z" />
     
     <!-- Subtle gradient overlay for depth -->
     <path
-        android:fillColor="@color/icon_sea_cottage_accent"
+        android:fillColor="@color/icon_purple_depth_very_light"
         android:alpha="0.2"
         android:pathData="M0,0h108v54h-108z" />
 </vector>

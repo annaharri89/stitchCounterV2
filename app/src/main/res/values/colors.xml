@@ -7,4 +7,41 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    
+    <!-- Sea Cottage Theme - Light -->
+    <color name="icon_sea_cottage_depth_darkest">#FF1F8A9A</color>
+    <color name="icon_sea_cottage_depth_dark">#FF2A7A9A</color>
+    <color name="icon_sea_cottage_depth_medium">#FF3A9B8A</color>
+    <color name="icon_sea_cottage_depth_light">#FF36C2CE</color>
+    <color name="icon_sea_cottage_depth_lightest">#FF77E4C8</color>
+    <color name="icon_sea_cottage_depth_very_dark">#FF2A2F7A</color>
+    <color name="icon_sea_cottage_depth_very_light">#FFA0E8D8</color>
+    <color name="icon_sea_cottage_accent">#FFE8E9FF</color>
+    <color name="icon_sea_cottage_base">#FF1F8A9A</color>
+    
+    <!-- Retro Summer Theme - Light -->
+    <color name="icon_retro_summer_depth_darkest">#FF2A7B5A</color>
+    <color name="icon_retro_summer_depth_dark">#FF3A8B6A</color>
+    <color name="icon_retro_summer_depth_medium">#FFC86A2A</color>
+    <color name="icon_retro_summer_depth_light">#FFF4A261</color>
+    <color name="icon_retro_summer_depth_lightest">#FF9B4A2A</color>
+    <color name="icon_retro_summer_depth_very_dark">#FFF4A261</color>
+    <color name="icon_retro_summer_depth_very_light">#FFFFB88A</color>
+    <color name="icon_retro_summer_accent">#FFFFF4F0</color>
+    <color name="icon_retro_summer_base">#FF2A7B5A</color>
+    
+    <!-- Purple Theme - Light -->
+    <color name="icon_purple_depth_darkest">#FF6650a4</color>
+    <color name="icon_purple_depth_dark">#FF7250b4</color>
+    <color name="icon_purple_depth_medium">#FF7D5260</color>
+    <color name="icon_purple_depth_light">#FFB88FA3</color>
+    <color name="icon_purple_depth_lightest">#FFD0BCFF</color>
+    <color name="icon_purple_depth_very_dark">#FF4A2C3A</color>
+    <color name="icon_purple_depth_very_light">#FFE8D4E8</color>
+    <color name="icon_purple_accent">#FFE8DEF8</color>
+    <color name="icon_purple_base">#FF6650a4</color>
+    
+    <!-- Text colors -->
+    <color name="icon_text_color">#333333</color>
+    <color name="icon_text_bg">#FFFFFF</color>
 </resources>

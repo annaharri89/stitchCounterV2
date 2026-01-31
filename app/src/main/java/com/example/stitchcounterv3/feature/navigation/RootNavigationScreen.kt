@@ -18,6 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.example.stitchcounterv3.domain.model.DismissalResult
 import com.example.stitchcounterv3.feature.NavGraphs
+import com.example.stitchcounterv3.feature.destinations.SettingsScreenDestination
 import com.example.stitchcounterv3.feature.doublecounter.DoubleCounterScreen
 import com.example.stitchcounterv3.feature.singleCounter.SingleCounterScreen
 import com.example.stitchcounterv3.feature.projectDetail.ProjectDetailContent
@@ -25,6 +26,7 @@ import com.google.accompanist.navigation.material.ExperimentalMaterialNavigation
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
 import com.ramcosta.composedestinations.navigation.dependency
+import com.ramcosta.composedestinations.navigation.navigate
 import kotlinx.coroutines.launch
 
 
@@ -68,6 +70,20 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
     
     LaunchedEffect(sheetState.currentValue) {
         currentSheetValue.value = sheetState.currentValue
+    }
+
+    var previousTab by remember { mutableStateOf<BottomNavTab?>(null) }
+    LaunchedEffect(selectedTab) {
+        if (selectedTab == BottomNavTab.SETTINGS && previousTab != BottomNavTab.SETTINGS) {
+            navController.navigate(SettingsScreenDestination) {
+                popUpTo(navController.graph.startDestinationId) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
+        previousTab = selectedTab
     }
 
     Scaffold(
