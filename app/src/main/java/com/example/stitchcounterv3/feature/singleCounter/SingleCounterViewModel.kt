@@ -25,14 +25,13 @@ data class SingleCounterUiState(
     val id: Int = 0,
     val title: String = "",
     val counterState: CounterState = CounterState(),
-    val isLoading: Boolean = false,
 )
 
 @HiltViewModel
 open class SingleCounterViewModel @Inject constructor(
     private val getProject: GetProject,
     private val upsertProject: UpsertProject,
-) : ViewModel(), SingleCounterActions {
+) : ViewModel() {
     private val _uiState = MutableStateFlow(SingleCounterUiState())
     open val uiState: StateFlow<SingleCounterUiState> = _uiState.asStateFlow()
     
@@ -48,7 +47,9 @@ open class SingleCounterViewModel @Inject constructor(
                 resetState()
                 return@launch
             }
-            _uiState.update { currentState -> currentState.copy(isLoading = true) }
+            if (_uiState.value.id == projectId) {
+                return@launch
+            }
             val project = getProject(projectId)
             if (project != null) {
                 _uiState.update { currentState ->
@@ -58,18 +59,15 @@ open class SingleCounterViewModel @Inject constructor(
                         counterState = CounterState(
                             count = project.stitchCounterNumber,
                             adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE
-                        ),
-                        isLoading = false
+                        )
                     )
                 }
-            } else {
-                _uiState.update { currentState -> currentState.copy(isLoading = false) }
             }
         }
     }
 
 
-    override fun changeAdjustment(value: AdjustmentAmount) {
+    fun changeAdjustment(value: AdjustmentAmount) {
         _uiState.update { currentState ->
             currentState.copy(
                 counterState = currentState.counterState.copy(adjustment = value)
@@ -78,7 +76,7 @@ open class SingleCounterViewModel @Inject constructor(
         triggerAutoSave()
     }
 
-    override fun increment() {
+    fun increment() {
         _uiState.update { currentState ->
             currentState.copy(
                 counterState = currentState.counterState.increment()
@@ -87,7 +85,7 @@ open class SingleCounterViewModel @Inject constructor(
         triggerAutoSave()
     }
 
-    override fun decrement() {
+    fun decrement() {
         _uiState.update { currentState ->
             currentState.copy(
                 counterState = currentState.counterState.decrement()
@@ -96,7 +94,7 @@ open class SingleCounterViewModel @Inject constructor(
         triggerAutoSave()
     }
 
-    override fun resetCount() {
+    fun resetCount() {
         _uiState.update { currentState ->
             currentState.copy(
                 counterState = currentState.counterState.reset()
@@ -142,20 +140,7 @@ open class SingleCounterViewModel @Inject constructor(
     fun attemptDismissal() {
         viewModelScope.launch {
             autoSaveJob?.cancel()
-            val state = _uiState.value
-            val existingProject = if (state.id > 0) getProject(state.id) else null
-            val project = Project(
-                id = state.id,
-                type = ProjectType.SINGLE,
-                title = existingProject?.title ?: "",
-                stitchCounterNumber = state.counterState.count,
-                stitchAdjustment = state.counterState.adjustment.adjustmentAmount,
-                imagePath = existingProject?.imagePath
-            )
-            val newId = upsertProject(project).toInt()
-            if (state.id == 0 && newId > 0) {
-                _uiState.update { currentState -> currentState.copy(id = newId) }
-            }
+            save()
             _dismissalResult.send(DismissalResult.Allowed)
         }
     }

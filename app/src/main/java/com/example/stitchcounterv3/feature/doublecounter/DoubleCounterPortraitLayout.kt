@@ -15,9 +15,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 import com.example.stitchcounterv3.domain.model.CounterState
 import com.example.stitchcounterv3.feature.sharedComposables.BottomActionButtons
+import com.example.stitchcounterv3.feature.sharedComposables.CounterTopBar
 import com.example.stitchcounterv3.feature.sharedComposables.CounterView
 import com.example.stitchcounterv3.feature.sharedComposables.RowProgressIndicator
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
@@ -41,29 +43,28 @@ fun DoubleCounterPortraitLayout(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (state.title.isNotEmpty() || topBarContent != null) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (state.title.isNotEmpty()) {
-                    Text(
-                        text = state.title,
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.weight(1f)
-                    )
-                } else {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-                topBarContent?.invoke()
+        CounterTopBar(
+            title = state.title,
+            topBarContent = topBarContent
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            RowProgressIndicator(
+                modifier = Modifier.weight(1f),
+                progress = state.rowProgress
+            )
+            if (state.totalRows > 0) {
+                Text(
+                    text = "${state.rowCounterState.count}/${state.totalRows}",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
             }
         }
-        RowProgressIndicator(
-            progress = state.rowProgress
-        )
 
         CounterView(
             modifier = Modifier.weight(1f),
@@ -87,7 +88,7 @@ fun DoubleCounterPortraitLayout(
             onAdjustmentClick = { actions.changeAdjustment(CounterType.ROW, it) }
         )
         
-        Spacer(modifier = Modifier.weight(.25f))
+        Spacer(modifier = Modifier.weight(1f))
 
         BottomActionButtons(
             onResetAll = actions::resetAll,

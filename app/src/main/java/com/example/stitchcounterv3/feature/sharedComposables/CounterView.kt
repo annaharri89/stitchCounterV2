@@ -28,7 +28,6 @@ fun CounterView(
     onDecrement: () -> Unit,
     onReset: () -> Unit,
     onAdjustmentClick: (AdjustmentAmount) -> Unit,
-    buttonsWeight: Float = 1f,
     textPaddingEnd: Float = 24f,
     buttonSpacing: Int = 24,
     buttonShape: RoundedCornerShape = RoundedCornerShape(12.dp),
@@ -43,7 +42,7 @@ fun CounterView(
             label?.let {
                 Text(
                     text = it,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

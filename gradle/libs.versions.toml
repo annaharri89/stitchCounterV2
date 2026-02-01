@@ -19,6 +19,7 @@ datastore = "1.0.0"
 materialNavigation = "1.2.1"
 materialIconsExtended = "1.7.4"
 coil = "2.5.0"
+windowSizeClass = "1.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -51,6 +52,7 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 androidx-material-navigation = { group = "androidx.compose.material3", name = "material-navigation", version.ref = "materialNavigation" }
 androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "materialIconsExtended" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+androidx-material3-window-size = { group = "androidx.compose.material3", name = "material3-window-size-class" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -60,21 +60,4 @@ class LauncherIconManager @Inject constructor(
             // Component might not exist or permission issue - ignore
         }
     }
-
-    /**
-     * Gets the currently enabled launcher icon theme by checking which alias is enabled.
-     *
-     * @return The currently enabled theme, or SEA_COTTAGE as default if none found
-     */
-    fun getCurrentLauncherIconTheme(): AppTheme {
-        return themeToComponentName.entries.firstOrNull { (_, componentName) ->
-            try {
-                val state = packageManager.getComponentEnabledSetting(componentName)
-                state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED ||
-                        state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
-            } catch (e: Exception) {
-                false
-            }
-        }?.key ?: AppTheme.SEA_COTTAGE
-    }
 }

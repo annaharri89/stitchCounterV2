@@ -2,8 +2,9 @@ package com.example.stitchcounterv3.feature.sharedComposables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -26,7 +27,6 @@ fun IncreaseDecreaseButtons(
     buttonShape: RoundedCornerShape = RoundedCornerShape(12.dp),
     incrementFontSize: Int = 50,
     decrementFontSize: Int = 60,
-    increaseDecreaseButtonsAspectRatio: Float = 1f
 ) {
     Column(
         modifier = modifier,
@@ -38,12 +38,13 @@ fun IncreaseDecreaseButtons(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Button(
+                modifier = Modifier
+                    .weight(1f),
                 colors = ButtonDefaults.buttonColors().copy(
                     containerColor = MaterialTheme.quaternary,
                     contentColor = Color.White
                 ),
-                modifier = Modifier
-                    .weight(1f),
+                contentPadding = PaddingValues(0.dp),
                 onClick = onDecrement,
                 shape = buttonShape
             ) {
@@ -59,6 +60,7 @@ fun IncreaseDecreaseButtons(
             Button(
                 modifier = Modifier
                     .weight(1f),
+                contentPadding =  PaddingValues(0.dp),
                 onClick = onIncrement,
                 shape = buttonShape
             ) {

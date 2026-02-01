@@ -1,16 +1,8 @@
 package com.example.stitchcounterv3.feature.doublecounter
 
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,15 +11,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.activity.ComponentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.stitchcounterv3.feature.navigation.RootNavGraph
 import com.example.stitchcounterv3.feature.sharedComposables.AdaptiveLayout
+import com.example.stitchcounterv3.feature.sharedComposables.ProjectDetailsFAB
+import com.example.stitchcounterv3.feature.sharedComposables.ResetConfirmationDialog
 import com.ramcosta.composedestinations.annotation.Destination
 
 @RootNavGraph
 @Destination
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun DoubleCounterScreen(
     projectId: Int? = null,
@@ -44,6 +42,8 @@ fun DoubleCounterScreen(
 
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     
+    val activity = LocalContext.current as ComponentActivity
+    val windowSizeClass = calculateWindowSizeClass(activity)
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
 
@@ -67,24 +67,16 @@ fun DoubleCounterScreen(
         modifier = Modifier.height(screenHeight * 0.99f)
     ) {
         AdaptiveLayout(
+            windowSizeClass = windowSizeClass,
             portraitContent = {
                 DoubleCounterPortraitLayout(
                     state = state,
                     actions = actions,
                     topBarContent = if (state.id > 0 && onNavigateToDetail != null) {
                         {
-                            FloatingActionButton(
-                                onClick = {
-                                    onNavigateToDetail(state.id)
-                                },
-                                modifier = Modifier.padding(start = 16.dp),
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Info,
-                                    contentDescription = "Project details"
-                                )
-                            }
+                            ProjectDetailsFAB(
+                                onClick = { onNavigateToDetail(state.id) }
+                            )
                         }
                     } else null
                 )
@@ -95,18 +87,9 @@ fun DoubleCounterScreen(
                     actions = actions,
                     topBarContent = if (state.id > 0 && onNavigateToDetail != null) {
                         {
-                            FloatingActionButton(
-                                onClick = {
-                                    onNavigateToDetail(state.id)
-                                },
-                                modifier = Modifier.padding(start = 16.dp),
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Info,
-                                    contentDescription = "Project details"
-                                )
-                            }
+                            ProjectDetailsFAB(
+                                onClick = { onNavigateToDetail(state.id) }
+                            )
                         }
                     } else null
                 )
@@ -119,52 +102,26 @@ fun DoubleCounterScreen(
             CounterType.STITCH -> "Stitches"
             CounterType.ROW -> "Rows/Rounds"
         }
-        AlertDialog(
-            onDismissRequest = { resetDialogType = null },
-            title = { Text("Reset $counterName Counter?") },
-            text = { Text("Are you sure you want to reset the $counterName counter to 0?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.reset(type)
-                        resetDialogType = null
-                    }
-                ) {
-                    Text("Reset")
-                }
+        ResetConfirmationDialog(
+            title = "Reset $counterName Counter?",
+            message = "Are you sure you want to reset the $counterName counter to 0?",
+            onConfirm = {
+                viewModel.reset(type)
+                resetDialogType = null
             },
-            dismissButton = {
-                TextButton(
-                    onClick = { resetDialogType = null }
-                ) {
-                    Text("Cancel")
-                }
-            }
+            onDismiss = { resetDialogType = null }
         )
     }
 
     if (showResetAllDialog) {
-        AlertDialog(
-            onDismissRequest = { showResetAllDialog = false },
-            title = { Text("Reset All Counters?") },
-            text = { Text("Are you sure you want to reset both Stitches and Rows/Rounds counters to 0?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.resetAll()
-                        showResetAllDialog = false
-                    }
-                ) {
-                    Text("Reset All")
-                }
+        ResetConfirmationDialog(
+            title = "Reset All Counters?",
+            message = "Are you sure you want to reset both Stitches and Rows/Rounds counters to 0?",
+            onConfirm = {
+                viewModel.resetAll()
+                showResetAllDialog = false
             },
-            dismissButton = {
-                TextButton(
-                    onClick = { showResetAllDialog = false }
-                ) {
-                    Text("Cancel")
-                }
-            }
+            onDismiss = { showResetAllDialog = false }
         )
     }
 }
