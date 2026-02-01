@@ -128,6 +128,8 @@ fun ProjectDetailContent(
                         .focusRequester(totalRowsFocusRequester),
                     singleLine = true,
                     placeholder = { Text("Enter total rows") },
+                    isError = uiState.totalRowsError != null,
+                    supportingText = uiState.totalRowsError?.let { { Text(it) } },
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Done,
                         keyboardType = KeyboardType.Number
@@ -171,12 +173,14 @@ fun ProjectDetailContent(
         }
 
         if (projectNotCreated) {
+            val isFormValid = uiState.title.isNotBlank() && 
+                (!isDoubleCounter || (uiState.totalRows.toIntOrNull() ?: 0) > 0)
             Button(
                 onClick = onCreateProject,
                 modifier = Modifier
                     .fillMaxWidth()
                     .imePadding(),
-                enabled = uiState.title.isNotBlank()
+                enabled = isFormValid
             ) {
                 Text("Create Project")
             }

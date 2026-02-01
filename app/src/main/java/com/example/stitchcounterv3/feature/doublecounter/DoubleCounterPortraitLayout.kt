@@ -2,15 +2,20 @@ package com.example.stitchcounterv3.feature.doublecounter
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 import com.example.stitchcounterv3.domain.model.CounterState
 import com.example.stitchcounterv3.feature.sharedComposables.BottomActionButtons
@@ -42,9 +47,24 @@ fun DoubleCounterPortraitLayout(
             title = state.title,
             topBarContent = topBarContent
         )
-        RowProgressIndicator(
-            progress = state.rowProgress
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            RowProgressIndicator(
+                modifier = Modifier.weight(1f),
+                progress = state.rowProgress
+            )
+            if (state.totalRows > 0) {
+                Text(
+                    text = "${state.rowCounterState.count}/${state.totalRows}",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+        }
 
         CounterView(
             modifier = Modifier.weight(1f),

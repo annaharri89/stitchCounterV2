@@ -27,7 +27,8 @@ data class ProjectDetailUiState(
     val imagePath: String? = null,
     val isLoading: Boolean = false,
     val hasUnsavedChanges: Boolean = false,
-    val titleError: String? = null
+    val titleError: String? = null,
+    val totalRowsError: String? = null
 )
 
 @HiltViewModel
@@ -71,7 +72,8 @@ class ProjectDetailViewModel @Inject constructor(
                         imagePath = null,
                         isLoading = false,
                         hasUnsavedChanges = false,
-                        titleError = null
+                        titleError = null,
+                        totalRowsError = null
                     )
                 }
                 originalTitle = ""
@@ -94,7 +96,8 @@ class ProjectDetailViewModel @Inject constructor(
                         imagePath = project.imagePath,
                         isLoading = false,
                         hasUnsavedChanges = false,
-                        titleError = null
+                        titleError = null,
+                        totalRowsError = null
                     )
                 }
             } else {
@@ -120,7 +123,8 @@ class ProjectDetailViewModel @Inject constructor(
                         imagePath = project.imagePath,
                         isLoading = false,
                         hasUnsavedChanges = false,
-                        titleError = null
+                        titleError = null,
+                        totalRowsError = null
                     )
                 }
             } else {
@@ -145,10 +149,21 @@ class ProjectDetailViewModel @Inject constructor(
     fun updateTotalRows(newTotalRows: String) {
         val currentTitle = _uiState.value.title
         val currentImagePath = _uiState.value.imagePath
+        val state = _uiState.value
+        val totalRowsValue = newTotalRows.toIntOrNull() ?: 0
+        val isDoubleCounter = state.projectType == ProjectType.DOUBLE
+        val totalRowsError = if (isDoubleCounter && totalRowsValue <= 0 && newTotalRows.isNotBlank()) {
+            "Total rows must be greater than 0"
+        } else if (isDoubleCounter && newTotalRows.isBlank()) {
+            "Total rows is required"
+        } else {
+            null
+        }
         _uiState.update { currentState ->
             currentState.copy(
                 totalRows = newTotalRows,
-                hasUnsavedChanges = currentTitle != originalTitle || newTotalRows != originalTotalRows || currentImagePath != originalImagePath
+                hasUnsavedChanges = currentTitle != originalTitle || newTotalRows != originalTotalRows || currentImagePath != originalImagePath,
+                totalRowsError = totalRowsError
             )
         }
         triggerAutoSave()
@@ -237,7 +252,8 @@ class ProjectDetailViewModel @Inject constructor(
                 totalRows = originalTotalRows,
                 imagePath = originalImagePath,
                 hasUnsavedChanges = false,
-                titleError = null
+                titleError = null,
+                totalRowsError = null
             )
         }
     }
@@ -264,8 +280,16 @@ class ProjectDetailViewModel @Inject constructor(
                 return@launch
             }
             
-            val existingProject = state.project
+            val isDoubleCounter = state.projectType == ProjectType.DOUBLE
             val totalRowsValue = state.totalRows.toIntOrNull() ?: 0
+            if (isDoubleCounter && totalRowsValue <= 0) {
+                _uiState.update { currentState ->
+                    currentState.copy(totalRowsError = "Total rows is required and must be greater than 0")
+                }
+                return@launch
+            }
+            
+            val existingProject = state.project
             val project = Project(
                 id = 0,
                 type = state.projectType,
@@ -288,7 +312,8 @@ class ProjectDetailViewModel @Inject constructor(
                         project = updatedProject,
                         imagePath = updatedProject.imagePath,
                         hasUnsavedChanges = false,
-                        titleError = null
+                        titleError = null,
+                        totalRowsError = null
                     )
                 }
             }

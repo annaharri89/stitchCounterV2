@@ -21,8 +21,7 @@ fun CounterTopBar(
     if (title.isNotEmpty() || topBarContent != null) {
         Row(
             modifier = modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
