@@ -52,7 +52,7 @@ fun DoubleCounterPortraitLayout(
                 if (state.title.isNotEmpty()) {
                     Text(
                         text = state.title,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.weight(1f)
                     )
                 } else {
@@ -87,7 +87,7 @@ fun DoubleCounterPortraitLayout(
             onAdjustmentClick = { actions.changeAdjustment(CounterType.ROW, it) }
         )
         
-        Spacer(modifier = Modifier.weight(.25f))
+        Spacer(modifier = Modifier.weight(1f))
 
         BottomActionButtons(
             onResetAll = actions::resetAll,

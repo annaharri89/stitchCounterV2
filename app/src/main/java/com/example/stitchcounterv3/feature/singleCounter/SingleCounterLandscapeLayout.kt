@@ -28,7 +28,9 @@ fun SingleCounterLandscapeLayout(
     topBarContent: (@Composable () -> Unit)? = null
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 8.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -43,7 +45,7 @@ fun SingleCounterLandscapeLayout(
                 if (state.title.isNotEmpty()) {
                     Text(
                         text = state.title,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.weight(1f)
                     )
                 } else {

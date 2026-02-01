@@ -28,9 +28,11 @@ fun DoubleCounterLandscapeLayout(
     actions: DoubleCounterActions,
     topBarContent: (@Composable () -> Unit)? = null
 ) {
-    Column(modifier = Modifier
+    Column(
+        modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(horizontal = 24.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         if (state.title.isNotEmpty() || topBarContent != null) {
             Row(
@@ -43,7 +45,7 @@ fun DoubleCounterLandscapeLayout(
                 if (state.title.isNotEmpty()) {
                     Text(
                         text = state.title,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.weight(1f)
                     )
                 } else {

@@ -35,7 +35,9 @@ fun SingleCounterPortraitLayout(
     topBarContent: (@Composable () -> Unit)? = null
 ) {
     Column(
-        modifier = Modifier.padding(horizontal = 24.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -50,7 +52,7 @@ fun SingleCounterPortraitLayout(
                 if (state.title.isNotEmpty()) {
                     Text(
                         text = state.title,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.weight(1f)
                     )
                 } else {
