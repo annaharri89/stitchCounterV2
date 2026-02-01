@@ -42,7 +42,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.stitchcounterv3.domain.model.ProjectType
 import com.example.stitchcounterv3.feature.navigation.RootNavGraph
-import com.example.stitchcounterv3.feature.sharedComposables.RowProgressIndicator
+import com.example.stitchcounterv3.feature.sharedComposables.RowProgressWithLabel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
@@ -141,19 +141,13 @@ fun ProjectDetailContent(
                     )
                 )
                 
-                val rowProgress: Float? = uiState.project?.let { project ->
-                    val totalRowsValue = project.totalRows
-                    if (totalRowsValue > 0) {
-                        (project.rowCounterNumber.toFloat() / totalRowsValue.toFloat()).coerceIn(0f, 1f)
-                    } else {
-                        null
-                    }
+                uiState.project?.let { project ->
+                    RowProgressWithLabel(
+                        currentRowCount = project.rowCounterNumber,
+                        totalRows = project.totalRows,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
-                
-                RowProgressIndicator(
-                    progress = rowProgress,
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
 
             ProjectImageSelector(
