@@ -1,17 +1,7 @@
 package com.example.stitchcounterv3.feature.singleCounter
 
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,6 +19,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.stitchcounterv3.feature.navigation.RootNavGraph
 import com.example.stitchcounterv3.feature.sharedComposables.AdaptiveLayout
+import com.example.stitchcounterv3.feature.sharedComposables.ProjectDetailsFAB
+import com.example.stitchcounterv3.feature.sharedComposables.ResetConfirmationDialog
 import com.ramcosta.composedestinations.annotation.Destination
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
@@ -78,21 +70,9 @@ fun SingleCounterScreen(
                     actions = actions,
                     topBarContent = if (state.id > 0 && onNavigateToDetail != null) {
                         {
-                            FloatingActionButton(
-                                onClick = {
-                                    onNavigateToDetail(state.id)
-                                },
-                                modifier = Modifier
-                                    .padding(start = 16.dp)
-                                    .size(40.dp),
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Info,
-                                    contentDescription = "Project details",
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
+                            ProjectDetailsFAB(
+                                onClick = { onNavigateToDetail(state.id) }
+                            )
                         }
                     } else null
                 )
@@ -103,21 +83,9 @@ fun SingleCounterScreen(
                     actions = actions,
                     topBarContent = if (state.id > 0 && onNavigateToDetail != null) {
                         {
-                            FloatingActionButton(
-                                onClick = {
-                                    onNavigateToDetail(state.id)
-                                },
-                                modifier = Modifier
-                                    .padding(start = 16.dp)
-                                    .size(40.dp),
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Info,
-                                    contentDescription = "Project details",
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
+                            ProjectDetailsFAB(
+                                onClick = { onNavigateToDetail(state.id) }
+                            )
                         }
                     } else null
                 )
@@ -126,27 +94,14 @@ fun SingleCounterScreen(
     }
 
     if (showResetDialog) {
-        AlertDialog(
-            onDismissRequest = { showResetDialog = false },
-            title = { Text("Reset Counter?") },
-            text = { Text("Are you sure you want to reset the counter to 0?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.resetCount()
-                        showResetDialog = false
-                    }
-                ) {
-                    Text("Reset")
-                }
+        ResetConfirmationDialog(
+            title = "Reset Counter?",
+            message = "Are you sure you want to reset the counter to 0?",
+            onConfirm = {
+                viewModel.resetCount()
+                showResetDialog = false
             },
-            dismissButton = {
-                TextButton(
-                    onClick = { showResetDialog = false }
-                ) {
-                    Text("Cancel")
-                }
-            }
+            onDismiss = { showResetDialog = false }
         )
     }
 }

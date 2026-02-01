@@ -1,6 +1,5 @@
 package com.example.stitchcounterv3.feature.navigation
 
-import android.net.http.SslCertificate.saveState
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -14,10 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
-import com.example.stitchcounterv3.feature.destinations.LibraryScreenDestination
-import com.example.stitchcounterv3.feature.destinations.MainScreenDestination
-import com.example.stitchcounterv3.feature.destinations.SettingsScreenDestination
-import com.ramcosta.composedestinations.navigation.navigate
 
 
 @Composable
@@ -57,19 +52,7 @@ private fun BottomNavigationBar(
                 selected = selectedTab == tab,
                 onClick = {
                     onTabSelected(tab)
-                    val destination = when(tab) {//todo repeatedCode
-                        BottomNavTab.HOME -> MainScreenDestination
-                        BottomNavTab.LIBRARY -> LibraryScreenDestination
-                        BottomNavTab.SETTINGS -> SettingsScreenDestination
-                    }
-                    navController.navigate(destination) {
-                        // Avoid building up a huge stack
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+                    navigateToDestination(navController, getDestinationForTab(tab))
                 },
                 icon = {
                     Icon(

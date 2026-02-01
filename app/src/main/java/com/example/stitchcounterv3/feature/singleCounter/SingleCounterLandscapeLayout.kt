@@ -2,14 +2,9 @@ package com.example.stitchcounterv3.feature.singleCounter
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.example.stitchcounterv3.domain.model.AdjustmentAmount
 import com.example.stitchcounterv3.domain.model.CounterState
 import com.example.stitchcounterv3.feature.sharedComposables.BottomActionButtons
+import com.example.stitchcounterv3.feature.sharedComposables.CounterTopBar
 import com.example.stitchcounterv3.feature.sharedComposables.CounterView
 import com.example.stitchcounterv3.ui.theme.StitchCounterV3Theme
 
@@ -34,26 +30,10 @@ fun SingleCounterLandscapeLayout(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (state.title.isNotEmpty() || topBarContent != null) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (state.title.isNotEmpty()) {
-                    Text(
-                        text = state.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.weight(1f)
-                    )
-                } else {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-                topBarContent?.invoke()
-            }
-        }
+        CounterTopBar(
+            title = state.title,
+            topBarContent = topBarContent
+        )
         CounterView(
             modifier = Modifier.weight(1f),
             count = state.counterState.count,

@@ -83,12 +83,14 @@ class ProjectDetailViewModel @Inject constructor(
             val project = getProject(projectId)
             if (project != null) {
                 originalTitle = project.title
+                originalTotalRows = if (project.totalRows > 0) project.totalRows.toString() else ""
                 originalImagePath = project.imagePath
                 _uiState.update { currentState ->
                     currentState.copy(
                         project = project,
                         title = project.title,
                         projectType = project.type,
+                        totalRows = if (project.totalRows > 0) project.totalRows.toString() else "",
                         imagePath = project.imagePath,
                         isLoading = false,
                         hasUnsavedChanges = false,
@@ -107,14 +109,14 @@ class ProjectDetailViewModel @Inject constructor(
             val project = getProject(projectId)
             if (project != null) {
                 originalTitle = project.title
-                originalTotalRows = project.totalRows.toString()
+                originalTotalRows = if (project.totalRows > 0) project.totalRows.toString() else ""
                 originalImagePath = project.imagePath
                 _uiState.update { currentState ->
                     currentState.copy(
                         project = project,
                         title = project.title,
                         projectType = project.type,
-                        totalRows = project.totalRows.toString(),
+                        totalRows = if (project.totalRows > 0) project.totalRows.toString() else "",
                         imagePath = project.imagePath,
                         isLoading = false,
                         hasUnsavedChanges = false,
@@ -225,13 +227,6 @@ class ProjectDetailViewModel @Inject constructor(
                 save()
                 _dismissalResult.send(DismissalResult.Allowed)
             }
-        }
-    }
-
-    fun confirmSaveAndDismiss() {
-        viewModelScope.launch {
-            save()
-            _dismissalResult.send(DismissalResult.Allowed)
         }
     }
 
