@@ -61,25 +61,35 @@ open class DoubleCounterViewModel @Inject constructor(
                 resetState()
                 return@launch
             }
-            if (_uiState.value.id == projectId) {
-                return@launch
-            }
             val project = getProject(projectId)
             if (project != null) {
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        id = project.id,
-                        title = project.title,
-                        stitchCounterState = CounterState(
-                            count = project.stitchCounterNumber,
-                            adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE
-                        ),
-                        rowCounterState = CounterState(
-                            count = project.rowCounterNumber,
-                            adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.rowAdjustment } ?: AdjustmentAmount.ONE
-                        ),
-                        totalRows = project.totalRows
-                    )
+                val currentState = _uiState.value
+                val shouldUpdate = currentState.id != project.id || currentState.totalRows != project.totalRows
+                if (shouldUpdate) {
+                    _uiState.update { currentState ->
+                        val preserveCounters = currentState.id == project.id && currentState.id > 0
+                        currentState.copy(
+                            id = project.id,
+                            title = project.title,
+                            stitchCounterState = if (preserveCounters) {
+                                currentState.stitchCounterState
+                            } else {
+                                CounterState(
+                                    count = project.stitchCounterNumber,
+                                    adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE
+                                )
+                            },
+                            rowCounterState = if (preserveCounters) {
+                                currentState.rowCounterState
+                            } else {
+                                CounterState(
+                                    count = project.rowCounterNumber,
+                                    adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.rowAdjustment } ?: AdjustmentAmount.ONE
+                                )
+                            },
+                            totalRows = project.totalRows
+                        )
+                    }
                 }
             }
         }
