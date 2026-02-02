@@ -15,7 +15,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.stitchcounterv3.domain.model.DismissalResult
 import com.example.stitchcounterv3.domain.model.ProjectType
 import com.example.stitchcounterv3.feature.doublecounter.DoubleCounterScreen
-import com.example.stitchcounterv3.feature.navigation.createSheetScreenForProjectType
 import com.example.stitchcounterv3.feature.projectDetail.ProjectDetailContent
 import com.example.stitchcounterv3.feature.singleCounter.SingleCounterScreen
 import kotlinx.coroutines.launch
@@ -109,7 +108,7 @@ fun BottomSheetManager(
         val projectDetailViewModel = hiltViewModel<com.example.stitchcounterv3.feature.projectDetail.ProjectDetailViewModel>()
         val projectDetailUiState by projectDetailViewModel.uiState.collectAsStateWithLifecycle()
         val context = LocalContext.current
-        var showDiscardDialog by remember { mutableStateOf(false) }
+        var showDiscardDialog = remember { mutableStateOf(false) }
 
         when (screen) {
             is SheetScreen.SingleCounter -> {
@@ -168,20 +167,20 @@ fun BottomSheetManager(
                                 handleDismissalResult(result)
                             }
                             is DismissalResult.ShowDiscardDialog -> {
-                                showDiscardDialog = true
+                                showDiscardDialog.value = true
                             }
                         }
                     }
                 }
 
-                var hasNavigatedToCounter by remember(screen) { mutableStateOf(false) }
-                var lastObservedProjectId by remember(screen) { mutableStateOf<Int?>(null) }
+                val hasNavigatedToCounter = remember(screen) { mutableStateOf(false) }
+                val lastObservedProjectId = remember(screen) { mutableStateOf<Int?>(null) }
                 var initialProjectIdWhenCreatingNew by remember(screen) { mutableStateOf<Int?>(null) }
 
                 LaunchedEffect(screen.projectId) {
                     if (screen.projectId == null) {
-                        hasNavigatedToCounter = false
-                        lastObservedProjectId = null
+                        hasNavigatedToCounter.value = false
+                        lastObservedProjectId.value = null
                         initialProjectIdWhenCreatingNew = projectDetailUiState.project?.id
                     }
                 }
@@ -189,23 +188,23 @@ fun BottomSheetManager(
                 LaunchedEffect(projectDetailUiState.project?.id) {
                     val currentProjectId = projectDetailUiState.project?.id
 
-                    val wasNewProject = lastObservedProjectId == null || lastObservedProjectId == 0
+                    val wasNewProject = lastObservedProjectId == null || lastObservedProjectId.value == 0
                     val isNowSaved = currentProjectId != null && currentProjectId > 0
                     val isNewProjectScreen = screen.projectId == null
-                    val isProjectIdChanged = lastObservedProjectId != currentProjectId
+                    val isProjectIdChanged = lastObservedProjectId.value != currentProjectId
                     val isNotStaleProjectId = initialProjectIdWhenCreatingNew == null ||
                         currentProjectId == null ||
                         currentProjectId == 0 ||
                         currentProjectId != initialProjectIdWhenCreatingNew
 
-                    if (isNewProjectScreen && wasNewProject && isNowSaved && isProjectIdChanged && isNotStaleProjectId && !hasNavigatedToCounter) {
-                        hasNavigatedToCounter = true
+                    if (isNewProjectScreen && wasNewProject && isNowSaved && isProjectIdChanged && isNotStaleProjectId && !hasNavigatedToCounter.value) {
+                        hasNavigatedToCounter.value = true
                         viewModel.showBottomSheet(
                             createSheetScreenForProjectType(screen.projectType, currentProjectId)
                         )
                     }
 
-                    lastObservedProjectId = currentProjectId
+                    lastObservedProjectId.value = currentProjectId
                 }
             }
         }
@@ -220,7 +219,6 @@ fun BottomSheetManager(
                 targetState = screen,
                 transitionSpec = {
                     val isGoingToDetail = targetState is SheetScreen.ProjectDetail && initialState !is SheetScreen.ProjectDetail
-                    val isGoingFromDetail = initialState is SheetScreen.ProjectDetail && targetState !is SheetScreen.ProjectDetail
 
                     slideInHorizontally(
                         initialOffsetX = { fullWidth ->
@@ -270,7 +268,7 @@ fun BottomSheetManager(
                             uiState = projectDetailUiState,
                             viewModel = projectDetailViewModel,
                             context = context,
-                            showDiscardDialog = showDiscardDialog,
+                            showDiscardDialog = showDiscardDialog.value,
                             onDismissDiscardDialog = { showDiscardDialog = false },
                             onDiscard = {
                                 projectDetailViewModel.discardChanges()

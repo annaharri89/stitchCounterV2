@@ -8,7 +8,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -47,13 +46,13 @@ fun SingleCounterScreen(
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
 
-    var showResetDialog by remember { mutableStateOf(false) }
+    val showResetDialog = remember { mutableStateOf(false) }
 
     val actions = object : SingleCounterActions {
         override fun increment() = viewModel.increment()
         override fun decrement() = viewModel.decrement()
         override fun resetCount() {
-            showResetDialog = true
+            showResetDialog.value = true
         }
         override fun changeAdjustment(value: com.example.stitchcounterv3.domain.model.AdjustmentAmount) = 
             viewModel.changeAdjustment(value)
@@ -93,15 +92,15 @@ fun SingleCounterScreen(
         )
     }
 
-    if (showResetDialog) {
+    if (showResetDialog.value) {
         ResetConfirmationDialog(
             title = "Reset Counter?",
             message = "Are you sure you want to reset the counter to 0?",
             onConfirm = {
                 viewModel.resetCount()
-                showResetDialog = false
+                showResetDialog.value = false
             },
-            onDismiss = { showResetDialog = false }
+            onDismiss = { showResetDialog.value = false }
         )
     }
 }
