@@ -4,20 +4,21 @@ import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
@@ -30,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
@@ -38,6 +40,8 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 
+private const val MAX_PHOTOS = 10
+
 @Composable
 fun ProjectImageSelector(
     imagePaths: List<String>,
@@ -45,30 +49,73 @@ fun ProjectImageSelector(
     onRemoveImage: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val photoCount = imagePaths.size
+    val isAtMax = photoCount >= MAX_PHOTOS
+    
     Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(12.dp)
+            )
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        if (imagePaths.isNotEmpty()) {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(imagePaths) { imagePath ->
-                    ProjectImageThumbnail(
-                        imagePath = imagePath,
-                        onImageClick = onImageClick,
-                        onRemoveImage = { onRemoveImage(imagePath) }
-                    )
-                }
-            }
-        }
+        ProjectPhotosSectionHeader(
+            currentCount = photoCount,
+            maxCount = MAX_PHOTOS,
+            modifier = Modifier.fillMaxWidth()
+        )
         
-        if (imagePaths.size < 10) {
+        if (photoCount == 0) {
             ProjectImagePlaceholder(
+                hasExistingPhotos = false,
+                isAtMax = false,
                 onImageClick = onImageClick,
                 modifier = Modifier.fillMaxWidth()
             )
+        } else {
+            val allItems = imagePaths.toMutableList()
+            if (!isAtMax) {
+                allItems.add("ADD_BUTTON_PLACEHOLDER")
+            }
+            
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                allItems.chunked(2).forEach { rowItems ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        rowItems.forEach { item ->
+                            Box(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                if (item == "ADD_BUTTON_PLACEHOLDER") {
+                                    AddPhotoButton(
+                                        onImageClick = onImageClick,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                } else {
+                                    ProjectImageThumbnail(
+                                        imagePath = item,
+                                        onRemoveImage = { onRemoveImage(item) },
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
+                        }
+                        if (rowItems.size == 1) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -76,12 +123,12 @@ fun ProjectImageSelector(
 @Composable
 private fun ProjectImageThumbnail(
     imagePath: String,
-    onImageClick: () -> Unit,
-    onRemoveImage: () -> Unit
+    onRemoveImage: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     
-    Box {
+    Box(modifier = modifier) {
         Image(
             painter = rememberAsyncImagePainter(
                 ImageRequest.Builder(context)
@@ -90,10 +137,9 @@ private fun ProjectImageThumbnail(
             ),
             contentDescription = "Project image",
             modifier = Modifier
-                .width(120.dp)
+                .fillMaxWidth()
                 .height(120.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .clickable { onImageClick() },
+                .clip(RoundedCornerShape(12.dp)),
             contentScale = ContentScale.Crop
         )
         ProjectImageDeleteButton(
@@ -124,15 +170,35 @@ private fun ProjectImageDeleteButton(
 
 @Composable
 private fun ProjectImagePlaceholder(
+    hasExistingPhotos: Boolean,
+    isAtMax: Boolean,
     onImageClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val placeholderText = when {
+        isAtMax -> "Maximum $MAX_PHOTOS photos reached"
+        hasExistingPhotos -> "Add Another Photo"
+        else -> "Add Photo"
+    }
+    
     Column(
         modifier = modifier
-            .clickable { onImageClick() }
+            .then(
+                if (!isAtMax) {
+                    Modifier.clickable { onImageClick() }
+                } else {
+                    Modifier
+                }
+            )
             .height(120.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = .2f))
+            .background(
+                if (isAtMax) {
+                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                } else {
+                    MaterialTheme.colorScheme.primary.copy(alpha = .2f)
+                }
+            )
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -141,13 +207,69 @@ private fun ProjectImagePlaceholder(
             imageVector = Icons.Default.AddPhotoAlternate,
             contentDescription = "Add photo",
             modifier = Modifier.size(32.dp),
-            tint = MaterialTheme.colorScheme.tertiary
+            tint = if (isAtMax) {
+                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            } else {
+                MaterialTheme.colorScheme.tertiary
+            }
         )
         Text(
-            text = "Add Photo",
-            color = MaterialTheme.colorScheme.tertiary,
+            text = placeholderText,
+            color = if (isAtMax) {
+                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            } else {
+                MaterialTheme.colorScheme.tertiary
+            },
             style = MaterialTheme.typography.labelMedium,
             textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun AddPhotoButton(
+    onImageClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(120.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f))
+            .clickable { onImageClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "Add another photo",
+            modifier = Modifier.size(32.dp),
+            tint = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    }
+}
+
+@Composable
+private fun ProjectPhotosSectionHeader(
+    currentCount: Int,
+    maxCount: Int,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Project Photos",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = "$currentCount/$maxCount",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
