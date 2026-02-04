@@ -108,7 +108,7 @@ fun BottomSheetManager(
         val projectDetailViewModel = hiltViewModel<com.example.stitchcounterv3.feature.projectDetail.ProjectDetailViewModel>()
         val projectDetailUiState by projectDetailViewModel.uiState.collectAsStateWithLifecycle()
         val context = LocalContext.current
-        var showDiscardDialog = remember { mutableStateOf(false) }
+        val showDiscardDialog = remember { mutableStateOf(false) }
 
         when (screen) {
             is SheetScreen.SingleCounter -> {
@@ -269,10 +269,10 @@ fun BottomSheetManager(
                             viewModel = projectDetailViewModel,
                             context = context,
                             showDiscardDialog = showDiscardDialog.value,
-                            onDismissDiscardDialog = { showDiscardDialog = false },
+                            onDismissDiscardDialog = { showDiscardDialog.value = false },
                             onDiscard = {
                                 projectDetailViewModel.discardChanges()
-                                showDiscardDialog = false
+                                showDiscardDialog.value = false
                                 isDismissalAllowedState.value = true
                                 scope.launch {
                                     sheetState.hide()
