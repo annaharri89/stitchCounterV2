@@ -1,9 +1,13 @@
 package com.example.stitchcounterv3.feature.settings
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.stitchcounterv3.data.backup.BackupManager
 import com.example.stitchcounterv3.data.repo.ThemePreferencesRepository
 import com.example.stitchcounterv3.domain.model.AppTheme
+import com.example.stitchcounterv3.domain.usecase.ExportLibrary
+import com.example.stitchcounterv3.domain.usecase.ImportLibrary
 import com.example.stitchcounterv3.feature.theme.LauncherIconManager
 import com.example.stitchcounterv3.feature.theme.ThemeColor
 import com.example.stitchcounterv3.feature.theme.ThemeManager
@@ -19,7 +23,9 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val themePreferencesRepository: ThemePreferencesRepository,
     private val themeManager: ThemeManager,
-    private val launcherIconManager: LauncherIconManager
+    private val launcherIconManager: LauncherIconManager,
+    private val exportLibraryUseCase: ExportLibrary,
+    private val importLibraryUseCase: ImportLibrary
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -49,9 +55,68 @@ class SettingsViewModel @Inject constructor(
             themePreferencesRepository.setShouldNavigateToSettings(true)
         }
     }
+
+    fun exportLibrary(outputUri: Uri? = null) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isExporting = true, exportError = null) }
+            exportLibraryUseCase(outputUri).fold(
+                onSuccess = { uri ->
+                    _uiState.update { it.copy(isExporting = false, exportSuccess = true) }
+                },
+                onFailure = { error ->
+                    _uiState.update { 
+                        it.copy(
+                            isExporting = false, 
+                            exportError = error.message ?: "Export failed"
+                        ) 
+                    }
+                }
+            )
+        }
+    }
+    
+    fun importLibrary(inputUri: Uri, replaceExisting: Boolean = false) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isImporting = true, importError = null) }
+            importLibraryUseCase(inputUri, replaceExisting).fold(
+                onSuccess = { importResult ->
+                    _uiState.update { 
+                        it.copy(
+                            isImporting = false, 
+                            importSuccess = true,
+                            importResult = importResult
+                        ) 
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.update { 
+                        it.copy(
+                            isImporting = false, 
+                            importError = error.message ?: "Import failed"
+                        ) 
+                    }
+                }
+            )
+        }
+    }
+    
+    fun clearExportStatus() {
+        _uiState.update { it.copy(exportSuccess = false, exportError = null) }
+    }
+    
+    fun clearImportStatus() {
+        _uiState.update { it.copy(importSuccess = false, importError = null, importResult = null) }
+    }
 }
 
 data class SettingsUiState(
     val selectedTheme: AppTheme = AppTheme.SEA_COTTAGE,
-    val themeColors: List<ThemeColor> = emptyList()
+    val themeColors: List<ThemeColor> = emptyList(),
+    val isExporting: Boolean = false,
+    val exportSuccess: Boolean = false,
+    val exportError: String? = null,
+    val isImporting: Boolean = false,
+    val importSuccess: Boolean = false,
+    val importError: String? = null,
+    val importResult: com.example.stitchcounterv3.domain.usecase.ImportResult? = null
 )

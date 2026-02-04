@@ -27,12 +27,12 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
     val navController = rememberNavController()
     val currentSheetScreen by viewModel.currentSheet.collectAsStateWithLifecycle()
 
-    var previousTab by remember { mutableStateOf<BottomNavTab?>(null) }
+    val previousTab = remember { mutableStateOf<BottomNavTab?>(null) }
     LaunchedEffect(selectedTab) {
-        if (selectedTab == BottomNavTab.SETTINGS && previousTab != BottomNavTab.SETTINGS) {
+        if (selectedTab == BottomNavTab.SETTINGS && previousTab.value != BottomNavTab.SETTINGS) {
             navigateToDestination(navController, getDestinationForTab(selectedTab))
         }
-        previousTab = selectedTab
+        previousTab.value = selectedTab
     }
 
     Scaffold(

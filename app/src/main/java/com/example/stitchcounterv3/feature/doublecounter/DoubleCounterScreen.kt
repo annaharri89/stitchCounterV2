@@ -9,7 +9,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -66,19 +65,19 @@ fun DoubleCounterScreen(
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
 
-    var resetDialogType by remember { mutableStateOf<CounterType?>(null) }
-    var showResetAllDialog by remember { mutableStateOf(false) }
+    val resetDialogType = remember { mutableStateOf<CounterType?>(null) }
+    val showResetAllDialog = remember { mutableStateOf(false) }
 
     val actions = object : DoubleCounterActions {
         override fun increment(type: CounterType) = viewModel.increment(type)
         override fun decrement(type: CounterType) = viewModel.decrement(type)
         override fun reset(type: CounterType) {
-            resetDialogType = type
+            resetDialogType.value = type
         }
         override fun changeAdjustment(type: CounterType, value: com.example.stitchcounterv3.domain.model.AdjustmentAmount) = 
             viewModel.changeAdjustment(type, value)
         override fun resetAll() {
-            showResetAllDialog = true
+            showResetAllDialog.value = true
         }
     }
 
@@ -116,7 +115,7 @@ fun DoubleCounterScreen(
         )
     }
 
-    resetDialogType?.let { type ->
+    resetDialogType.value?.let { type ->
         val counterName = when (type) {
             CounterType.STITCH -> "Stitches"
             CounterType.ROW -> "Rows/Rounds"
@@ -126,21 +125,21 @@ fun DoubleCounterScreen(
             message = "Are you sure you want to reset the $counterName counter to 0?",
             onConfirm = {
                 viewModel.reset(type)
-                resetDialogType = null
+                resetDialogType.value = null
             },
-            onDismiss = { resetDialogType = null }
+            onDismiss = { resetDialogType.value = null }
         )
     }
 
-    if (showResetAllDialog) {
+    if (showResetAllDialog.value) {
         ResetConfirmationDialog(
             title = "Reset All Counters?",
             message = "Are you sure you want to reset both Stitches and Rows/Rounds counters to 0?",
             onConfirm = {
                 viewModel.resetAll()
-                showResetAllDialog = false
+                showResetAllDialog.value = false
             },
-            onDismiss = { showResetAllDialog = false }
+            onDismiss = { showResetAllDialog.value = false }
         )
     }
 }
