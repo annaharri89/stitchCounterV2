@@ -140,7 +140,7 @@ open class DoubleCounterViewModel @Inject constructor(
                 rowCounterNumber = s.rowCounterState.count,
                 rowAdjustment = s.rowCounterState.adjustment.adjustmentAmount,
                 totalRows = existingProject?.totalRows ?: s.totalRows,
-                imagePath = existingProject?.imagePath
+                imagePaths = existingProject?.imagePaths ?: emptyList()
             )
             val newId = upsertProject(project).toInt()
             if (s.id == 0 && newId > 0) {

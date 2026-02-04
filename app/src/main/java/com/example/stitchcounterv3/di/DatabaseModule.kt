@@ -3,6 +3,7 @@ package com.example.stitchcounterv3.di
 import android.content.Context
 import androidx.room.Room
 import com.example.stitchcounterv3.data.local.AppDatabase
+import com.example.stitchcounterv3.data.local.DatabaseMigrations
 import com.example.stitchcounterv3.data.local.ProjectDao
 import dagger.Module
 import dagger.Provides
@@ -22,7 +23,10 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "StitchCounter.db"
-        ).fallbackToDestructiveMigration().build()
+        ).addMigrations(
+            DatabaseMigrations.MIGRATION_1_2,
+            DatabaseMigrations.MIGRATION_2_3
+        ).build()
 
     @Provides
     @Singleton

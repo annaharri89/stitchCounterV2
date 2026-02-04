@@ -8,10 +8,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddPhotoAlternate
@@ -36,26 +40,41 @@ import java.io.InputStream
 
 @Composable
 fun ProjectImageSelector(
-    imagePath: String?,
+    imagePaths: List<String>,
     onImageClick: () -> Unit,
-    onRemoveImage: () -> Unit,
+    onRemoveImage: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier) {
-        if (imagePath != null) {
-            ProjectImageDisplay(
-                imagePath = imagePath,
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        if (imagePaths.isNotEmpty()) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(imagePaths) { imagePath ->
+                    ProjectImageThumbnail(
+                        imagePath = imagePath,
+                        onImageClick = onImageClick,
+                        onRemoveImage = { onRemoveImage(imagePath) }
+                    )
+                }
+            }
+        }
+        
+        if (imagePaths.size < 10) {
+            ProjectImagePlaceholder(
                 onImageClick = onImageClick,
-                onRemoveImage = onRemoveImage
+                modifier = Modifier.fillMaxWidth()
             )
-        } else {
-            ProjectImagePlaceholder(onImageClick = onImageClick)
         }
     }
 }
 
 @Composable
-private fun ProjectImageDisplay(
+private fun ProjectImageThumbnail(
     imagePath: String,
     onImageClick: () -> Unit,
     onRemoveImage: () -> Unit
@@ -71,8 +90,8 @@ private fun ProjectImageDisplay(
             ),
             contentDescription = "Project image",
             modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
+                .width(120.dp)
+                .height(120.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .clickable { onImageClick() },
             contentScale = ContentScale.Crop
@@ -81,7 +100,7 @@ private fun ProjectImageDisplay(
             onRemoveImage = onRemoveImage,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(8.dp)
+                .padding(4.dp)
         )
     }
 }
@@ -105,47 +124,42 @@ private fun ProjectImageDeleteButton(
 
 @Composable
 private fun ProjectImagePlaceholder(
-    onImageClick: () -> Unit
+    onImageClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .clickable { onImageClick() }
-            .height(200.dp)
+            .height(120.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = .2f)),
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = .2f))
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
             imageVector = Icons.Default.AddPhotoAlternate,
-            contentDescription = null,
-            modifier = Modifier.size(48.dp),
+            contentDescription = "Add photo",
+            modifier = Modifier.size(32.dp),
             tint = MaterialTheme.colorScheme.tertiary
         )
         Text(
-            text = "Add Project Image",
+            text = "Add Photo",
             color = MaterialTheme.colorScheme.tertiary,
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center
-        )
-        Text(
-            text = "(You can add it later)",
-            color = MaterialTheme.colorScheme.tertiary,
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.labelMedium,
             textAlign = TextAlign.Center
         )
     }
 }
 
-fun saveImageToInternalStorage(context: Context, uri: Uri, projectId: Int): String? {
+fun saveImageToInternalStorage(context: Context, uri: Uri, projectId: Int, imageIndex: Int = 0): String? {
     return try {
         val imagesDir = File(context.filesDir, "project_images")
         if (!imagesDir.exists()) {
             imagesDir.mkdirs()
         }
         
-        val fileName = "project_${projectId}_${System.currentTimeMillis()}.jpg"
+        val fileName = "project_${projectId}_${System.currentTimeMillis()}_${imageIndex}.jpg"
         val file = File(imagesDir, fileName)
         
         context.contentResolver.openInputStream(uri)?.use { inputStream: InputStream ->

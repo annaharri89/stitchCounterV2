@@ -9,7 +9,7 @@ data class Project(
     val rowCounterNumber: Int = 0,
     val rowAdjustment: Int = 1,
     val totalRows: Int = 0,
-    val imagePath: String? = null,
+    val imagePaths: List<String> = emptyList(),
 )
 
 enum class ProjectType { SINGLE, DOUBLE }

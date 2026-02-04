@@ -26,7 +26,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -61,9 +60,11 @@ fun ProjectDetailContent(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            val savedImagePath = saveImageToInternalStorage(context, it, uiState.project?.id ?: 0)
+            val projectId = uiState.project?.id ?: 0
+            val imageIndex = uiState.imagePaths.size
+            val savedImagePath = saveImageToInternalStorage(context, it, projectId, imageIndex)
             savedImagePath?.let { path ->
-                viewModel.updateImagePath(path)
+                viewModel.addImagePath(path)
             }
         }
     }
@@ -89,7 +90,7 @@ fun ProjectDetailContent(
             ProjectDetailTopBar(
                 isNewProject = isNewProject,
                 onCloseClick = if (isNewProject) { { viewModel.attemptDismissal() } } else null,
-                onBackClick = if (!isNewProject && uiState.project?.id != null && onNavigateBack != null) {
+                onBackClick = if (!isNewProject && onNavigateBack != null) {
                     { onNavigateBack(uiState.project.id) }
                 } else null
             )
@@ -151,9 +152,9 @@ fun ProjectDetailContent(
             }
 
             ProjectImageSelector(
-                imagePath = uiState.imagePath,
+                imagePaths = uiState.imagePaths,
                 onImageClick = { imagePickerLauncher.launch("image/*") },
-                onRemoveImage = { viewModel.updateImagePath(null) },
+                onRemoveImage = { imagePath -> viewModel.removeImagePath(imagePath) },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -228,7 +229,7 @@ fun ProjectDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    var showDiscardDialog by remember { mutableStateOf(false) }
+    val showDiscardDialog = remember { mutableStateOf(false) }
 
     LaunchedEffect(projectId) {
         if (uiState.project == null || uiState.project?.id != projectId) {
@@ -245,7 +246,7 @@ fun ProjectDetailScreen(
                 is com.example.stitchcounterv3.domain.model.DismissalResult.Blocked -> {
                 }
                 is com.example.stitchcounterv3.domain.model.DismissalResult.ShowDiscardDialog -> {
-                    showDiscardDialog = true
+                    showDiscardDialog.value = true
                 }
             }
         }
@@ -259,11 +260,11 @@ fun ProjectDetailScreen(
         uiState = uiState,
         viewModel = viewModel,
         context = context,
-        showDiscardDialog = showDiscardDialog,
-        onDismissDiscardDialog = { showDiscardDialog = false },
+        showDiscardDialog = showDiscardDialog.value,
+        onDismissDiscardDialog = { showDiscardDialog.value = false },
         onDiscard = {
             viewModel.discardChanges()
-            showDiscardDialog = false
+            showDiscardDialog.value = false
             navigator.popBackStack()
         },
         onCreateProject = null,

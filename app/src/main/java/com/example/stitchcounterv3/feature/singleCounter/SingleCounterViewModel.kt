@@ -128,7 +128,7 @@ open class SingleCounterViewModel @Inject constructor(
                 title = existingProject?.title ?: "",
                 stitchCounterNumber = state.counterState.count,
                 stitchAdjustment = state.counterState.adjustment.adjustmentAmount,
-                imagePath = existingProject?.imagePath
+                imagePaths = existingProject?.imagePaths ?: emptyList()
             )
             val newId = upsertProject(project).toInt()
             if (state.id == 0 && newId > 0) {
