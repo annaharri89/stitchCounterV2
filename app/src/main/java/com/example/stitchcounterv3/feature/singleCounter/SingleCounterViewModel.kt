@@ -47,19 +47,22 @@ open class SingleCounterViewModel @Inject constructor(
                 resetState()
                 return@launch
             }
-            if (_uiState.value.id == projectId) {
-                return@launch
-            }
             val project = getProject(projectId)
             if (project != null) {
+                val currentState = _uiState.value
+                val preserveCounter = currentState.id == project.id && currentState.id > 0
                 _uiState.update { currentState ->
                     currentState.copy(
                         id = project.id,
                         title = project.title,
-                        counterState = CounterState(
-                            count = project.stitchCounterNumber,
-                            adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE
-                        )
+                        counterState = if (preserveCounter) {
+                            currentState.counterState
+                        } else {
+                            CounterState(
+                                count = project.stitchCounterNumber,
+                                adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE
+                            )
+                        }
                     )
                 }
             }
