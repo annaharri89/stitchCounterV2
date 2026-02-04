@@ -24,7 +24,7 @@ data class ProjectDetailUiState(
     val title: String = "",
     val projectType: ProjectType = ProjectType.SINGLE,
     val totalRows: String = "",
-    val imagePath: String? = null,
+    val imagePaths: List<String> = emptyList(),
     val isLoading: Boolean = false,
     val hasUnsavedChanges: Boolean = false,
     val titleError: String? = null,
@@ -46,7 +46,7 @@ class ProjectDetailViewModel @Inject constructor(
     private val autoSaveDelayMs = 1000L
     private var originalTitle: String = ""
     private var originalTotalRows: String = ""
-    private var originalImagePath: String? = null
+    private var originalImagePaths: List<String> = emptyList()
 
     fun loadProject(projectId: Int?, projectType: ProjectType) {
         viewModelScope.launch {
@@ -69,7 +69,7 @@ class ProjectDetailViewModel @Inject constructor(
                         title = "",
                         projectType = projectType,
                         totalRows = "",
-                        imagePath = null,
+                        imagePaths = emptyList(),
                         isLoading = false,
                         hasUnsavedChanges = false,
                         titleError = null,
@@ -78,7 +78,7 @@ class ProjectDetailViewModel @Inject constructor(
                 }
                 originalTitle = ""
                 originalTotalRows = ""
-                originalImagePath = null
+                originalImagePaths = emptyList()
                 return@launch
             }
             
@@ -86,14 +86,14 @@ class ProjectDetailViewModel @Inject constructor(
             if (project != null) {
                 originalTitle = project.title
                 originalTotalRows = if (project.totalRows > 0) project.totalRows.toString() else ""
-                originalImagePath = project.imagePath
+                originalImagePaths = project.imagePaths
                 _uiState.update { currentState ->
                     currentState.copy(
                         project = project,
                         title = project.title,
                         projectType = project.type,
                         totalRows = if (project.totalRows > 0) project.totalRows.toString() else "",
-                        imagePath = project.imagePath,
+                        imagePaths = project.imagePaths,
                         isLoading = false,
                         hasUnsavedChanges = false,
                         titleError = null,
@@ -113,14 +113,14 @@ class ProjectDetailViewModel @Inject constructor(
             if (project != null) {
                 originalTitle = project.title
                 originalTotalRows = if (project.totalRows > 0) project.totalRows.toString() else ""
-                originalImagePath = project.imagePath
+                originalImagePaths = project.imagePaths
                 _uiState.update { currentState ->
                     currentState.copy(
                         project = project,
                         title = project.title,
                         projectType = project.type,
                         totalRows = if (project.totalRows > 0) project.totalRows.toString() else "",
-                        imagePath = project.imagePath,
+                        imagePaths = project.imagePaths,
                         isLoading = false,
                         hasUnsavedChanges = false,
                         titleError = null,
@@ -134,12 +134,12 @@ class ProjectDetailViewModel @Inject constructor(
     }
 
     fun updateTitle(newTitle: String) {
-        val currentImagePath = _uiState.value.imagePath
+        val currentImagePaths = _uiState.value.imagePaths
         val currentTotalRows = _uiState.value.totalRows
         _uiState.update { currentState ->
             currentState.copy(
                 title = newTitle,
-                hasUnsavedChanges = newTitle != originalTitle || currentTotalRows != originalTotalRows || currentImagePath != originalImagePath,
+                hasUnsavedChanges = newTitle != originalTitle || currentTotalRows != originalTotalRows || currentImagePaths != originalImagePaths,
                 titleError = if (newTitle.isBlank()) "Title is required" else null
             )
         }
@@ -148,7 +148,7 @@ class ProjectDetailViewModel @Inject constructor(
 
     fun updateTotalRows(newTotalRows: String) {
         val currentTitle = _uiState.value.title
-        val currentImagePath = _uiState.value.imagePath
+        val currentImagePaths = _uiState.value.imagePaths
         val state = _uiState.value
         val totalRowsValue = newTotalRows.toIntOrNull() ?: 0
         val isDoubleCounter = state.projectType == ProjectType.DOUBLE
@@ -162,7 +162,7 @@ class ProjectDetailViewModel @Inject constructor(
         _uiState.update { currentState ->
             currentState.copy(
                 totalRows = newTotalRows,
-                hasUnsavedChanges = currentTitle != originalTitle || newTotalRows != originalTotalRows || currentImagePath != originalImagePath,
+                hasUnsavedChanges = currentTitle != originalTitle || newTotalRows != originalTotalRows || currentImagePaths != originalImagePaths,
                 totalRowsError = totalRowsError
             )
         }
@@ -195,18 +195,18 @@ class ProjectDetailViewModel @Inject constructor(
                 rowCounterNumber = existingProject?.rowCounterNumber ?: 0,
                 rowAdjustment = existingProject?.rowAdjustment ?: 1,
                 totalRows = totalRowsValue,
-                imagePath = state.imagePath
+                imagePaths = state.imagePaths
             )
             val newId = upsertProject(project).toInt()
             if (state.project?.id == 0 && newId > 0) {
                 val updatedProject = project.copy(id = newId)
                 originalTitle = state.title
                 originalTotalRows = state.totalRows
-                originalImagePath = updatedProject.imagePath
+                originalImagePaths = updatedProject.imagePaths
                 _uiState.update { currentState ->
                     currentState.copy(
                         project = updatedProject,
-                        imagePath = updatedProject.imagePath,
+                        imagePaths = updatedProject.imagePaths,
                         hasUnsavedChanges = false
                     )
                 }
@@ -214,11 +214,11 @@ class ProjectDetailViewModel @Inject constructor(
                 val updatedProject = project.copy(id = state.project.id)
                 originalTitle = state.title
                 originalTotalRows = state.totalRows
-                originalImagePath = updatedProject.imagePath
+                originalImagePaths = updatedProject.imagePaths
                 _uiState.update { currentState ->
                     currentState.copy(
                         project = updatedProject,
-                        imagePath = updatedProject.imagePath,
+                        imagePaths = updatedProject.imagePaths,
                         hasUnsavedChanges = false
                     )
                 }
@@ -250,7 +250,7 @@ class ProjectDetailViewModel @Inject constructor(
             currentState.copy(
                 title = originalTitle,
                 totalRows = originalTotalRows,
-                imagePath = originalImagePath,
+                imagePaths = originalImagePaths,
                 hasUnsavedChanges = false,
                 titleError = null,
                 totalRowsError = null
@@ -258,13 +258,41 @@ class ProjectDetailViewModel @Inject constructor(
         }
     }
 
-    fun updateImagePath(imagePath: String?) {
+    fun addImagePath(imagePath: String) {
+        val currentTitle = _uiState.value.title
+        val currentTotalRows = _uiState.value.totalRows
+        val currentImagePaths = _uiState.value.imagePaths
+        val newImagePaths = currentImagePaths + imagePath
+        _uiState.update { currentState ->
+            currentState.copy(
+                imagePaths = newImagePaths,
+                hasUnsavedChanges = currentTitle != originalTitle || currentTotalRows != originalTotalRows || newImagePaths != originalImagePaths
+            )
+        }
+        triggerAutoSave()
+    }
+
+    fun removeImagePath(imagePath: String) {
+        val currentTitle = _uiState.value.title
+        val currentTotalRows = _uiState.value.totalRows
+        val currentImagePaths = _uiState.value.imagePaths
+        val newImagePaths = currentImagePaths.filter { it != imagePath }
+        _uiState.update { currentState ->
+            currentState.copy(
+                imagePaths = newImagePaths,
+                hasUnsavedChanges = currentTitle != originalTitle || currentTotalRows != originalTotalRows || newImagePaths != originalImagePaths
+            )
+        }
+        triggerAutoSave()
+    }
+
+    fun updateImagePaths(imagePaths: List<String>) {
         val currentTitle = _uiState.value.title
         val currentTotalRows = _uiState.value.totalRows
         _uiState.update { currentState ->
             currentState.copy(
-                imagePath = imagePath,
-                hasUnsavedChanges = currentTitle != originalTitle || currentTotalRows != originalTotalRows || imagePath != originalImagePath
+                imagePaths = imagePaths,
+                hasUnsavedChanges = currentTitle != originalTitle || currentTotalRows != originalTotalRows || imagePaths != originalImagePaths
             )
         }
         triggerAutoSave()
@@ -299,18 +327,18 @@ class ProjectDetailViewModel @Inject constructor(
                 rowCounterNumber = existingProject?.rowCounterNumber ?: 0,
                 rowAdjustment = existingProject?.rowAdjustment ?: 1,
                 totalRows = totalRowsValue,
-                imagePath = state.imagePath
+                imagePaths = state.imagePaths
             )
             val newId = upsertProject(project).toInt()
             if (newId > 0) {
                 val updatedProject = project.copy(id = newId)
                 originalTitle = state.title
                 originalTotalRows = state.totalRows
-                originalImagePath = updatedProject.imagePath
+                originalImagePaths = updatedProject.imagePaths
                 _uiState.update { currentState ->
                     currentState.copy(
                         project = updatedProject,
-                        imagePath = updatedProject.imagePath,
+                        imagePaths = updatedProject.imagePaths,
                         hasUnsavedChanges = false,
                         titleError = null,
                         totalRowsError = null

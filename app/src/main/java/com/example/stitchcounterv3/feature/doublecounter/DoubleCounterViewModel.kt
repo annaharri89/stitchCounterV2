@@ -64,32 +64,29 @@ open class DoubleCounterViewModel @Inject constructor(
             val project = getProject(projectId)
             if (project != null) {
                 val currentState = _uiState.value
-                val shouldUpdate = currentState.id != project.id || currentState.totalRows != project.totalRows
-                if (shouldUpdate) {
-                    _uiState.update { currentState ->
-                        val preserveCounters = currentState.id == project.id && currentState.id > 0
-                        currentState.copy(
-                            id = project.id,
-                            title = project.title,
-                            stitchCounterState = if (preserveCounters) {
-                                currentState.stitchCounterState
-                            } else {
-                                CounterState(
-                                    count = project.stitchCounterNumber,
-                                    adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE
-                                )
-                            },
-                            rowCounterState = if (preserveCounters) {
-                                currentState.rowCounterState
-                            } else {
-                                CounterState(
-                                    count = project.rowCounterNumber,
-                                    adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.rowAdjustment } ?: AdjustmentAmount.ONE
-                                )
-                            },
-                            totalRows = project.totalRows
-                        )
-                    }
+                val preserveCounters = currentState.id == project.id && currentState.id > 0
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        id = project.id,
+                        title = project.title,
+                        stitchCounterState = if (preserveCounters) {
+                            currentState.stitchCounterState
+                        } else {
+                            CounterState(
+                                count = project.stitchCounterNumber,
+                                adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE
+                            )
+                        },
+                        rowCounterState = if (preserveCounters) {
+                            currentState.rowCounterState
+                        } else {
+                            CounterState(
+                                count = project.rowCounterNumber,
+                                adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.rowAdjustment } ?: AdjustmentAmount.ONE
+                            )
+                        },
+                        totalRows = project.totalRows
+                    )
                 }
             }
         }
@@ -140,7 +137,7 @@ open class DoubleCounterViewModel @Inject constructor(
                 rowCounterNumber = s.rowCounterState.count,
                 rowAdjustment = s.rowCounterState.adjustment.adjustmentAmount,
                 totalRows = existingProject?.totalRows ?: s.totalRows,
-                imagePath = existingProject?.imagePath
+                imagePaths = existingProject?.imagePaths ?: emptyList()
             )
             val newId = upsertProject(project).toInt()
             if (s.id == 0 && newId > 0) {

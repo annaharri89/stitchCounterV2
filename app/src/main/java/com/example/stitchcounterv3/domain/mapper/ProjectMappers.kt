@@ -13,7 +13,7 @@ fun ProjectEntity.toDomain(): Project = Project(
     rowCounterNumber = rowCounterNumber,
     rowAdjustment = rowAdjustment,
     totalRows = totalRows,
-    imagePath = imagePath,
+    imagePaths = imagePaths,
 )
 
 fun Project.toEntity(): ProjectEntity = ProjectEntity(
@@ -25,6 +25,6 @@ fun Project.toEntity(): ProjectEntity = ProjectEntity(
     rowCounterNumber = rowCounterNumber,
     rowAdjustment = rowAdjustment,
     totalRows = totalRows,
-    imagePath = imagePath,
+    imagePaths = imagePaths,
 )
 

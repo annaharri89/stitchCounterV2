@@ -48,11 +48,11 @@ internal fun ProjectImageOrCheckbox(
             modifier = Modifier.size(24.dp)
         )
     } else {
-        if (project.imagePath != null) {
+        project.imagePaths.firstOrNull()?.let { imagePath ->
             Image(
                 painter = rememberAsyncImagePainter(
                     ImageRequest.Builder(context)
-                        .data(project.imagePath)
+                        .data(imagePath)
                         .build()
                 ),
                 contentDescription = "Project image",
@@ -61,7 +61,7 @@ internal fun ProjectImageOrCheckbox(
                     .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )
-        } 
+        }
     }
 }
 
