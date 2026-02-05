@@ -35,7 +35,7 @@ fun DoubleCounterPortraitLayout(
     topBarContent: (@Composable () -> Unit)? = null
 ) {
     Column(
-        modifier = Modifier.padding(horizontal = 24.dp),
+        modifier = Modifier.padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

@@ -219,21 +219,26 @@ fun ProjectDetailContent(
     }
 }
 
-@RootNavGraph
-@Destination
 @Composable
-fun ProjectDetailScreen(
-    projectId: Int,
+fun ProjectDetailScreenContent(
+    projectId: Int? = null,
+    projectType: ProjectType? = null,
     viewModel: ProjectDetailViewModel = hiltViewModel(),
-    navigator: DestinationsNavigator
+    onNavigateBack: ((Int) -> Unit)? = null,
+    onDismiss: (() -> Unit)? = null,
+    onCreateProject: (() -> Unit)? = null
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val showDiscardDialog = remember { mutableStateOf(false) }
 
-    LaunchedEffect(projectId) {
-        if (uiState.project == null || uiState.project?.id != projectId) {
-            viewModel.loadProjectById(projectId)
+    LaunchedEffect(projectId, projectType) {
+        if (projectId != null && projectId > 0) {
+            if (uiState.project == null || uiState.project?.id != projectId) {
+                viewModel.loadProjectById(projectId)
+            }
+        } else if (projectType != null) {
+            viewModel.loadProject(null, projectType)
         }
     }
 
@@ -241,7 +246,7 @@ fun ProjectDetailScreen(
         viewModel.dismissalResult.collect { result ->
             when (result) {
                 is com.example.stitchcounterv3.domain.model.DismissalResult.Allowed -> {
-                    navigator.popBackStack()
+                    onDismiss?.invoke()
                 }
                 is com.example.stitchcounterv3.domain.model.DismissalResult.Blocked -> {
                 }
@@ -252,8 +257,10 @@ fun ProjectDetailScreen(
         }
     }
 
-    BackHandler {
-        viewModel.attemptDismissal()
+    if (onDismiss != null) {
+        BackHandler {
+            viewModel.attemptDismissal()
+        }
     }
 
     ProjectDetailContent(
@@ -265,9 +272,27 @@ fun ProjectDetailScreen(
         onDiscard = {
             viewModel.discardChanges()
             showDiscardDialog.value = false
-            navigator.popBackStack()
+            onDismiss?.invoke()
         },
-        onCreateProject = null,
-        onNavigateBack = null
+        onCreateProject = onCreateProject,
+        onNavigateBack = onNavigateBack
+    )
+}
+
+@RootNavGraph
+@Destination
+@Composable
+fun ProjectDetailScreen(
+    projectId: Int,
+    viewModel: ProjectDetailViewModel = hiltViewModel(),
+    navigator: DestinationsNavigator
+) {
+    ProjectDetailScreenContent(
+        projectId = projectId,
+        projectType = null,
+        viewModel = viewModel,
+        onNavigateBack = null,
+        onDismiss = { navigator.popBackStack() },
+        onCreateProject = null
     )
 }

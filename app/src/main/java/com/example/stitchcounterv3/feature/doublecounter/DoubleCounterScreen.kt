@@ -1,6 +1,6 @@
 package com.example.stitchcounterv3.feature.doublecounter
 
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
@@ -10,7 +10,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
@@ -62,8 +61,6 @@ fun DoubleCounterScreen(
     
     val activity = LocalContext.current as ComponentActivity
     val windowSizeClass = calculateWindowSizeClass(activity)
-    val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
 
     val resetDialogType = remember { mutableStateOf<CounterType?>(null) }
     val showResetAllDialog = remember { mutableStateOf(false) }
@@ -82,7 +79,7 @@ fun DoubleCounterScreen(
     }
 
     Surface(
-        modifier = Modifier.height(screenHeight * 0.99f)
+        modifier = Modifier.fillMaxSize()
     ) {
         AdaptiveLayout(
             windowSizeClass = windowSizeClass,
