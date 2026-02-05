@@ -99,9 +99,17 @@ open class DoubleCounterViewModel @Inject constructor(
                 CounterType.STITCH -> currentState.copy(
                     stitchCounterState = update(currentState.stitchCounterState)
                 )
-                CounterType.ROW -> currentState.copy(
-                    rowCounterState = update(currentState.rowCounterState)
-                )
+                CounterType.ROW -> {
+                    val updatedState = update(currentState.rowCounterState)
+                    val cappedCount = if (currentState.totalRows > 0) {
+                        updatedState.count.coerceAtMost(currentState.totalRows)
+                    } else {
+                        updatedState.count
+                    }
+                    currentState.copy(
+                        rowCounterState = updatedState.copy(count = cappedCount)
+                    )
+                }
             }
         }
         triggerAutoSave()
