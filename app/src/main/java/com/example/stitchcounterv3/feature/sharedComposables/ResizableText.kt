@@ -6,11 +6,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFontFamilyResolver
@@ -57,10 +54,11 @@ fun ResizableText(
         ).coerceIn(minFontSize, maxFontSize)
         
         val maxTextWidth = with(density) { maxWidth.toPx() }
+        val maxTextHeight = with(density) { maxHeight.toPx() }
         
         val absoluteMinFontSize = minFontSize * 0.5f
         
-        val fontSize = remember(text, maxTextWidth, initialFontSize, minFontSize, maxFontSize, fontWeight, baseTypography) {
+        val fontSize = remember(text, maxTextWidth, maxTextHeight, initialFontSize, minFontSize, maxFontSize, fontWeight, baseTypography) {
             var currentSize = initialFontSize
             val baseStyle = TextStyle(
                 fontSize = baseTypography.fontSize,
@@ -73,6 +71,30 @@ fun ResizableText(
             var iterations = 0
             val maxIterations = 30
             
+            // First, try to grow the font size if there's extra space
+            while (currentSize < maxFontSize && iterations < maxIterations) {
+                iterations++
+                val testSize = (currentSize * 1.1f).coerceAtMost(maxFontSize)
+                val textStyle = baseStyle.copy(fontSize = testSize.sp)
+                
+                val textLayoutResult = textMeasurer.measure(
+                    text = text,
+                    style = textStyle,
+                    constraints = Constraints(maxWidth = Int.MAX_VALUE)
+                )
+                
+                val measuredWidth = textLayoutResult.size.width.toFloat()
+                val measuredHeight = textLayoutResult.size.height.toFloat()
+                
+                if (measuredWidth <= maxTextWidth && measuredHeight <= maxTextHeight) {
+                    currentSize = testSize
+                } else {
+                    break
+                }
+            }
+            
+            // Then, ensure it fits (reduce if needed)
+            iterations = 0
             while (currentSize >= absoluteMinFontSize && iterations < maxIterations) {
                 iterations++
                 val textStyle = baseStyle.copy(fontSize = currentSize.sp)
@@ -84,12 +106,15 @@ fun ResizableText(
                 )
                 
                 val measuredWidth = textLayoutResult.size.width.toFloat()
+                val measuredHeight = textLayoutResult.size.height.toFloat()
                 
-                if (measuredWidth <= maxTextWidth) {
+                if (measuredWidth <= maxTextWidth && measuredHeight <= maxTextHeight) {
                     break
                 }
                 
-                val scaleFactor = maxTextWidth / measuredWidth
+                val widthScaleFactor = if (measuredWidth > maxTextWidth) maxTextWidth / measuredWidth else 1f
+                val heightScaleFactor = if (measuredHeight > maxTextHeight) maxTextHeight / measuredHeight else 1f
+                val scaleFactor = min(widthScaleFactor, heightScaleFactor)
                 val newSize = currentSize * scaleFactor * 0.98f
                 
                 if (newSize in absoluteMinFontSize..<currentSize) {
@@ -105,10 +130,10 @@ fun ResizableText(
             currentSize.coerceIn(absoluteMinFontSize, maxFontSize)
         }
         
-        var finalFontSize by remember { mutableStateOf(fontSize) }
+        val finalFontSize = remember { mutableFloatStateOf(fontSize) }
         
         LaunchedEffect(text, fontSize) {
-            finalFontSize = fontSize
+            finalFontSize.floatValue = fontSize
         }
         
         Text(
@@ -116,7 +141,7 @@ fun ResizableText(
             maxLines = 1,
             softWrap = false,
             style = MaterialTheme.typography.displayLarge.copy(
-                fontSize = finalFontSize.sp,
+                fontSize = finalFontSize.floatValue.sp,
                 fontWeight = fontWeight
             ),
             textAlign = textAlign,
@@ -126,15 +151,15 @@ fun ResizableText(
                 val didOverflow = layoutResult.didOverflowWidth || measuredWidth > maxTextWidth
                 val absoluteMin = minFontSize * 0.5f
                 
-                if (didOverflow && finalFontSize > absoluteMin) {
+                if (didOverflow && finalFontSize.floatValue > absoluteMin) {
                     val scaleFactor = if (measuredWidth > 0) {
                         (maxTextWidth / measuredWidth * 0.95f).coerceIn(0.5f, 0.95f)
                     } else {
                         0.9f
                     }
-                    val newSize = (finalFontSize * scaleFactor).coerceAtLeast(absoluteMin)
-                    if (newSize < finalFontSize) {
-                        finalFontSize = newSize
+                    val newSize = (finalFontSize.floatValue * scaleFactor).coerceAtLeast(absoluteMin)
+                    if (newSize < finalFontSize.floatValue) {
+                        finalFontSize.floatValue = newSize
                     }
                 }
             }
