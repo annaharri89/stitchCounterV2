@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.stitchcounterv3"
+    namespace = "dev.harrisonsoftware.stitchCounter"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.stitchcounterv3"
+        applicationId = "dev.harrisonsoftware.stitchCounter"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
