@@ -1,5 +1,6 @@
 package dev.harrisonsoftware.stitchCounter.feature.settings
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -7,16 +8,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material3.*
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
@@ -27,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -35,6 +38,8 @@ import dev.harrisonsoftware.stitchCounter.domain.model.AppTheme
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavGraph
 import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeColor
 import com.ramcosta.composedestinations.annotation.Destination
+import androidx.core.net.toUri
+import dev.harrisonsoftware.stitchCounter.Constants
 
 @RootNavGraph
 @Destination
@@ -56,9 +61,11 @@ fun SettingsScreen(
         uri?.let { viewModel.importLibrary(it) }
     }
     
+    val context = LocalContext.current
     val showImportDialog = remember { mutableStateOf(false) }
     val isThemeSectionExpanded = remember { mutableStateOf(true) }
     val isBackupSectionExpanded = remember { mutableStateOf(true) }
+    val isSupportSectionExpanded = remember { mutableStateOf(true) }
     
     LaunchedEffect(uiState.exportSuccess) {
         if (uiState.exportSuccess) {
@@ -69,6 +76,25 @@ fun SettingsScreen(
     LaunchedEffect(uiState.importSuccess) {
         if (uiState.importSuccess) {
             showImportDialog.value = true
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is SettingsEffect.OpenEmailClient -> {
+                    val encodedSubject = Uri.encode(effect.subject)
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = "mailto:${Constants.SUPPORT_EMAIL}?subject=$encodedSubject".toUri()
+                    }
+                    context.startActivity(intent)
+                }
+                is SettingsEffect.OpenPrivacyPolicy -> {
+                    val browserIntent = Intent(Intent.ACTION_VIEW,
+                        Constants.PRIVACY_POLICY_URL.toUri())
+                    context.startActivity(browserIntent)
+                }
+            }
         }
     }
     
@@ -127,6 +153,26 @@ fun SettingsScreen(
                         onImport = { importLauncher.launch("application/zip") }
                     )
                 }
+            }
+        }
+
+        item {
+            ExpandableSection(
+                title = "Support",
+                isExpanded = isSupportSectionExpanded.value,
+                onToggleExpanded = { isSupportSectionExpanded.value = !isSupportSectionExpanded.value }
+            ) {
+                SupportCard(
+                    onReportBug = {
+                        viewModel.onReportBug()
+                    },
+                    onGiveFeedback = {
+                        viewModel.onGiveFeedback()
+                    },
+                    onOpenPrivacyPolicy = {
+                        viewModel.onOpenPrivacyPolicy()
+                    }
+                )
             }
         }
     }
@@ -354,6 +400,69 @@ private fun BackupRestoreCard(
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SupportCard(
+    onReportBug: () -> Unit,
+    onGiveFeedback: () -> Unit,
+    onOpenPrivacyPolicy: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors().copy(containerColor = MaterialTheme.colorScheme.primaryContainer)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Button(
+                onClick = onReportBug,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.BugReport,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Report a Bug")
+            }
+
+            Button(
+                onClick = onGiveFeedback,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Policy,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Give Feedback")
+            }
+
+            Button(
+                onClick = onOpenPrivacyPolicy,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Policy,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Privacy Policy")
             }
         }
     }

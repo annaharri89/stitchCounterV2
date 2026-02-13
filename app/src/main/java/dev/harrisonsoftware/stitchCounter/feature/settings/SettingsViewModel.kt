@@ -3,20 +3,23 @@ package dev.harrisonsoftware.stitchCounter.feature.settings
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.harrisonsoftware.stitchCounter.data.backup.BackupManager
 import dev.harrisonsoftware.stitchCounter.data.repo.ThemePreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AppTheme
+import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
 import dev.harrisonsoftware.stitchCounter.domain.usecase.ExportLibrary
 import dev.harrisonsoftware.stitchCounter.domain.usecase.ImportLibrary
 import dev.harrisonsoftware.stitchCounter.feature.theme.LauncherIconManager
 import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeColor
 import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.harrisonsoftware.stitchCounter.Constants
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,6 +33,9 @@ class SettingsViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
+
+    private val _effect = Channel<SettingsEffect>(Channel.BUFFERED)
+    val effect = _effect.receiveAsFlow()
 
     init {
         observeTheme()
@@ -59,8 +65,9 @@ class SettingsViewModel @Inject constructor(
     fun exportLibrary(outputUri: Uri? = null) {
         viewModelScope.launch {
             _uiState.update { it.copy(isExporting = true, exportError = null) }
-            exportLibraryUseCase(outputUri).fold(
-                onSuccess = { uri ->
+            val outputContentUri = outputUri?.let { ContentUri(it.toString()) }
+            exportLibraryUseCase(outputContentUri).fold(
+                onSuccess = {
                     _uiState.update { it.copy(isExporting = false, exportSuccess = true) }
                 },
                 onFailure = { error ->
@@ -78,7 +85,7 @@ class SettingsViewModel @Inject constructor(
     fun importLibrary(inputUri: Uri, replaceExisting: Boolean = false) {
         viewModelScope.launch {
             _uiState.update { it.copy(isImporting = true, importError = null) }
-            importLibraryUseCase(inputUri, replaceExisting).fold(
+            importLibraryUseCase(ContentUri(inputUri.toString()), replaceExisting).fold(
                 onSuccess = { importResult ->
                     _uiState.update { 
                         it.copy(
@@ -107,6 +114,24 @@ class SettingsViewModel @Inject constructor(
     fun clearImportStatus() {
         _uiState.update { it.copy(importSuccess = false, importError = null, importResult = null) }
     }
+
+    fun onReportBug() {
+        viewModelScope.launch {
+            _effect.send(SettingsEffect.OpenEmailClient(Constants.BUG_REPORT_SUBJECT))
+        }
+    }
+
+    fun onGiveFeedback() {
+        viewModelScope.launch {
+            _effect.send(SettingsEffect.OpenEmailClient(Constants.FEEDBACK_SUBJECT))
+        }
+    }
+
+    fun onOpenPrivacyPolicy() {
+        viewModelScope.launch {
+            _effect.send(SettingsEffect.OpenPrivacyPolicy)
+        }
+    }
 }
 
 data class SettingsUiState(
@@ -120,3 +145,8 @@ data class SettingsUiState(
     val importError: String? = null,
     val importResult: dev.harrisonsoftware.stitchCounter.domain.usecase.ImportResult? = null
 )
+
+sealed interface SettingsEffect {
+    data class OpenEmailClient(val subject: String) : SettingsEffect
+    object OpenPrivacyPolicy : SettingsEffect
+}
