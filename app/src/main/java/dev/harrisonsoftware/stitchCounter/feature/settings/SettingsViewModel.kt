@@ -12,11 +12,14 @@ import dev.harrisonsoftware.stitchCounter.feature.theme.LauncherIconManager
 import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeColor
 import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.harrisonsoftware.stitchCounter.Constants
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,6 +33,9 @@ class SettingsViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
+
+    private val _effect = Channel<SettingsEffect>(Channel.BUFFERED)
+    val effect = _effect.receiveAsFlow()
 
     init {
         observeTheme()
@@ -107,6 +113,18 @@ class SettingsViewModel @Inject constructor(
     fun clearImportStatus() {
         _uiState.update { it.copy(importSuccess = false, importError = null, importResult = null) }
     }
+
+    fun onContactSupportTapped() {
+        viewModelScope.launch {
+            _effect.send(SettingsEffect.OpenEmailClient(Constants.BUG_REPORT_EMAIL, Constants.BUG_REPORT_SUBJECT))
+        }
+    }
+
+    fun onPrivacyPolicyTapped() {
+        viewModelScope.launch {
+            _effect.send(SettingsEffect.OpenPrivacyPolicy)
+        }
+    }
 }
 
 data class SettingsUiState(
@@ -120,3 +138,8 @@ data class SettingsUiState(
     val importError: String? = null,
     val importResult: dev.harrisonsoftware.stitchCounter.domain.usecase.ImportResult? = null
 )
+
+sealed interface SettingsEffect {
+    data class OpenEmailClient(val address: String, val subject: String) : SettingsEffect
+    object OpenPrivacyPolicy : SettingsEffect
+}
