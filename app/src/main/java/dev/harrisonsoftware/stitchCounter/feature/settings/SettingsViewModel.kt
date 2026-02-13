@@ -3,9 +3,9 @@ package dev.harrisonsoftware.stitchCounter.feature.settings
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.harrisonsoftware.stitchCounter.data.backup.BackupManager
 import dev.harrisonsoftware.stitchCounter.data.repo.ThemePreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AppTheme
+import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
 import dev.harrisonsoftware.stitchCounter.domain.usecase.ExportLibrary
 import dev.harrisonsoftware.stitchCounter.domain.usecase.ImportLibrary
 import dev.harrisonsoftware.stitchCounter.feature.theme.LauncherIconManager
@@ -65,8 +65,9 @@ class SettingsViewModel @Inject constructor(
     fun exportLibrary(outputUri: Uri? = null) {
         viewModelScope.launch {
             _uiState.update { it.copy(isExporting = true, exportError = null) }
-            exportLibraryUseCase(outputUri).fold(
-                onSuccess = { uri ->
+            val outputContentUri = outputUri?.let { ContentUri(it.toString()) }
+            exportLibraryUseCase(outputContentUri).fold(
+                onSuccess = {
                     _uiState.update { it.copy(isExporting = false, exportSuccess = true) }
                 },
                 onFailure = { error ->
@@ -84,7 +85,7 @@ class SettingsViewModel @Inject constructor(
     fun importLibrary(inputUri: Uri, replaceExisting: Boolean = false) {
         viewModelScope.launch {
             _uiState.update { it.copy(isImporting = true, importError = null) }
-            importLibraryUseCase(inputUri, replaceExisting).fold(
+            importLibraryUseCase(ContentUri(inputUri.toString()), replaceExisting).fold(
                 onSuccess = { importResult ->
                     _uiState.update { 
                         it.copy(
@@ -114,13 +115,19 @@ class SettingsViewModel @Inject constructor(
         _uiState.update { it.copy(importSuccess = false, importError = null, importResult = null) }
     }
 
-    fun onContactSupportTapped() {
+    fun onReportBug() {
         viewModelScope.launch {
-            _effect.send(SettingsEffect.OpenEmailClient(Constants.BUG_REPORT_EMAIL, Constants.BUG_REPORT_SUBJECT))
+            _effect.send(SettingsEffect.OpenEmailClient(Constants.BUG_REPORT_SUBJECT))
         }
     }
 
-    fun onPrivacyPolicyTapped() {
+    fun onGiveFeedback() {
+        viewModelScope.launch {
+            _effect.send(SettingsEffect.OpenEmailClient(Constants.FEEDBACK_SUBJECT))
+        }
+    }
+
+    fun onOpenPrivacyPolicy() {
         viewModelScope.launch {
             _effect.send(SettingsEffect.OpenPrivacyPolicy)
         }
@@ -140,6 +147,6 @@ data class SettingsUiState(
 )
 
 sealed interface SettingsEffect {
-    data class OpenEmailClient(val address: String, val subject: String) : SettingsEffect
+    data class OpenEmailClient(val subject: String) : SettingsEffect
     object OpenPrivacyPolicy : SettingsEffect
 }

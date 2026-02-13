@@ -8,7 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -84,14 +83,15 @@ fun SettingsScreen(
         viewModel.effect.collect { effect ->
             when (effect) {
                 is SettingsEffect.OpenEmailClient -> {
+                    val encodedSubject = Uri.encode(effect.subject)
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
-                        data = "mailto:${effect.address}".toUri()
-                        putExtra(Intent.EXTRA_SUBJECT, effect.subject)
+                        data = "mailto:${Constants.SUPPORT_EMAIL}?subject=$encodedSubject".toUri()
                     }
                     context.startActivity(intent)
                 }
                 is SettingsEffect.OpenPrivacyPolicy -> {
-                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(Constants.PRIVACY_POLICY_URL))
+                    val browserIntent = Intent(Intent.ACTION_VIEW,
+                        Constants.PRIVACY_POLICY_URL.toUri())
                     context.startActivity(browserIntent)
                 }
             }
@@ -164,10 +164,13 @@ fun SettingsScreen(
             ) {
                 SupportCard(
                     onReportBug = {
-                        viewModel.onContactSupportTapped()
+                        viewModel.onReportBug()
+                    },
+                    onGiveFeedback = {
+                        viewModel.onGiveFeedback()
                     },
                     onOpenPrivacyPolicy = {
-                        viewModel.onPrivacyPolicyTapped()
+                        viewModel.onOpenPrivacyPolicy()
                     }
                 )
             }
@@ -405,6 +408,7 @@ private fun BackupRestoreCard(
 @Composable
 private fun SupportCard(
     onReportBug: () -> Unit,
+    onGiveFeedback: () -> Unit,
     onOpenPrivacyPolicy: () -> Unit
 ) {
     Card(
@@ -429,11 +433,27 @@ private fun SupportCard(
                 Text("Report a Bug")
             }
 
-            OutlinedButton(
-                onClick = onOpenPrivacyPolicy,
+            Button(
+                onClick = onGiveFeedback,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.secondary
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Policy,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Give Feedback")
+            }
+
+            Button(
+                onClick = onOpenPrivacyPolicy,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary
                 )
             ) {
                 Icon(
