@@ -4,12 +4,14 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -36,7 +38,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -269,6 +274,65 @@ private fun ExpandableSection(
 }
 
 @Composable
+private fun ThemeIconPreview(
+    theme: AppTheme,
+    isSelected: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val backgroundResourceId = when (theme) {
+        AppTheme.SEA_COTTAGE -> R.drawable.ic_launcher_background_sea_cottage
+        AppTheme.RETRO_SUMMER -> R.drawable.ic_launcher_background_retro_summer
+        AppTheme.GOLDEN_HEARTH -> R.drawable.ic_launcher_background_golden_hearth
+        AppTheme.FOREST_FIBER -> R.drawable.ic_launcher_background_forest_fiber
+        AppTheme.CLOUD_SOFT -> R.drawable.ic_launcher_background_cloud_soft
+        AppTheme.YARN_CANDY -> R.drawable.ic_launcher_background_yarn_candy
+        AppTheme.DUSTY_ROSE -> R.drawable.ic_launcher_background_dusty_rose
+    }
+
+    val foregroundResourceId = when (theme) {
+        AppTheme.SEA_COTTAGE -> R.drawable.ic_yarn_sea_cottage
+        AppTheme.RETRO_SUMMER -> R.drawable.ic_yarn_retro_summer
+        AppTheme.GOLDEN_HEARTH -> R.drawable.ic_yarn_golden_hearth
+        AppTheme.FOREST_FIBER -> R.drawable.ic_yarn_forest_fiber
+        AppTheme.CLOUD_SOFT -> R.drawable.ic_yarn_cloud_soft
+        AppTheme.YARN_CANDY -> R.drawable.ic_yarn_yarn_candy
+        AppTheme.DUSTY_ROSE -> R.drawable.ic_yarn_dusty_rose
+    }
+
+    val themeIconDescription = stringResource(R.string.cd_theme_icon, theme.displayName)
+
+    val iconShape = RoundedCornerShape(12.dp)
+
+    Box(
+        modifier = modifier
+            .size(48.dp)
+            .then(
+                if (isSelected) Modifier.shadow(
+                    elevation = 6.dp,
+                    shape = iconShape,
+                    ambientColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                    spotColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                ) else Modifier
+            )
+            .clip(iconShape)
+            .semantics { contentDescription = themeIconDescription }
+    ) {
+        Image(
+            painter = painterResource(id = backgroundResourceId),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+        Image(
+            painter = painterResource(id = foregroundResourceId),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+    }
+}
+
+@Composable
 private fun ThemeOptionCard(
     theme: AppTheme,
     isSelected: Boolean,
@@ -299,12 +363,18 @@ private fun ThemeOptionCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = theme.displayName,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    ThemeIconPreview(theme = theme, isSelected = isSelected)
+                    Text(
+                        text = theme.displayName,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
                 RadioButton(
                     selected = isSelected,
                     onClick = onThemeSelected

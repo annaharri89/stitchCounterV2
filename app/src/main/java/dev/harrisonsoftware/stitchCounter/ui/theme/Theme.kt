@@ -26,6 +26,9 @@ fun seaCottageLightColors() = lightColorScheme(
     primaryContainer = SeaCottagePrimaryContainerLight,
     secondaryContainer = SeaCottageSecondaryContainerLight,
     tertiaryContainer = SeaCottageTertiaryContainerLight,
+    onPrimaryContainer = SeaCottageOnPrimaryContainerLight,
+    onSecondaryContainer = SeaCottageOnSecondaryContainerLight,
+    onTertiaryContainer = SeaCottageOnTertiaryContainerLight,
     error = SeaCottageErrorLight,
     onError = SeaCottageOnErrorLight,
     errorContainer = SeaCottageErrorContainerLight,
@@ -58,15 +61,17 @@ fun retroSummerLightColors() = lightColorScheme(
     primary = RetroSummerCactus40,
     secondary = RetroSummerSun40,
     tertiary = RetroSummerOrangeLight40,
-    onTertiary = Color.White,
     primaryContainer = RetroSummerPrimaryContainer40,
     secondaryContainer = RetroSummerSecondaryContainer40,
     tertiaryContainer = RetroSummerTertiaryContainer40,
+    onPrimaryContainer = RetroSummerOnPrimaryContainer40,
+    onSecondaryContainer = RetroSummerOnSecondaryContainer40,
     onTertiaryContainer = RetroSummerOnTertiaryContainer40,
     error = RetroSummerError40,
     onError = Color.White,
     onPrimary = Color.White,
-    onSecondary = Color.White
+    onSecondary = Color.White,
+    onTertiary = Color.White
 )
 
 fun retroSummerDarkColors() = darkColorScheme(
@@ -76,12 +81,14 @@ fun retroSummerDarkColors() = darkColorScheme(
     primaryContainer = RetroSummerPrimaryContainer80,
     secondaryContainer = RetroSummerSecondaryContainer80,
     tertiaryContainer = RetroSummerTertiaryContainer80,
+    onPrimaryContainer = RetroSummerOnPrimaryContainer80,
+    onSecondaryContainer = RetroSummerOnSecondaryContainer80,
     onTertiaryContainer = RetroSummerOnTertiaryContainer80,
     error = RetroSummerError80,
     onError = Color.White,
-    onPrimary = Color.White,
+    onPrimary = Color.Black,
     onSecondary = Color.Black,
-    onTertiary = Color.White
+    onTertiary = Color.Black
 )
 
 fun goldenHearthLightColors() = lightColorScheme(
@@ -91,6 +98,9 @@ fun goldenHearthLightColors() = lightColorScheme(
     primaryContainer = GoldenHearthPrimaryContainerLight,
     secondaryContainer = GoldenHearthSecondaryContainerLight,
     tertiaryContainer = GoldenHearthTertiaryContainerLight,
+    onPrimaryContainer = GoldenHearthOnPrimaryContainerLight,
+    onSecondaryContainer = GoldenHearthOnSecondaryContainerLight,
+    onTertiaryContainer = GoldenHearthOnTertiaryContainerLight,
     error = GoldenHearthErrorLight,
     onError = GoldenHearthOnErrorLight,
     errorContainer = GoldenHearthErrorContainerLight,
@@ -107,13 +117,16 @@ fun goldenHearthDarkColors() = darkColorScheme(
     primaryContainer = GoldenHearthPrimaryContainerDark,
     secondaryContainer = GoldenHearthSecondaryContainerDark,
     tertiaryContainer = GoldenHearthTertiaryContainerDark,
+    onPrimaryContainer = GoldenHearthOnPrimaryContainerDark,
+    onSecondaryContainer = GoldenHearthOnSecondaryContainerDark,
+    onTertiaryContainer = GoldenHearthOnTertiaryContainerDark,
     error = GoldenHearthErrorDark,
     onError = GoldenHearthOnErrorDark,
     errorContainer = GoldenHearthErrorContainerDark,
     onErrorContainer = GoldenHearthOnErrorContainerDark,
     onPrimary = Color.Black,
     onSecondary = Color.Black,
-    onTertiary = Color.White
+    onTertiary = Color.Black
 )
 
 fun forestFiberLightColors() = lightColorScheme(
@@ -123,12 +136,15 @@ fun forestFiberLightColors() = lightColorScheme(
     primaryContainer = ForestFiberPrimaryContainerLight,
     secondaryContainer = ForestFiberSecondaryContainerLight,
     tertiaryContainer = ForestFiberTertiaryContainerLight,
+    onPrimaryContainer = ForestFiberOnPrimaryContainerLight,
+    onSecondaryContainer = ForestFiberOnSecondaryContainerLight,
+    onTertiaryContainer = ForestFiberOnTertiaryContainerLight,
     error = ForestFiberErrorLight,
     onError = ForestFiberOnErrorLight,
     errorContainer = ForestFiberErrorContainerLight,
     onErrorContainer = ForestFiberOnErrorContainerLight,
     onPrimary = Color.White,
-    onSecondary = Color.Black,
+    onSecondary = Color.White,
     onTertiary = Color.White
 )
 
@@ -139,13 +155,16 @@ fun forestFiberDarkColors() = darkColorScheme(
     primaryContainer = ForestFiberPrimaryContainerDark,
     secondaryContainer = ForestFiberSecondaryContainerDark,
     tertiaryContainer = ForestFiberTertiaryContainerDark,
+    onPrimaryContainer = ForestFiberOnPrimaryContainerDark,
+    onSecondaryContainer = ForestFiberOnSecondaryContainerDark,
+    onTertiaryContainer = ForestFiberOnTertiaryContainerDark,
     error = ForestFiberErrorDark,
     onError = ForestFiberOnErrorDark,
     errorContainer = ForestFiberErrorContainerDark,
     onErrorContainer = ForestFiberOnErrorContainerDark,
     onPrimary = Color.Black,
     onSecondary = Color.Black,
-    onTertiary = Color.White
+    onTertiary = Color.Black
 )
 
 fun cloudSoftLightColors() = lightColorScheme(
@@ -155,11 +174,14 @@ fun cloudSoftLightColors() = lightColorScheme(
     primaryContainer = CloudSoftPrimaryContainerLight,
     secondaryContainer = CloudSoftSecondaryContainerLight,
     tertiaryContainer = CloudSoftTertiaryContainerLight,
+    onPrimaryContainer = CloudSoftOnPrimaryContainerLight,
+    onSecondaryContainer = CloudSoftOnSecondaryContainerLight,
+    onTertiaryContainer = CloudSoftOnTertiaryContainerLight,
     error = CloudSoftErrorLight,
     onError = CloudSoftOnErrorLight,
     errorContainer = CloudSoftErrorContainerLight,
     onErrorContainer = CloudSoftOnErrorContainerLight,
-    onPrimary = Color.White,
+    onPrimary = Color.Black,
     onSecondary = Color.Black,
     onTertiary = Color.Black
 )
@@ -171,13 +193,16 @@ fun cloudSoftDarkColors() = darkColorScheme(
     primaryContainer = CloudSoftPrimaryContainerDark,
     secondaryContainer = CloudSoftSecondaryContainerDark,
     tertiaryContainer = CloudSoftTertiaryContainerDark,
+    onPrimaryContainer = CloudSoftOnPrimaryContainerDark,
+    onSecondaryContainer = CloudSoftOnSecondaryContainerDark,
+    onTertiaryContainer = CloudSoftOnTertiaryContainerDark,
     error = CloudSoftErrorDark,
     onError = CloudSoftOnErrorDark,
     errorContainer = CloudSoftErrorContainerDark,
     onErrorContainer = CloudSoftOnErrorContainerDark,
     onPrimary = Color.Black,
     onSecondary = Color.Black,
-    onTertiary = Color.White
+    onTertiary = Color.Black
 )
 
 fun yarnCandyLightColors() = lightColorScheme(
@@ -187,13 +212,16 @@ fun yarnCandyLightColors() = lightColorScheme(
     primaryContainer = YarnCandyPrimaryContainerLight,
     secondaryContainer = YarnCandySecondaryContainerLight,
     tertiaryContainer = YarnCandyTertiaryContainerLight,
+    onPrimaryContainer = YarnCandyOnPrimaryContainerLight,
+    onSecondaryContainer = YarnCandyOnSecondaryContainerLight,
+    onTertiaryContainer = YarnCandyOnTertiaryContainerLight,
     error = YarnCandyErrorLight,
     onError = YarnCandyOnErrorLight,
     errorContainer = YarnCandyErrorContainerLight,
     onErrorContainer = YarnCandyOnErrorContainerLight,
-    onPrimary = Color.White,
+    onPrimary = Color.Black,
     onSecondary = Color.Black,
-    onTertiary = Color.White
+    onTertiary = Color.Black
 )
 
 fun yarnCandyDarkColors() = darkColorScheme(
@@ -203,6 +231,9 @@ fun yarnCandyDarkColors() = darkColorScheme(
     primaryContainer = YarnCandyPrimaryContainerDark,
     secondaryContainer = YarnCandySecondaryContainerDark,
     tertiaryContainer = YarnCandyTertiaryContainerDark,
+    onPrimaryContainer = YarnCandyOnPrimaryContainerDark,
+    onSecondaryContainer = YarnCandyOnSecondaryContainerDark,
+    onTertiaryContainer = YarnCandyOnTertiaryContainerDark,
     error = YarnCandyErrorDark,
     onError = YarnCandyOnErrorDark,
     errorContainer = YarnCandyErrorContainerDark,
@@ -219,12 +250,15 @@ fun dustyRoseLightColors() = lightColorScheme(
     primaryContainer = DustyRosePrimaryContainerLight,
     secondaryContainer = DustyRoseSecondaryContainerLight,
     tertiaryContainer = DustyRoseTertiaryContainerLight,
+    onPrimaryContainer = DustyRoseOnPrimaryContainerLight,
+    onSecondaryContainer = DustyRoseOnSecondaryContainerLight,
+    onTertiaryContainer = DustyRoseOnTertiaryContainerLight,
     error = DustyRoseErrorLight,
     onError = DustyRoseOnErrorLight,
     errorContainer = DustyRoseErrorContainerLight,
     onErrorContainer = DustyRoseOnErrorContainerLight,
     onPrimary = Color.White,
-    onSecondary = Color.Black,
+    onSecondary = Color.White,
     onTertiary = Color.White
 )
 
@@ -235,13 +269,16 @@ fun dustyRoseDarkColors() = darkColorScheme(
     primaryContainer = DustyRosePrimaryContainerDark,
     secondaryContainer = DustyRoseSecondaryContainerDark,
     tertiaryContainer = DustyRoseTertiaryContainerDark,
+    onPrimaryContainer = DustyRoseOnPrimaryContainerDark,
+    onSecondaryContainer = DustyRoseOnSecondaryContainerDark,
+    onTertiaryContainer = DustyRoseOnTertiaryContainerDark,
     error = DustyRoseErrorDark,
     onError = DustyRoseOnErrorDark,
     errorContainer = DustyRoseErrorContainerDark,
     onErrorContainer = DustyRoseOnErrorContainerDark,
     onPrimary = Color.Black,
     onSecondary = Color.Black,
-    onTertiary = Color.White
+    onTertiary = Color.Black
 )
 
 /**

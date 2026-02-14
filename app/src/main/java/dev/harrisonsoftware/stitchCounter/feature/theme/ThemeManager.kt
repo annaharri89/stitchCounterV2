@@ -53,11 +53,11 @@ class ThemeManager @Inject constructor() {
     fun getOnQuaternaryColor(theme: AppTheme, isDark: Boolean): Color {
         return when (theme) {
             AppTheme.SEA_COTTAGE -> Color.White
-            AppTheme.RETRO_SUMMER -> Color.White
+            AppTheme.RETRO_SUMMER -> if (isDark) Color.Black else Color.White
             AppTheme.GOLDEN_HEARTH -> if (isDark) Color.Black else Color.White
             AppTheme.FOREST_FIBER -> Color.White
-            AppTheme.CLOUD_SOFT -> if (isDark) Color.Black else Color.White
-            AppTheme.YARN_CANDY -> if (isDark) Color.Black else Color.White
+            AppTheme.CLOUD_SOFT -> Color.Black
+            AppTheme.YARN_CANDY -> Color.Black
             AppTheme.DUSTY_ROSE -> if (isDark) Color.Black else Color.White
         }
     }

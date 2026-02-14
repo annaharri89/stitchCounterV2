@@ -54,7 +54,7 @@ fun MultiSelectTopBar(
                 text = if (selectedCount > 0) {
                     stringResource(R.string.library_selected_count, selectedCount)
                 } else {
-                    stringResource(R.string.library_select_projects)
+                    stringResource(R.string.library_multi_delete)
                 }
             )
         },
