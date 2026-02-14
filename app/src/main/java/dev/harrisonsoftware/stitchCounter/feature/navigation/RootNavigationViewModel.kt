@@ -23,7 +23,7 @@ class RootNavigationViewModel @Inject constructor(
         _currentSheet.value = sheet
     }
 
-    private val _selectedTab = MutableStateFlow(BottomNavTab.HOME)
+    private val _selectedTab = MutableStateFlow(BottomNavTab.LIBRARY)
     val selectedTab: StateFlow<BottomNavTab> = _selectedTab.asStateFlow()
 
     init {
