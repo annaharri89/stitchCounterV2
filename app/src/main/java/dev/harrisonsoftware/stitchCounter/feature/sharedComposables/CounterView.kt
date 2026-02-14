@@ -14,7 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount
 import dev.harrisonsoftware.stitchCounter.ui.theme.quaternary
 
@@ -101,7 +103,7 @@ fun CounterView(
                         onClick = { onReset() },
                         modifier = Modifier.padding(end = 4.dp)
                     ) {
-                        Text("Reset")
+                        Text(stringResource(R.string.action_reset))
                     }
                 }
 

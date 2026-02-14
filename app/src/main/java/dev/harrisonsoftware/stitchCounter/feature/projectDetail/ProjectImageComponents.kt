@@ -31,11 +31,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import dev.harrisonsoftware.stitchCounter.R
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -135,7 +137,7 @@ private fun ProjectImageThumbnail(
                     .data(imagePath)
                     .build()
             ),
-            contentDescription = "Project image",
+            contentDescription = stringResource(R.string.cd_project_image),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp)
@@ -162,7 +164,7 @@ private fun ProjectImageDeleteButton(
     ) {
         Icon(
             imageVector = Icons.Default.Delete,
-            contentDescription = "Remove image",
+            contentDescription = stringResource(R.string.cd_remove_image),
             tint = MaterialTheme.colorScheme.error
         )
     }
@@ -176,9 +178,9 @@ private fun ProjectImagePlaceholder(
     modifier: Modifier = Modifier
 ) {
     val placeholderText = when {
-        isAtMax -> "Maximum $MAX_PHOTOS photos reached"
-        hasExistingPhotos -> "Add Another Photo"
-        else -> "Add Photo"
+        isAtMax -> stringResource(R.string.max_photos_reached, MAX_PHOTOS)
+        hasExistingPhotos -> stringResource(R.string.add_another_photo)
+        else -> stringResource(R.string.add_photo)
     }
     
     Column(
@@ -205,7 +207,7 @@ private fun ProjectImagePlaceholder(
     ) {
         Icon(
             imageVector = Icons.Default.AddPhotoAlternate,
-            contentDescription = "Add photo",
+            contentDescription = stringResource(R.string.cd_add_photo),
             modifier = Modifier.size(32.dp),
             tint = if (isAtMax) {
                 MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
@@ -242,7 +244,7 @@ private fun AddPhotoButton(
     ) {
         Icon(
             imageVector = Icons.Default.Add,
-            contentDescription = "Add another photo",
+            contentDescription = stringResource(R.string.cd_add_another_photo),
             modifier = Modifier.size(32.dp),
             tint = MaterialTheme.colorScheme.onPrimaryContainer
         )
@@ -261,13 +263,13 @@ private fun ProjectPhotosSectionHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Project Photos",
+            text = stringResource(R.string.project_photos_header),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
-            text = "$currentCount/$maxCount",
+            text = stringResource(R.string.photo_count_format, currentCount, maxCount),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

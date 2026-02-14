@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.unit.dp
@@ -19,6 +20,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.activity.ComponentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavGraph
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.AdaptiveLayout
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.ProjectDetailsFAB
@@ -110,8 +112,8 @@ fun SingleCounterScreen(
 
     if (showResetDialog.value) {
         ResetConfirmationDialog(
-            title = "Reset Counter?",
-            message = "Are you sure you want to reset the counter to 0?",
+            title = stringResource(R.string.reset_counter_title),
+            message = stringResource(R.string.reset_counter_message),
             onConfirm = {
                 viewModel.resetCount()
                 showResetDialog.value = false

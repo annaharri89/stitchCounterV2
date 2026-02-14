@@ -32,6 +32,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -39,6 +40,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavGraph
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.RowProgressWithLabel
@@ -98,12 +100,12 @@ fun ProjectDetailContent(
             OutlinedTextField(
                 value = uiState.title,
                 onValueChange = { viewModel.updateTitle(it) },
-                label = { Text("Project Title") },
+                label = { Text(stringResource(R.string.label_project_title)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                placeholder = { Text("Enter project title") },
+                placeholder = { Text(stringResource(R.string.placeholder_project_title)) },
                 isError = uiState.titleError != null,
-                supportingText = uiState.titleError?.let { { Text(it) } },
+                supportingText = uiState.titleError?.let { errorResId -> { Text(stringResource(errorResId)) } },
                 keyboardOptions = KeyboardOptions(
                     imeAction = if (isDoubleCounter) ImeAction.Next else ImeAction.Done
                 ),
@@ -123,14 +125,14 @@ fun ProjectDetailContent(
                 OutlinedTextField(
                     value = uiState.totalRows,
                     onValueChange = { viewModel.updateTotalRows(it) },
-                    label = { Text("Total Rows") },
+                    label = { Text(stringResource(R.string.label_total_rows)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(totalRowsFocusRequester),
                     singleLine = true,
-                    placeholder = { Text("Enter total rows") },
+                    placeholder = { Text(stringResource(R.string.placeholder_total_rows)) },
                     isError = uiState.totalRowsError != null,
-                    supportingText = uiState.totalRowsError?.let { { Text(it) } },
+                    supportingText = uiState.totalRowsError?.let { errorResId -> { Text(stringResource(errorResId)) } },
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Done,
                         keyboardType = KeyboardType.Number
@@ -177,7 +179,7 @@ fun ProjectDetailContent(
                     .imePadding(),
                 enabled = isFormValid
             ) {
-                Text("Create Project")
+                Text(stringResource(R.string.action_create_project))
             }
         }
     }
@@ -187,14 +189,17 @@ fun ProjectDetailContent(
         AlertDialog(
             onDismissRequest = onDismissDiscardDialog,
             title = {
-                Text(if (isTitleEmpty) "Title Required" else "Discard Changes?")
+                Text(
+                    if (isTitleEmpty) stringResource(R.string.dialog_title_required)
+                    else stringResource(R.string.dialog_discard_changes)
+                )
             },
             text = {
                 Text(
                     if (isTitleEmpty) {
-                        "Project title is required. Do you want to discard this project?"
+                        stringResource(R.string.dialog_title_required_message)
                     } else {
-                        "You have unsaved changes. Are you sure you want to discard them?"
+                        stringResource(R.string.dialog_discard_changes_message)
                     }
                 )
             },
@@ -207,12 +212,12 @@ fun ProjectDetailContent(
                         contentColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Discard")
+                    Text(stringResource(R.string.action_discard))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDismissDiscardDialog) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )

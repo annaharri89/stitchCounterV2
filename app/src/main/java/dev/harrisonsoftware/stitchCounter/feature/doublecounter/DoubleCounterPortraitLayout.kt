@@ -10,8 +10,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount
 import dev.harrisonsoftware.stitchCounter.domain.model.CounterState
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.BottomActionButtons
@@ -51,7 +53,7 @@ fun DoubleCounterPortraitLayout(
 
         CounterView(
             modifier = Modifier.weight(1f),
-            label = "Stitches",
+            label = stringResource(R.string.counter_type_stitches),
             count = state.stitchCounterState.count,
             selectedAdjustmentAmount = state.stitchCounterState.adjustment,
             onIncrement = { actions.increment(CounterType.STITCH) },
@@ -62,7 +64,7 @@ fun DoubleCounterPortraitLayout(
 
         CounterView(
             modifier = Modifier.weight(1f),
-            label = "Rows/Rounds",
+            label = stringResource(R.string.counter_type_rows_rounds),
             count = state.rowCounterState.count,
             selectedAdjustmentAmount = state.rowCounterState.adjustment,
             onIncrement = { actions.increment(CounterType.ROW) },
@@ -75,7 +77,7 @@ fun DoubleCounterPortraitLayout(
 
         BottomActionButtons(
             onResetAll = actions::resetAll,
-            labelText = "Reset All"
+            labelText = stringResource(R.string.action_reset_all)
         )
     }
 }

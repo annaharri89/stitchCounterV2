@@ -5,7 +5,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavigationViewModel
 import dev.harrisonsoftware.stitchCounter.feature.navigation.SheetScreen
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavGraph
@@ -27,18 +29,18 @@ fun MainScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Stitch Counter", style = MaterialTheme.typography.headlineMedium)
+            Text(stringResource(R.string.main_title), style = MaterialTheme.typography.headlineMedium)
 
             Button(onClick = {
                 viewModel.showBottomSheet(SheetScreen.ProjectDetail(projectId = null, projectType = dev.harrisonsoftware.stitchCounter.domain.model.ProjectType.SINGLE))
             }) {
-                Text("New Single Tracker")
+                Text(stringResource(R.string.main_new_single_tracker))
             }
 
             Button(onClick = {
                 viewModel.showBottomSheet(SheetScreen.ProjectDetail(projectId = null, projectType = dev.harrisonsoftware.stitchCounter.domain.model.ProjectType.DOUBLE))
             }) {
-                Text("New Double Tracker")
+                Text(stringResource(R.string.main_new_double_tracker))
             }
         }
     }

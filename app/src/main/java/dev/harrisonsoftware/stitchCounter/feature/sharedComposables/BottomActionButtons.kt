@@ -8,11 +8,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.ui.theme.onQuaternary
 import dev.harrisonsoftware.stitchCounter.ui.theme.quaternary
 
 @Composable
-fun BottomActionButtons(labelText: String = "Reset",
+fun BottomActionButtons(labelText: String = stringResource(R.string.action_reset),
                         onResetAll: () -> Unit) {
     Button(
         colors = ButtonDefaults.buttonColors(

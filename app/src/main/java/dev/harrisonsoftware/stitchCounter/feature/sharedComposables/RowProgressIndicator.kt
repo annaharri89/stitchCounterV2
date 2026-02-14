@@ -10,8 +10,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.harrisonsoftware.stitchCounter.R
 
 @Composable
 fun RowProgressIndicator(
@@ -49,7 +51,7 @@ fun RowProgressWithLabel(
         )
         if (totalRows > 0) {
             Text(
-                text = "$currentRowCount/$totalRows",
+                text = stringResource(R.string.row_progress_format, currentRowCount, totalRows),
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = 12.sp,
                 modifier = Modifier.padding(start = 8.dp)
