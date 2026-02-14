@@ -25,6 +25,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
@@ -193,13 +195,17 @@ fun StatBadge(
     value: String,
     modifier: Modifier = Modifier
 ) {
+    val badgeDescription = stringResource(R.string.cd_stat_badge, label, value)
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
             .background(
                 MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
             )
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .semantics(mergeDescendants = true) {
+                contentDescription = badgeDescription
+            },
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Text(
