@@ -7,6 +7,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import dev.harrisonsoftware.stitchCounter.domain.model.AppTheme
 import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeManager
@@ -19,14 +20,18 @@ val LocalOnQuaternaryColor = compositionLocalOf<Color> {
     error("No onQuaternary color provided") 
 }
 
+val LocalAppThemeStyle = staticCompositionLocalOf<AppThemeStyle> {
+    CottageStyle
+}
+
 fun seaCottageLightColors() = lightColorScheme(
-    primary = SeaCottageSurf40,
-    secondary = SeaCottageMint40,
-    tertiary = SeaCottageWhaleLight40,
-    primaryContainer = SeaCottagePrimaryContainer40,
-    secondaryContainer = SeaCottageSecondaryContainer40,
-    tertiaryContainer = SeaCottageTertiaryContainer40,
-    onTertiaryContainer = SeaCottageOnTertiaryContainer40,
+    primary = SeaCottagePrimaryLight,
+    secondary = SeaCottageSecondaryLight,
+    tertiary = SeaCottageTertiaryLight,
+    primaryContainer = SeaCottagePrimaryContainerLight,
+    secondaryContainer = SeaCottageSecondaryContainerLight,
+    tertiaryContainer = SeaCottageTertiaryContainerLight,
+    onTertiaryContainer = SeaCottageOnTertiaryContainerLight,
     error = SeaCottageError40,
     onError = Color.White,
     onPrimary = Color.White,
@@ -36,13 +41,13 @@ fun seaCottageLightColors() = lightColorScheme(
 
 
 fun seaCottageDarkColors() = darkColorScheme(
-    primary = SeaCottageSurf80,
-    secondary = SeaCottageMint80,
-    tertiary = SeaCottageWhaleLight80,
-    primaryContainer = SeaCottagePrimaryContainer80,
-    secondaryContainer = SeaCottageSecondaryContainer80,
-    tertiaryContainer = SeaCottageTertiaryContainer80,
-    onTertiaryContainer = SeaCottageOnTertiaryContainer80,
+    primary = SeaCottagePrimaryDark,
+    secondary = SeaCottageSecondaryDark,
+    tertiary = SeaCottageTertiaryDark,
+    primaryContainer = SeaCottagePrimaryContainerDark,
+    secondaryContainer = SeaCottageSecondaryContainerDark,
+    tertiaryContainer = SeaCottageTertiaryContainerDark,
+    onTertiaryContainer = SeaCottageOnTertiaryContainerDark,
     error = SeaCottageError80,
     onPrimary = Color.Black,
     onSecondary = Color.Black,
@@ -82,7 +87,7 @@ fun retroSummerDarkColors() = darkColorScheme(
 
 fun dustyRoseLightColors() = lightColorScheme(
     primary =  DustyRose40 ,
-    secondary = DustyRoseGrey40,
+    secondary = DustyRoseGold40,
     tertiary = Pink40,
     primaryContainer = DustyRosePrimaryContainer40,
     secondaryContainer = DustyRoseSecondaryContainer40,
@@ -97,7 +102,7 @@ fun dustyRoseLightColors() = lightColorScheme(
 
 fun dustyRoseDarkColors() = darkColorScheme(
     primary = DustyRose80,
-    secondary = DustyRoseGrey80,
+    secondary = DustyRoseGold80,
     tertiary = Pink80,
     primaryContainer = DustyRosePrimaryContainer80,
     secondaryContainer = DustyRoseSecondaryContainer80,
@@ -114,7 +119,7 @@ fun dustyRoseDarkColors() = darkColorScheme(
  * Main theme composable that applies the selected color scheme app-wide.
  * 
  * Flow: ThemeViewModel observes DataStore → emits selected theme → 
- * ThemeManager maps theme to ColorScheme → MaterialTheme applies colors
+ * ThemeManager maps theme to ColorScheme + AppThemeStyle → MaterialTheme applies everything
  */
 @Composable
 fun StitchCounterV3Theme(
@@ -138,13 +143,17 @@ fun StitchCounterV3Theme(
         else -> themeManager.getOnQuaternaryColor(theme, isDark = false)
     }
 
+    val themeStyle = themeManager.getStyle(theme)
+    val typography = themeStyle.toTypography()
+
     CompositionLocalProvider(
         LocalQuaternaryColor provides quaternaryColor,
-        LocalOnQuaternaryColor provides onQuaternaryColor
+        LocalOnQuaternaryColor provides onQuaternaryColor,
+        LocalAppThemeStyle provides themeStyle
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = Typography,
+            typography = typography,
             content = content
         )
     }
@@ -155,3 +164,6 @@ val MaterialTheme.quaternary: Color
 
 val MaterialTheme.onQuaternary: Color
     @Composable get() = LocalOnQuaternaryColor.current
+
+val MaterialTheme.appStyle: AppThemeStyle
+    @Composable get() = LocalAppThemeStyle.current

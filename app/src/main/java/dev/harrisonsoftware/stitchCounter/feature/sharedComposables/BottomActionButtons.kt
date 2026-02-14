@@ -2,8 +2,6 @@ package dev.harrisonsoftware.stitchCounter.feature.sharedComposables
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,16 +12,17 @@ import dev.harrisonsoftware.stitchCounter.ui.theme.onQuaternary
 import dev.harrisonsoftware.stitchCounter.ui.theme.quaternary
 
 @Composable
-fun BottomActionButtons(labelText: String = stringResource(R.string.action_reset),
-                        onResetAll: () -> Unit) {
-    Button(
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.quaternary,
-            contentColor = MaterialTheme.onQuaternary
-        ),
+fun BottomActionButtons(
+    labelText: String = stringResource(R.string.action_reset),
+    onResetAll: () -> Unit
+) {
+    AppButton(
+        containerColor = MaterialTheme.quaternary,
+        contentColor = MaterialTheme.onQuaternary,
         onClick = { onResetAll.invoke() },
-        modifier = Modifier.fillMaxWidth()
-            .imePadding()
+        modifier = Modifier
+            .fillMaxWidth()
+            .imePadding(),
     ) {
         Text(labelText)
     }

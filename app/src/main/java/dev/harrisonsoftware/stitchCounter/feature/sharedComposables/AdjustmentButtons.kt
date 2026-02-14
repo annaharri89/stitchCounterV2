@@ -3,8 +3,6 @@ package dev.harrisonsoftware.stitchCounter.feature.sharedComposables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +29,20 @@ fun AdjustmentButtons(
     ) {
         AdjustmentAmount.entries.forEach { amount ->
             val isSelected = amount == selectedAdjustmentAmount
-            val buttonColors = ButtonDefaults.buttonColors(
+            val adjustmentDescription = if (isSelected) {
+                stringResource(R.string.cd_adjustment_amount_selected, amount.text)
+            } else {
+                stringResource(R.string.cd_adjustment_amount, amount.text)
+            }
+
+            AppButton(
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .semantics {
+                        selected = isSelected
+                        role = Role.RadioButton
+                        contentDescription = adjustmentDescription
+                    },
                 containerColor = if (isSelected) {
                     MaterialTheme.colorScheme.secondary
                 } else {
@@ -42,22 +53,7 @@ fun AdjustmentButtons(
                 } else {
                     MaterialTheme.colorScheme.onTertiary
                 },
-            )
-            val adjustmentDescription = if (isSelected) {
-                stringResource(R.string.cd_adjustment_amount_selected, amount.text)
-            } else {
-                stringResource(R.string.cd_adjustment_amount, amount.text)
-            }
-            Button(
-                modifier = Modifier
-                    .padding(horizontal = 4.dp)
-                    .semantics {
-                        selected = isSelected
-                        role = Role.RadioButton
-                        contentDescription = adjustmentDescription
-                    },
-                colors = buttonColors,
-                onClick = { onAdjustmentClick(amount) }
+                onClick = { onAdjustmentClick(amount) },
             ) {
                 Text(
                     text = amount.text,

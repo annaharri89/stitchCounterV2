@@ -32,7 +32,7 @@ class ThemeManager @Inject constructor() {
     
     fun getQuaternaryColor(theme: AppTheme, isDark: Boolean): Color {
         return when (theme) {
-            AppTheme.SEA_COTTAGE -> if (isDark) SeaCottageWhaleDark80 else SeaCottageWhaleDark40
+            AppTheme.SEA_COTTAGE -> if (isDark) SeaCottageQuaternaryDark else SeaCottageQuaternaryLight
             AppTheme.RETRO_SUMMER -> if (isDark) RetroSummerOrangeDark80 else RetroSummerOrangeDark40
             AppTheme.DUSTY_ROSE -> if (isDark) DustyRoseViolet80 else DustyRoseViolet40
         }
@@ -40,9 +40,17 @@ class ThemeManager @Inject constructor() {
     
     fun getOnQuaternaryColor(theme: AppTheme, isDark: Boolean): Color {
         return when (theme) {
-            AppTheme.SEA_COTTAGE -> Color.White // Dark blue needs white text
-            AppTheme.RETRO_SUMMER -> Color.White // Orange-red needs white text
+            AppTheme.SEA_COTTAGE -> Color.White
+            AppTheme.RETRO_SUMMER -> Color.White
             AppTheme.DUSTY_ROSE -> if (isDark) Color.Black else Color.White
+        }
+    }
+
+    fun getStyle(theme: AppTheme): AppThemeStyle {
+        return when (theme) {
+            AppTheme.SEA_COTTAGE -> CottageStyle
+            AppTheme.RETRO_SUMMER -> KitschyRetroStyle
+            AppTheme.DUSTY_ROSE -> FairyStyle
         }
     }
     
@@ -52,10 +60,10 @@ class ThemeManager @Inject constructor() {
     fun getThemeColors(theme: AppTheme): List<ThemeColor> {
         return when (theme) {
             AppTheme.SEA_COTTAGE -> listOf(
-                ThemeColor("Mint", SeaCottageMint40, SeaCottageMint80),
-                ThemeColor("Surf", SeaCottageSurf40, SeaCottageSurf80),
-                ThemeColor("Whale Light", SeaCottageWhaleLight40, SeaCottageWhaleLight80),
-                ThemeColor("Whale Dark", SeaCottageWhaleDark40, SeaCottageWhaleDark80)
+                ThemeColor("Mint", SeaCottageSecondaryLight, SeaCottageSecondaryDark),
+                ThemeColor("Surf", SeaCottagePrimaryLight, SeaCottagePrimaryDark),
+                ThemeColor("Whale Light", SeaCottageTertiaryLight, SeaCottageTertiaryDark),
+                ThemeColor("Whale Dark", SeaCottageQuaternaryLight, SeaCottageQuaternaryDark)
             )
             AppTheme.RETRO_SUMMER -> listOf(
                 ThemeColor("Cactus", RetroSummerCactus40, RetroSummerCactus80),
@@ -65,7 +73,7 @@ class ThemeManager @Inject constructor() {
             )
             AppTheme.DUSTY_ROSE -> listOf(
                 ThemeColor("Dusty Rose", DustyRose40, DustyRose80),
-                ThemeColor("Dusty Rose Grey", DustyRoseGrey40, DustyRoseGrey80),
+                ThemeColor("Gold", DustyRoseGold40, DustyRoseGold80),
                 ThemeColor("Pink", Pink40, Pink80),
                 ThemeColor("Violet", DustyRoseViolet40, DustyRoseViolet80)
             )

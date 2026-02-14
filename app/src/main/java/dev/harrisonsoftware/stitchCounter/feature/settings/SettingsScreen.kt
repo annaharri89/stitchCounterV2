@@ -45,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.domain.model.AppTheme
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavGraph
+import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.AppButton
 import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeColor
 import com.ramcosta.composedestinations.annotation.Destination
 import androidx.core.net.toUri
@@ -111,110 +112,111 @@ fun SettingsScreen(
             }
         }
     }
-    
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        item {
-            ExpandableSection(
-                title = stringResource(R.string.settings_theme),
-                isExpanded = isThemeSectionExpanded.value,
-                onToggleExpanded = { isThemeSectionExpanded.value = !isThemeSectionExpanded.value }
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(
-                        text = stringResource(R.string.settings_choose_color_scheme),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    
-                    AppTheme.entries.forEach { theme ->
-                        ThemeOptionCard(
-                            theme = theme,
-                            isSelected = uiState.selectedTheme == theme,
-                            themeColors = if (uiState.selectedTheme == theme) uiState.themeColors else emptyList(),
-                            onThemeSelected = { viewModel.onThemeSelected(theme) }
+    Surface() {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                ExpandableSection(
+                    title = stringResource(R.string.settings_theme),
+                    isExpanded = isThemeSectionExpanded.value,
+                    onToggleExpanded = { isThemeSectionExpanded.value = !isThemeSectionExpanded.value }
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text(
+                            text = stringResource(R.string.settings_choose_color_scheme),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+
+                        AppTheme.entries.forEach { theme ->
+                            ThemeOptionCard(
+                                theme = theme,
+                                isSelected = uiState.selectedTheme == theme,
+                                themeColors = if (uiState.selectedTheme == theme) uiState.themeColors else emptyList(),
+                                onThemeSelected = { viewModel.onThemeSelected(theme) }
+                            )
+                        }
+                    }
+                }
+            }
+
+            item {
+                ExpandableSection(
+                    title = stringResource(R.string.settings_backup_restore),
+                    isExpanded = isBackupSectionExpanded.value,
+                    onToggleExpanded = { isBackupSectionExpanded.value = !isBackupSectionExpanded.value }
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text(
+                            text = stringResource(R.string.settings_export_import_library),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+
+                        BackupRestoreCard(
+                            isExporting = uiState.isExporting,
+                            isImporting = uiState.isImporting,
+                            exportError = uiState.exportError,
+                            importError = uiState.importError,
+                            onExport = {
+                                val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US)
+                                    .format(java.util.Date())
+                                exportLauncher.launch("stitch_counter_backup_$timestamp.zip")
+                            },
+                            onImport = { importLauncher.launch("application/zip") }
                         )
                     }
                 }
             }
-        }
-        
-        item {
-            ExpandableSection(
-                title = stringResource(R.string.settings_backup_restore),
-                isExpanded = isBackupSectionExpanded.value,
-                onToggleExpanded = { isBackupSectionExpanded.value = !isBackupSectionExpanded.value }
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(
-                        text = stringResource(R.string.settings_export_import_library),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    
-                    BackupRestoreCard(
-                        isExporting = uiState.isExporting,
-                        isImporting = uiState.isImporting,
-                        exportError = uiState.exportError,
-                        importError = uiState.importError,
-                        onExport = {
-                            val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US)
-                                .format(java.util.Date())
-                            exportLauncher.launch("stitch_counter_backup_$timestamp.zip")
+
+            item {
+                ExpandableSection(
+                    title = stringResource(R.string.settings_support),
+                    isExpanded = isSupportSectionExpanded.value,
+                    onToggleExpanded = { isSupportSectionExpanded.value = !isSupportSectionExpanded.value }
+                ) {
+                    SupportCard(
+                        onReportBug = {
+                            viewModel.onReportBug()
                         },
-                        onImport = { importLauncher.launch("application/zip") }
+                        onGiveFeedback = {
+                            viewModel.onGiveFeedback()
+                        }
+                    )
+                }
+            }
+
+            item {
+                ExpandableSection(
+                    title = stringResource(R.string.settings_privacy_legal),
+                    isExpanded = isSupportSectionExpanded.value,
+                    onToggleExpanded = { isSupportSectionExpanded.value = !isSupportSectionExpanded.value }
+                ) {
+                    LegalCard(
+                        onOpenPrivacyPolicy = {
+                            viewModel.onOpenPrivacyPolicy()
+                        },
+                        onOpenEULA = {
+                            viewModel.onOpenEULA()
+                        }
                     )
                 }
             }
         }
 
-        item {
-            ExpandableSection(
-                title = stringResource(R.string.settings_support),
-                isExpanded = isSupportSectionExpanded.value,
-                onToggleExpanded = { isSupportSectionExpanded.value = !isSupportSectionExpanded.value }
-            ) {
-                SupportCard(
-                    onReportBug = {
-                        viewModel.onReportBug()
-                    },
-                    onGiveFeedback = {
-                        viewModel.onGiveFeedback()
+        if (showImportDialog.value) {
+            uiState.importResult?.let {
+
+                ImportResultDialog(
+                    result = it,
+                    onDismiss = {
+                        showImportDialog.value = false
+                        viewModel.clearImportStatus()
                     }
                 )
             }
-        }
-
-        item {
-            ExpandableSection(
-                title = stringResource(R.string.settings_privacy_legal),
-                isExpanded = isSupportSectionExpanded.value,
-                onToggleExpanded = { isSupportSectionExpanded.value = !isSupportSectionExpanded.value }
-            ) {
-                LegalCard(
-                    onOpenPrivacyPolicy = {
-                        viewModel.onOpenPrivacyPolicy()
-                    },
-                    onOpenEULA = {
-                        viewModel.onOpenEULA()
-                    }
-                )
-            }
-        }
-    }
-
-    if (showImportDialog.value) {
-        uiState.importResult?.let {
-
-            ImportResultDialog(
-                result = it,
-                onDismiss = {
-                    showImportDialog.value = false
-                    viewModel.clearImportStatus()
-                }
-            )
         }
     }
 }
@@ -393,7 +395,7 @@ private fun BackupRestoreCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Button(
+            AppButton(
                 onClick = onExport,
                 enabled = !isExporting && !isImporting,
                 modifier = Modifier.fillMaxWidth()
@@ -418,13 +420,12 @@ private fun BackupRestoreCard(
                 )
             }
             
-            Button(
+            AppButton(
                 onClick = onImport,
                 enabled = !isExporting && !isImporting,
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary
-                )
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
             ) {
                 Icon(
                     imageVector = Icons.Default.CloudDownload,
@@ -463,7 +464,7 @@ private fun SupportCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Button(
+            AppButton(
                 onClick = onReportBug,
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -476,12 +477,11 @@ private fun SupportCard(
                 Text(stringResource(R.string.settings_report_bug))
             }
 
-            Button(
+            AppButton(
                 onClick = onGiveFeedback,
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary
-                )
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
             ) {
                 Icon(
                     imageVector = Icons.Default.Feedback,
@@ -510,12 +510,9 @@ private fun LegalCard(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            Button(
+            AppButton(
                 onClick = onOpenPrivacyPolicy,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
                     imageVector = Icons.Default.Policy,
@@ -526,12 +523,11 @@ private fun LegalCard(
                 Text(stringResource(R.string.settings_privacy_policy))
             }
 
-            Button(
+            AppButton(
                 onClick = onOpenEULA,
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary
-                )
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
             ) {
                 Icon(
                     imageVector = Icons.Default.LocalPolice,

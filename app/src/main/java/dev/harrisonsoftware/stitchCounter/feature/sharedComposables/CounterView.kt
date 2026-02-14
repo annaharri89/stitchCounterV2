@@ -1,13 +1,12 @@
 package dev.harrisonsoftware.stitchCounter.feature.sharedComposables
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,7 +35,6 @@ fun CounterView(
     onAdjustmentClick: (AdjustmentAmount) -> Unit,
     textPaddingEnd: Float = 24f,
     buttonSpacing: Int = 24,
-    buttonShape: RoundedCornerShape = RoundedCornerShape(12.dp),
     incrementFontSize: Int = 50,
     decrementFontSize: Int = 60,
     showResetButton: Boolean = true,
@@ -48,9 +46,10 @@ fun CounterView(
         stringResource(R.string.cd_current_count, count)
     }
 
-    Column(
-        modifier = modifier,
-    ) {
+    Box(modifier = modifier) {
+        FairySparkleOverlay()
+
+        Column(modifier = Modifier.fillMaxSize()) {
         label?.let {
             Text(
                 text = it,
@@ -103,7 +102,6 @@ fun CounterView(
                 onDecrement = onDecrement,
                 counterLabel = label,
                 buttonSpacing = buttonSpacing,
-                buttonShape = buttonShape,
                 incrementFontSize = incrementFontSize,
                 decrementFontSize = decrementFontSize
             )
@@ -114,13 +112,11 @@ fun CounterView(
             horizontalArrangement = if (!showResetButton) Arrangement.SpaceAround else Arrangement.Start
         ) {
             if (showResetButton) {
-                Button(
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.quaternary,
-                        contentColor = Color.White
-                    ),
+                AppButton(
+                    containerColor = MaterialTheme.quaternary,
+                    contentColor = Color.White,
                     onClick = { onReset() },
-                    modifier = Modifier.padding(end = 4.dp)
+                    modifier = Modifier.padding(end = 4.dp),
                 ) {
                     Text(stringResource(R.string.action_reset))
                 }
@@ -131,6 +127,7 @@ fun CounterView(
                 onAdjustmentClick = onAdjustmentClick,
                 modifier = Modifier.weight(1f)
             )
+        }
         }
     }
 }
