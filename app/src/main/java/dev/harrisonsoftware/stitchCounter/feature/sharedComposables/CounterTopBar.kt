@@ -14,9 +14,9 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun CounterTopBar(
+    modifier: Modifier = Modifier,
     title: String,
     topBarContent: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier
 ) {
     if (title.isNotEmpty() || topBarContent != null) {
         Row(
