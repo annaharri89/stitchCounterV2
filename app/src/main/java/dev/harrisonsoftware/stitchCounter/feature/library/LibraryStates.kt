@@ -51,7 +51,7 @@ fun EmptyLibraryState(
         ) {
             Icon(
                 imageVector = Icons.Default.FolderOpen,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.cd_empty_library),
                 modifier = Modifier.size(80.dp),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
             )
