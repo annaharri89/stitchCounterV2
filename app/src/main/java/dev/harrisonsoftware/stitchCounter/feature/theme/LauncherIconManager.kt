@@ -29,12 +29,16 @@ class LauncherIconManager @Inject constructor(
         AppTheme.DUSTY_ROSE to ComponentName(packageName, "$packageName.DustyRoseLauncherAlias")
     )
 
-    /**
-     * Updates the launcher icon to match the selected theme.
-     * Disables all other theme aliases and enables the one for the given theme.
-     *
-     * @param theme The theme to set the launcher icon for
-     */
+    @Volatile
+    var pendingTheme: AppTheme? = null
+
+    fun applyPendingIconChangeIfNeeded() {
+        pendingTheme?.let { theme ->
+            updateLauncherIcon(theme)
+            pendingTheme = null
+        }
+    }
+
     fun updateLauncherIcon(theme: AppTheme) {
         val targetComponent = themeToComponentName[theme]
             ?: return // Unknown theme, do nothing

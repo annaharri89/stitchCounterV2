@@ -308,10 +308,10 @@ private fun ThemeIconPreview(
             .size(48.dp)
             .then(
                 if (isSelected) Modifier.shadow(
-                    elevation = 6.dp,
+                    elevation = 12.dp,
                     shape = iconShape,
-                    ambientColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                    spotColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                    ambientColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    spotColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 ) else Modifier
             )
             .clip(iconShape)

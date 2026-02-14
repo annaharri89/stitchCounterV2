@@ -8,7 +8,7 @@
     <!-- Background - Dusty Rose theme colors -->
     <!-- Light theme: Dusty Rose background -->
     <path
-        android:fillColor="@color/icon_dusty_rose_accent"
+        android:fillColor="@color/icon_dusty_rose_base"
         android:pathData="M0,0h108v108h-108z" />
     
     <!-- Subtle gradient overlay for depth -->
