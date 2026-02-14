@@ -11,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.harrisonsoftware.stitchCounter.R
@@ -18,11 +20,19 @@ import dev.harrisonsoftware.stitchCounter.R
 @Composable
 fun RowProgressIndicator(
     progress: Float?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    accessibilityDescription: String? = null
 ) {
     progress?.let {
+        val progressModifier = if (accessibilityDescription != null) {
+            modifier
+                .fillMaxWidth()
+                .semantics { contentDescription = accessibilityDescription }
+        } else {
+            modifier.fillMaxWidth()
+        }
         LinearProgressIndicator(
-            modifier = modifier.fillMaxWidth(),
+            modifier = progressModifier,
             progress = { it }
         )
     }
@@ -39,7 +49,13 @@ fun RowProgressWithLabel(
     } else {
         null
     }
-    
+
+    val progressDescription = if (totalRows > 0) {
+        stringResource(R.string.cd_row_progress, currentRowCount, totalRows)
+    } else {
+        null
+    }
+
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -47,7 +63,8 @@ fun RowProgressWithLabel(
     ) {
         RowProgressIndicator(
             modifier = Modifier.weight(1f),
-            progress = progress
+            progress = progress,
+            accessibilityDescription = progressDescription
         )
         if (totalRows > 0) {
             Text(
