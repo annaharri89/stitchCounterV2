@@ -86,4 +86,16 @@ object DatabaseMigrations {
             database.execSQL("ALTER TABLE entry_new RENAME TO entry")
         }
     }
+
+    val MIGRATION_3_4 = object : Migration(3, 4) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE entry ADD COLUMN created_at INTEGER NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE entry ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE entry ADD COLUMN completed_at INTEGER")
+            database.execSQL("ALTER TABLE entry ADD COLUMN total_stitches_ever INTEGER NOT NULL DEFAULT 0")
+
+            val now = System.currentTimeMillis()
+            database.execSQL("UPDATE entry SET total_stitches_ever = stitch_counter_number, created_at = $now, updated_at = $now")
+        }
+    }
 }

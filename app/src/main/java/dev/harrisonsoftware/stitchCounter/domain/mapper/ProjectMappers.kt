@@ -14,6 +14,10 @@ fun ProjectEntity.toDomain(): Project = Project(
     rowAdjustment = rowAdjustment,
     totalRows = totalRows,
     imagePaths = imagePaths,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    completedAt = completedAt,
+    totalStitchesEver = totalStitchesEver,
 )
 
 fun Project.toEntity(): ProjectEntity = ProjectEntity(
@@ -26,5 +30,8 @@ fun Project.toEntity(): ProjectEntity = ProjectEntity(
     rowAdjustment = rowAdjustment,
     totalRows = totalRows,
     imagePaths = imagePaths,
+    createdAt = createdAt,
+    updatedAt = updatedAt,
+    completedAt = completedAt,
+    totalStitchesEver = totalStitchesEver,
 )
-

@@ -10,6 +10,10 @@ data class Project(
     val rowAdjustment: Int = 1,
     val totalRows: Int = 0,
     val imagePaths: List<String> = emptyList(),
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis(),
+    val completedAt: Long? = null,
+    val totalStitchesEver: Int = 0,
 )
 
 enum class ProjectType { SINGLE, DOUBLE }

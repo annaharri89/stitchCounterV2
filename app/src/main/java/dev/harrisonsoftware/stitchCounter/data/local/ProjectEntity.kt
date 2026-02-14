@@ -48,5 +48,17 @@ data class ProjectEntity(
 
     @ColumnInfo(name = "image_paths")
     val imagePaths: List<String> = emptyList(),
+
+    @ColumnInfo(name = "created_at")
+    val createdAt: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "updated_at")
+    val updatedAt: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "completed_at")
+    val completedAt: Long? = null,
+
+    @ColumnInfo(name = "total_stitches_ever")
+    val totalStitchesEver: Int = 0,
 )
 

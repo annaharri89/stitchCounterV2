@@ -34,7 +34,15 @@ data class BackupProject(
     @SerialName("total_rows")
     val totalRows: Int,
     @SerialName("image_paths")
-    val imagePaths: List<String>
+    val imagePaths: List<String>,
+    @SerialName("created_at")
+    val createdAt: Long = 0L,
+    @SerialName("updated_at")
+    val updatedAt: Long = 0L,
+    @SerialName("completed_at")
+    val completedAt: Long? = null,
+    @SerialName("total_stitches_ever")
+    val totalStitchesEver: Int = 0,
 )
 
 @Serializable

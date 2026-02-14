@@ -61,6 +61,7 @@ class ImportLibrary @Inject constructor(
                                 }
                             }
                             
+                            val now = System.currentTimeMillis()
                             val project = Project(
                                 id = if (replaceExisting) backupProject.id else 0,
                                 type = if (backupProject.type == "double") ProjectType.DOUBLE else ProjectType.SINGLE,
@@ -70,7 +71,11 @@ class ImportLibrary @Inject constructor(
                                 rowCounterNumber = backupProject.rowCounterNumber,
                                 rowAdjustment = backupProject.rowAdjustment,
                                 totalRows = backupProject.totalRows,
-                                imagePaths = imagePaths
+                                imagePaths = imagePaths,
+                                createdAt = if (backupProject.createdAt > 0L) backupProject.createdAt else now,
+                                updatedAt = if (backupProject.updatedAt > 0L) backupProject.updatedAt else now,
+                                completedAt = backupProject.completedAt,
+                                totalStitchesEver = backupProject.totalStitchesEver,
                             )
                             
                             val newId = projectRepository.upsert(project.toEntity())
