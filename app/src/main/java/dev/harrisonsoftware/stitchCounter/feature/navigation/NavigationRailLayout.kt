@@ -12,6 +12,7 @@ import androidx.compose.material3.NavigationRailItemColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 
 @Composable
@@ -20,7 +21,6 @@ fun NavigationRailLayout(
     onTabSelected: (BottomNavTab) -> Unit,
     navController: NavHostController
 ) {
-    // Navigation Rail
     AnimatedVisibility(
         visible = true,
         enter = slideInHorizontally(
@@ -48,6 +48,7 @@ private fun NavigationRailComponent(
 ) {
     NavigationRail {
         BottomNavTab.entries.forEach { tab ->
+            val tabTitle = stringResource(tab.titleResId)
             NavigationRailItem(
                 selected = selectedTab == tab,
                 onClick = {
@@ -57,11 +58,11 @@ private fun NavigationRailComponent(
                 icon = {
                     Icon(
                         imageVector = tab.icon,
-                        contentDescription = tab.title
+                        contentDescription = tabTitle
                     )
                 },
                 label = {
-                    Text(tab.title)
+                    Text(tabTitle)
                 },
                 colors = NavigationRailItemColors(
                     selectedIconColor = MaterialTheme.colorScheme.secondary,

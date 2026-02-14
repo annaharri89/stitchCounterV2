@@ -12,6 +12,7 @@ import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 
 
@@ -48,6 +49,7 @@ private fun BottomNavigationBar(
 ) {
     NavigationBar {
         BottomNavTab.entries.forEach { tab ->
+            val tabTitle = stringResource(tab.titleResId)
             NavigationBarItem(
                 selected = selectedTab == tab,
                 onClick = {
@@ -57,11 +59,11 @@ private fun BottomNavigationBar(
                 icon = {
                     Icon(
                         imageVector = tab.icon,
-                        contentDescription = tab.title
+                        contentDescription = tabTitle
                     )
                 },
                 label = {
-                    Text(tab.title)
+                    Text(tabTitle)
                 },
                 colors = NavigationBarItemColors(
                     selectedIconColor = MaterialTheme.colorScheme.secondary,
