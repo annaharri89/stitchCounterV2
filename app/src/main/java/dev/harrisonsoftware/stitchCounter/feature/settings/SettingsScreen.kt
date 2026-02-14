@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.animation.AnimatedVisibility
@@ -233,7 +234,7 @@ private fun ExpandableSection(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onToggleExpanded() }
+                    .clickable(role = Role.Button) { onToggleExpanded() }
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -275,7 +276,11 @@ private fun ThemeOptionCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onThemeSelected() },
+            .selectable(
+                selected = isSelected,
+                role = Role.RadioButton,
+                onClick = onThemeSelected
+            ),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer
             else MaterialTheme.colorScheme.surface
@@ -328,6 +333,9 @@ private fun ThemeOptionCard(
 
 @Composable
 private fun ColorItem(themeColor: ThemeColor) {
+    val lightSwatchDescription = stringResource(R.string.cd_color_swatch_light, themeColor.name)
+    val darkSwatchDescription = stringResource(R.string.cd_color_swatch_dark, themeColor.name)
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -338,6 +346,7 @@ private fun ColorItem(themeColor: ThemeColor) {
                 .size(24.dp)
                 .clip(CircleShape)
                 .background(themeColor.lightColor)
+                .semantics { contentDescription = lightSwatchDescription }
         )
         
         Text(
@@ -353,6 +362,7 @@ private fun ColorItem(themeColor: ThemeColor) {
                 .size(24.dp)
                 .clip(CircleShape)
                 .background(themeColor.darkColor)
+                .semantics { contentDescription = darkSwatchDescription }
         )
         
         Text(
