@@ -6,22 +6,23 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.window.Dialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import dev.harrisonsoftware.stitchCounter.R
@@ -185,45 +187,51 @@ fun NewProjectDialog(
     onSelectDoubleCounter: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = stringResource(R.string.new_project_dialog_title),
-                style = MaterialTheme.typography.headlineSmall
-            )
-        },
-        text = {
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            tonalElevation = 6.dp,
+            color = MaterialTheme.colorScheme.surface
+        ) {
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.padding(24.dp)
             ) {
+                Text(
+                    text = stringResource(R.string.new_project_dialog_title),
+                    style = MaterialTheme.typography.headlineSmall
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 Button(
                     onClick = onSelectSingleCounter,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .sizeIn(minHeight = 48.dp),
-                    shape = RoundedCornerShape(12.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(stringResource(R.string.new_project_single_counter))
                 }
 
-                OutlinedButton(
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Button(
                     onClick = onSelectDoubleCounter,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .sizeIn(minHeight = 48.dp),
-                    shape = RoundedCornerShape(12.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary
+                    )
                 ) {
                     Text(stringResource(R.string.new_project_double_counter))
                 }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.action_cancel))
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                TextButton(onClick = onDismiss) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(R.string.action_cancel),
+                        textAlign = TextAlign.End
+                    )
+                }
             }
         }
-    )
+    }
 }
