@@ -10,11 +10,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CloudDownload
@@ -30,11 +32,13 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,6 +57,7 @@ import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavGraph
 import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeColor
 import com.ramcosta.composedestinations.annotation.Destination
 import androidx.core.net.toUri
+import kotlinx.coroutines.flow.takeWhile
 import dev.harrisonsoftware.stitchCounter.Constants
 
 @RootNavGraph
@@ -80,6 +85,8 @@ fun SettingsScreen(
     val isThemeSectionExpanded = remember { mutableStateOf(true) }
     val isBackupSectionExpanded = remember { mutableStateOf(true) }
     val isSupportSectionExpanded = remember { mutableStateOf(true) }
+    val isLegalSectionExpanded = remember { mutableStateOf(true) }
+    val lazyListState = rememberLazyListState()
     
     LaunchedEffect(uiState.exportSuccess) {
         if (uiState.exportSuccess) {
@@ -116,110 +123,142 @@ fun SettingsScreen(
             }
         }
     }
-    
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        item {
-            ExpandableSection(
-                title = stringResource(R.string.settings_theme),
-                isExpanded = isThemeSectionExpanded.value,
-                onToggleExpanded = { isThemeSectionExpanded.value = !isThemeSectionExpanded.value }
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(
-                        text = stringResource(R.string.settings_choose_color_scheme),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    
-                    AppTheme.entries.forEach { theme ->
-                        ThemeOptionCard(
-                            theme = theme,
-                            isSelected = uiState.selectedTheme == theme,
-                            themeColors = if (uiState.selectedTheme == theme) uiState.themeColors else emptyList(),
-                            onThemeSelected = { viewModel.onThemeSelected(theme) }
+
+    ScrollToRevealExpandedItem(isThemeSectionExpanded.value, 0, lazyListState)
+    ScrollToRevealExpandedItem(isBackupSectionExpanded.value, 1, lazyListState)
+    ScrollToRevealExpandedItem(isSupportSectionExpanded.value, 2, lazyListState)
+    ScrollToRevealExpandedItem(isLegalSectionExpanded.value, 3, lazyListState)
+
+    Surface {
+        LazyColumn(
+            state = lazyListState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                ExpandableSection(
+                    title = stringResource(R.string.settings_theme),
+                    isExpanded = isThemeSectionExpanded.value,
+                    onToggleExpanded = { isThemeSectionExpanded.value = !isThemeSectionExpanded.value }
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text(
+                            text = stringResource(R.string.settings_choose_color_scheme),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+
+                        AppTheme.entries.forEach { theme ->
+                            ThemeOptionCard(
+                                theme = theme,
+                                isSelected = uiState.selectedTheme == theme,
+                                themeColors = if (uiState.selectedTheme == theme) uiState.themeColors else emptyList(),
+                                onThemeSelected = { viewModel.onThemeSelected(theme) }
+                            )
+                        }
+                    }
+                }
+            }
+
+            item {
+                ExpandableSection(
+                    title = stringResource(R.string.settings_backup_restore),
+                    isExpanded = isBackupSectionExpanded.value,
+                    onToggleExpanded = { isBackupSectionExpanded.value = !isBackupSectionExpanded.value }
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text(
+                            text = stringResource(R.string.settings_export_import_library),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+
+                        BackupRestoreCard(
+                            isExporting = uiState.isExporting,
+                            isImporting = uiState.isImporting,
+                            exportError = uiState.exportError,
+                            importError = uiState.importError,
+                            onExport = {
+                                val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US)
+                                    .format(java.util.Date())
+                                exportLauncher.launch("stitch_counter_backup_$timestamp.zip")
+                            },
+                            onImport = { importLauncher.launch("application/zip") }
                         )
                     }
                 }
             }
-        }
-        
-        item {
-            ExpandableSection(
-                title = stringResource(R.string.settings_backup_restore),
-                isExpanded = isBackupSectionExpanded.value,
-                onToggleExpanded = { isBackupSectionExpanded.value = !isBackupSectionExpanded.value }
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(
-                        text = stringResource(R.string.settings_export_import_library),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    
-                    BackupRestoreCard(
-                        isExporting = uiState.isExporting,
-                        isImporting = uiState.isImporting,
-                        exportError = uiState.exportError,
-                        importError = uiState.importError,
-                        onExport = {
-                            val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US)
-                                .format(java.util.Date())
-                            exportLauncher.launch("stitch_counter_backup_$timestamp.zip")
+
+            item {
+                ExpandableSection(
+                    title = stringResource(R.string.settings_support),
+                    isExpanded = isSupportSectionExpanded.value,
+                    onToggleExpanded = { isSupportSectionExpanded.value = !isSupportSectionExpanded.value }
+                ) {
+                    SupportCard(
+                        onReportBug = {
+                            viewModel.onReportBug()
                         },
-                        onImport = { importLauncher.launch("application/zip") }
+                        onGiveFeedback = {
+                            viewModel.onGiveFeedback()
+                        }
+                    )
+                }
+            }
+
+            item {
+                ExpandableSection(
+                    title = stringResource(R.string.settings_privacy_legal),
+                    isExpanded = isLegalSectionExpanded.value,
+                    onToggleExpanded = { isLegalSectionExpanded.value = !isLegalSectionExpanded.value }
+                ) {
+                    LegalCard(
+                        onOpenPrivacyPolicy = {
+                            viewModel.onOpenPrivacyPolicy()
+                        },
+                        onOpenEULA = {
+                            viewModel.onOpenEULA()
+                        }
                     )
                 }
             }
         }
 
-        item {
-            ExpandableSection(
-                title = stringResource(R.string.settings_support),
-                isExpanded = isSupportSectionExpanded.value,
-                onToggleExpanded = { isSupportSectionExpanded.value = !isSupportSectionExpanded.value }
-            ) {
-                SupportCard(
-                    onReportBug = {
-                        viewModel.onReportBug()
-                    },
-                    onGiveFeedback = {
-                        viewModel.onGiveFeedback()
-                    }
-                )
-            }
-        }
+        if (showImportDialog.value) {
+            uiState.importResult?.let {
 
-        item {
-            ExpandableSection(
-                title = stringResource(R.string.settings_privacy_legal),
-                isExpanded = isSupportSectionExpanded.value,
-                onToggleExpanded = { isSupportSectionExpanded.value = !isSupportSectionExpanded.value }
-            ) {
-                LegalCard(
-                    onOpenPrivacyPolicy = {
-                        viewModel.onOpenPrivacyPolicy()
-                    },
-                    onOpenEULA = {
-                        viewModel.onOpenEULA()
+                ImportResultDialog(
+                    result = it,
+                    onDismiss = {
+                        showImportDialog.value = false
+                        viewModel.clearImportStatus()
                     }
                 )
             }
         }
     }
+}
 
-    if (showImportDialog.value) {
-        uiState.importResult?.let {
-
-            ImportResultDialog(
-                result = it,
-                onDismiss = {
-                    showImportDialog.value = false
-                    viewModel.clearImportStatus()
+@Composable
+private fun ScrollToRevealExpandedItem(
+    isExpanded: Boolean,
+    itemIndex: Int,
+    lazyListState: LazyListState
+) {
+    LaunchedEffect(isExpanded) {
+        if (isExpanded) {
+            val trackingStartTime = System.currentTimeMillis()
+            snapshotFlow { lazyListState.layoutInfo }
+                .takeWhile { System.currentTimeMillis() - trackingStartTime < 500L }
+                .collect { layoutInfo ->
+                    val itemInfo = layoutInfo.visibleItemsInfo.find { it.index == itemIndex }
+                    if (itemInfo != null) {
+                        val overflowBeyondViewport = (itemInfo.offset + itemInfo.size) - layoutInfo.viewportEndOffset
+                        if (overflowBeyondViewport > 0) {
+                            lazyListState.scrollBy(overflowBeyondViewport.toFloat())
+                        }
+                    }
                 }
-            )
         }
     }
 }
