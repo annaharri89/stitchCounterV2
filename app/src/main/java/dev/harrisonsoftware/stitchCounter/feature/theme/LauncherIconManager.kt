@@ -23,7 +23,7 @@ class LauncherIconManager @Inject constructor(
     private val themeToComponentName = mapOf(
         AppTheme.SEA_COTTAGE to ComponentName(packageName, "$packageName.SeaCottageLauncherAlias"),
         AppTheme.RETRO_SUMMER to ComponentName(packageName, "$packageName.RetroSummerLauncherAlias"),
-        AppTheme.PURPLE to ComponentName(packageName, "$packageName.PurpleLauncherAlias")
+        AppTheme.DUSTY_ROSE to ComponentName(packageName, "$packageName.DustyRoseLauncherAlias")
     )
 
     /**

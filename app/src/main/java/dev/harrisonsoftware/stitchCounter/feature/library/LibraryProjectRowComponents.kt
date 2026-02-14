@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Checkbox
@@ -37,36 +39,26 @@ import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.RowProgressIndicator
 
 @Composable
-internal fun ProjectImageOrCheckbox(
-    project: Project,
-    isSelected: Boolean,
-    isMultiSelectMode: Boolean,
-    onSelect: () -> Unit
+internal fun ProjectImage(
+    project: Project
 ) {
     val context = LocalContext.current
-    
-    if (isMultiSelectMode) {
-        Checkbox(
-            checked = isSelected,
-            onCheckedChange = { onSelect() },
-            modifier = Modifier.size(24.dp)
+
+    project.imagePaths.firstOrNull()?.let { imagePath ->
+        Image(
+            painter = rememberAsyncImagePainter(
+                ImageRequest.Builder(context)
+                    .data(imagePath)
+                    .build()
+            ),
+            contentDescription = stringResource(R.string.cd_project_image),
+            modifier = Modifier
+                .size(100.dp)
+                .clip(RoundedCornerShape(12.dp)),
+            contentScale = ContentScale.Crop
         )
-    } else {
-        project.imagePaths.firstOrNull()?.let { imagePath ->
-            Image(
-                painter = rememberAsyncImagePainter(
-                    ImageRequest.Builder(context)
-                        .data(imagePath)
-                        .build()
-                ),
-                contentDescription = stringResource(R.string.cd_project_image),
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop
-            )
-        }
     }
+
 }
 
 @Composable
@@ -76,10 +68,39 @@ internal fun ProjectInfoSection(
 ) {
     Column(
         modifier = modifier.semantics(mergeDescendants = true) {},
-        verticalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         ProjectTitle(project.title)
-        ProjectStatsContent(project = project)
+
+        if (project.completedAt != null) {
+            CompletedBadge()
+        }
+    }
+}
+
+@Composable
+private fun CompletedBadge() {
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            .padding(horizontal = 8.dp, vertical = 2.dp)
+            .height(20.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.CheckCircle,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(14.dp)
+        )
+        Text(
+            text = stringResource(R.string.label_project_completed),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }
 
@@ -91,16 +112,14 @@ private fun ProjectTitle(
         text = title.ifBlank { stringResource(R.string.library_untitled_project) },
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold,
-        maxLines = 1,
+        maxLines = 2,
         overflow = TextOverflow.Ellipsis,
         color = MaterialTheme.colorScheme.onSurface
     )
 }
 
 @Composable
-private fun ProjectStatsContent(
-    project: Project
-) {
+fun ProjectStatsContent(project: Project) {
     when (project.type) {
         ProjectType.SINGLE -> {
             StatBadge(
@@ -150,40 +169,6 @@ private fun DoubleProjectStats(
             RowProgressIndicator(
                 progress = rowProgress,
                 modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
-}
-
-@Composable
-internal fun ProjectActionButtons(
-    onInfoClick: () -> Unit,
-    onDelete: () -> Unit
-) {
-    Column(
-        horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        IconButton(
-            onClick = onInfoClick,
-            modifier = Modifier.size(40.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Info,
-                contentDescription = stringResource(R.string.cd_project_details),
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                modifier = Modifier.size(20.dp)
-            )
-        }
-        IconButton(
-            onClick = onDelete,
-            modifier = Modifier.size(40.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = stringResource(R.string.cd_delete_project),
-                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
-                modifier = Modifier.size(20.dp)
             )
         }
     }

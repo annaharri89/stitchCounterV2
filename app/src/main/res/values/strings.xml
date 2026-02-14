@@ -26,7 +26,7 @@
 
     <!-- Library -->
     <string name="library_title">Library</string>
-    <string name="library_select_projects">Select projects</string>
+    <string name="library_multi_delete">Multi delete</string>
     <string name="library_selected_count">%1$d selected</string>
     <string name="library_empty_title">No Projects Yet</string>
     <string name="library_empty_message">Create your first project to start tracking your stitches</string>
@@ -48,6 +48,7 @@
     <string name="label_total_rows">Total Rows</string>
     <string name="placeholder_total_rows">Enter total rows</string>
     <string name="action_create_project">Create Project</string>
+    <string name="label_project_completed">Finished</string>
     <string name="dialog_title_required">Title Required</string>
     <string name="dialog_discard_changes">Discard Changes?</string>
     <string name="dialog_title_required_message">Project title is required. Do you want to discard this project?</string>

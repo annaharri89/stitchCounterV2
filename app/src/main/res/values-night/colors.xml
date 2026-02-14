@@ -22,16 +22,16 @@
     <color name="icon_retro_summer_accent">#FFC47A5A</color>
     <color name="icon_retro_summer_base">#FFE76F51</color>
     
-    <!-- Purple Theme - Dark -->
-    <color name="icon_purple_depth_darkest">#FF4A2C3A</color>
-    <color name="icon_purple_depth_dark">#FF7D5260</color>
-    <color name="icon_purple_depth_medium">#FFB88FA3</color>
-    <color name="icon_purple_depth_light">#FFCCC2DC</color>
-    <color name="icon_purple_depth_lightest">#FFD0BCFF</color>
-    <color name="icon_purple_depth_very_dark">#FF3A1C2A</color>
-    <color name="icon_purple_depth_very_light">#FFE8D4F8</color>
-    <color name="icon_purple_accent">#FF4F378B</color>
-    <color name="icon_purple_base">#FFD0BCFF</color>
+    <!-- Dusty Rose Theme - Dark -->
+    <color name="icon_dusty_rose_depth_darkest">#FF4A2C3A</color>
+    <color name="icon_dusty_rose_depth_dark">#FF7D5260</color>
+    <color name="icon_dusty_rose_depth_medium">#FFB88FA3</color>
+    <color name="icon_dusty_rose_depth_light">#FFCCC2DC</color>
+    <color name="icon_dusty_rose_depth_lightest">#FFD0BCFF</color>
+    <color name="icon_dusty_rose_depth_very_dark">#FF3A1C2A</color>
+    <color name="icon_dusty_rose_depth_very_light">#FFE8D4F8</color>
+    <color name="icon_dusty_rose_accent">#FF4F378B</color>
+    <color name="icon_dusty_rose_base">#FFD0BCFF</color>
     
     <!-- Text colors -->
     <color name="icon_text_color">#333333</color>

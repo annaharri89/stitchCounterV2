@@ -1,5 +1,6 @@
 package dev.harrisonsoftware.stitchCounter.feature.library
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -11,8 +12,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import dev.harrisonsoftware.stitchCounter.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,8 +27,9 @@ fun LibraryTopBar(
 ) {
     TopAppBar(
         title = {
-
+            Text(stringResource(R.string.library_title))
         },
+        windowInsets = WindowInsets(0.dp),
         actions = {
             if (hasProjects) {
                 IconButton(onClick = onEnterMultiSelect) {
@@ -54,10 +59,11 @@ fun MultiSelectTopBar(
                 text = if (selectedCount > 0) {
                     stringResource(R.string.library_selected_count, selectedCount)
                 } else {
-                    stringResource(R.string.library_select_projects)
+                    stringResource(R.string.library_multi_delete)
                 }
             )
         },
+        windowInsets = WindowInsets(0.dp),
         navigationIcon = {
             IconButton(onClick = onCancel) {
                 Icon(

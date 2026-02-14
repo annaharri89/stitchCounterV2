@@ -80,30 +80,30 @@ fun retroSummerDarkColors() = darkColorScheme(
     onTertiary = Color.White
 )
 
-fun purpleLightColors() = lightColorScheme(
-    primary =  Purple40 ,
-    secondary = PurpleGrey40,
+fun dustyRoseLightColors() = lightColorScheme(
+    primary =  DustyRose40 ,
+    secondary = DustyRoseGrey40,
     tertiary = Pink40,
-    primaryContainer = PurplePrimaryContainer40,
-    secondaryContainer = PurpleSecondaryContainer40,
-    tertiaryContainer = PurpleTertiaryContainer40,
-    onTertiaryContainer = PurpleOnTertiaryContainer40,
-    error = PurpleError40,
+    primaryContainer = DustyRosePrimaryContainer40,
+    secondaryContainer = DustyRoseSecondaryContainer40,
+    tertiaryContainer = DustyRoseTertiaryContainer40,
+    onTertiaryContainer = DustyRoseOnTertiaryContainer40,
+    error = DustyRoseError40,
     onError = Color.White,
     onPrimary = Color.White,
     onSecondary = Color.White,
     onTertiary = Color.White
 )
 
-fun purpleDarkColors() = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
+fun dustyRoseDarkColors() = darkColorScheme(
+    primary = DustyRose80,
+    secondary = DustyRoseGrey80,
     tertiary = Pink80,
-    primaryContainer = PurplePrimaryContainer80,
-    secondaryContainer = PurpleSecondaryContainer80,
-    tertiaryContainer = PurpleTertiaryContainer80,
-    onTertiaryContainer = PurpleOnTertiaryContainer80,
-    error = PurpleError80,
+    primaryContainer = DustyRosePrimaryContainer80,
+    secondaryContainer = DustyRoseSecondaryContainer80,
+    tertiaryContainer = DustyRoseTertiaryContainer80,
+    onTertiaryContainer = DustyRoseOnTertiaryContainer80,
+    error = DustyRoseError80,
     onError = Color.White,
     onPrimary = Color.Black,
     onSecondary = Color.Black,

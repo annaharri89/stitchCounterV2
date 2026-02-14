@@ -18,7 +18,7 @@ class ThemeManager @Inject constructor() {
         return when (theme) {
             AppTheme.SEA_COTTAGE -> seaCottageLightColors()
             AppTheme.RETRO_SUMMER -> retroSummerLightColors()
-            AppTheme.PURPLE -> purpleLightColors()
+            AppTheme.DUSTY_ROSE -> dustyRoseLightColors()
         }
     }
 
@@ -26,7 +26,7 @@ class ThemeManager @Inject constructor() {
         return when (theme) {
             AppTheme.SEA_COTTAGE -> seaCottageDarkColors()
             AppTheme.RETRO_SUMMER -> retroSummerDarkColors()
-            AppTheme.PURPLE -> purpleDarkColors()
+            AppTheme.DUSTY_ROSE -> dustyRoseDarkColors()
         }
     }
     
@@ -34,7 +34,7 @@ class ThemeManager @Inject constructor() {
         return when (theme) {
             AppTheme.SEA_COTTAGE -> if (isDark) SeaCottageWhaleDark80 else SeaCottageWhaleDark40
             AppTheme.RETRO_SUMMER -> if (isDark) RetroSummerOrangeDark80 else RetroSummerOrangeDark40
-            AppTheme.PURPLE -> if (isDark) PurpleViolet80 else PurpleViolet40
+            AppTheme.DUSTY_ROSE -> if (isDark) DustyRoseViolet80 else DustyRoseViolet40
         }
     }
     
@@ -42,7 +42,7 @@ class ThemeManager @Inject constructor() {
         return when (theme) {
             AppTheme.SEA_COTTAGE -> Color.White // Dark blue needs white text
             AppTheme.RETRO_SUMMER -> Color.White // Orange-red needs white text
-            AppTheme.PURPLE -> if (isDark) Color.Black else Color.White // Light purple-pink in dark theme needs black, dark in light theme needs white
+            AppTheme.DUSTY_ROSE -> if (isDark) Color.Black else Color.White
         }
     }
     
@@ -63,11 +63,11 @@ class ThemeManager @Inject constructor() {
                 ThemeColor("Orange Light", RetroSummerOrangeLight40, RetroSummerOrangeLight80),
                 ThemeColor("Orange Dark", RetroSummerOrangeDark40, RetroSummerOrangeDark80)
             )
-            AppTheme.PURPLE -> listOf(
-                ThemeColor("Purple", Purple40, Purple80),
-                ThemeColor("Purple Grey", PurpleGrey40, PurpleGrey80),
+            AppTheme.DUSTY_ROSE -> listOf(
+                ThemeColor("Dusty Rose", DustyRose40, DustyRose80),
+                ThemeColor("Dusty Rose Grey", DustyRoseGrey40, DustyRoseGrey80),
                 ThemeColor("Pink", Pink40, Pink80),
-                ThemeColor("Violet", PurpleViolet40, PurpleViolet80)
+                ThemeColor("Violet", DustyRoseViolet40, DustyRoseViolet80)
             )
         }
     }
