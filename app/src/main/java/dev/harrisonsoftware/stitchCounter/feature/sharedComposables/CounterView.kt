@@ -13,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
@@ -22,6 +21,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount
+import dev.harrisonsoftware.stitchCounter.ui.theme.onQuaternary
 import dev.harrisonsoftware.stitchCounter.ui.theme.quaternary
 
 @Composable
@@ -117,7 +117,7 @@ fun CounterView(
                 Button(
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.quaternary,
-                        contentColor = Color.White
+                        contentColor = MaterialTheme.onQuaternary
                     ),
                     onClick = { onReset() },
                     modifier = Modifier.padding(end = 4.dp)

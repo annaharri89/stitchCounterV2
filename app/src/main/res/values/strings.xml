@@ -21,7 +21,7 @@
 
     <!-- Library -->
     <string name="library_title">Library</string>
-    <string name="library_select_projects">Select projects</string>
+    <string name="library_multi_delete">Multi Delete</string>
     <string name="library_selected_count">%1$d selected</string>
     <string name="library_empty_title">No Projects Yet</string>
     <string name="library_empty_message">Create your first project to start tracking your stitches</string>
@@ -123,6 +123,7 @@
     <string name="cd_adjustment_amount">Adjust by %1$s</string>
     <string name="cd_adjustment_amount_selected">Adjust by %1$s, selected</string>
     <string name="cd_row_progress">Row progress: %1$d of %2$d</string>
+    <string name="cd_theme_icon">%1$s theme icon</string>
     <string name="cd_color_swatch_light">%1$s light color</string>
     <string name="cd_color_swatch_dark">%1$s dark color</string>
     <string name="cd_enter_multi_select">Select multiple projects</string>

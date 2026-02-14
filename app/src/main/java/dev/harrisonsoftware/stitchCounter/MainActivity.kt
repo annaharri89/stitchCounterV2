@@ -35,7 +35,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Initialize launcher icon on first launch (when savedInstanceState is null)
         if (savedInstanceState == null) {
             initializeLauncherIcon()
         }
@@ -54,10 +53,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /**
-     * Initializes the launcher icon to match the current theme on app startup.
-     * Reads the saved theme from DataStore and ensures the correct icon alias is enabled.
-     */
+    override fun onStop() {
+        super.onStop()
+        launcherIconManager.applyPendingIconChangeIfNeeded()
+    }
+
     private fun initializeLauncherIcon() {
         lifecycleScope.launch {
             try {

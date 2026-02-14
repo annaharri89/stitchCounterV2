@@ -57,8 +57,7 @@ class SettingsViewModel @Inject constructor(
     fun onThemeSelected(theme: AppTheme) {
         viewModelScope.launch {
             themePreferencesRepository.setTheme(theme)
-            launcherIconManager.updateLauncherIcon(theme)
-            themePreferencesRepository.setShouldNavigateToSettings(true)
+            launcherIconManager.pendingTheme = theme
         }
     }
 

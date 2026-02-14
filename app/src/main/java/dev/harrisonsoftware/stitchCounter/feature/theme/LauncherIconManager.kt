@@ -19,19 +19,26 @@ class LauncherIconManager @Inject constructor(
     private val packageManager: PackageManager = context.packageManager
     private val packageName: String = context.packageName
 
-    // Map themes to their corresponding activity alias component names
     private val themeToComponentName = mapOf(
         AppTheme.SEA_COTTAGE to ComponentName(packageName, "$packageName.SeaCottageLauncherAlias"),
         AppTheme.RETRO_SUMMER to ComponentName(packageName, "$packageName.RetroSummerLauncherAlias"),
-        AppTheme.PURPLE to ComponentName(packageName, "$packageName.PurpleLauncherAlias")
+        AppTheme.GOLDEN_HEARTH to ComponentName(packageName, "$packageName.GoldenHearthLauncherAlias"),
+        AppTheme.FOREST_FIBER to ComponentName(packageName, "$packageName.ForestFiberLauncherAlias"),
+        AppTheme.CLOUD_SOFT to ComponentName(packageName, "$packageName.CloudSoftLauncherAlias"),
+        AppTheme.YARN_CANDY to ComponentName(packageName, "$packageName.YarnCandyLauncherAlias"),
+        AppTheme.DUSTY_ROSE to ComponentName(packageName, "$packageName.DustyRoseLauncherAlias")
     )
 
-    /**
-     * Updates the launcher icon to match the selected theme.
-     * Disables all other theme aliases and enables the one for the given theme.
-     *
-     * @param theme The theme to set the launcher icon for
-     */
+    @Volatile
+    var pendingTheme: AppTheme? = null
+
+    fun applyPendingIconChangeIfNeeded() {
+        pendingTheme?.let { theme ->
+            updateLauncherIcon(theme)
+            pendingTheme = null
+        }
+    }
+
     fun updateLauncherIcon(theme: AppTheme) {
         val targetComponent = themeToComponentName[theme]
             ?: return // Unknown theme, do nothing

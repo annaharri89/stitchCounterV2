@@ -18,7 +18,11 @@ class ThemeManager @Inject constructor() {
         return when (theme) {
             AppTheme.SEA_COTTAGE -> seaCottageLightColors()
             AppTheme.RETRO_SUMMER -> retroSummerLightColors()
-            AppTheme.PURPLE -> purpleLightColors()
+            AppTheme.GOLDEN_HEARTH -> goldenHearthLightColors()
+            AppTheme.FOREST_FIBER -> forestFiberLightColors()
+            AppTheme.CLOUD_SOFT -> cloudSoftLightColors()
+            AppTheme.YARN_CANDY -> yarnCandyLightColors()
+            AppTheme.DUSTY_ROSE -> dustyRoseLightColors()
         }
     }
 
@@ -26,36 +30,45 @@ class ThemeManager @Inject constructor() {
         return when (theme) {
             AppTheme.SEA_COTTAGE -> seaCottageDarkColors()
             AppTheme.RETRO_SUMMER -> retroSummerDarkColors()
-            AppTheme.PURPLE -> purpleDarkColors()
+            AppTheme.GOLDEN_HEARTH -> goldenHearthDarkColors()
+            AppTheme.FOREST_FIBER -> forestFiberDarkColors()
+            AppTheme.CLOUD_SOFT -> cloudSoftDarkColors()
+            AppTheme.YARN_CANDY -> yarnCandyDarkColors()
+            AppTheme.DUSTY_ROSE -> dustyRoseDarkColors()
         }
     }
     
     fun getQuaternaryColor(theme: AppTheme, isDark: Boolean): Color {
         return when (theme) {
-            AppTheme.SEA_COTTAGE -> if (isDark) SeaCottageWhaleDark80 else SeaCottageWhaleDark40
+            AppTheme.SEA_COTTAGE -> if (isDark) SeaCottageQuaternaryDark else SeaCottageQuaternaryLight
             AppTheme.RETRO_SUMMER -> if (isDark) RetroSummerOrangeDark80 else RetroSummerOrangeDark40
-            AppTheme.PURPLE -> if (isDark) PurpleViolet80 else PurpleViolet40
+            AppTheme.GOLDEN_HEARTH -> if (isDark) GoldenHearthQuaternaryDark else GoldenHearthQuaternaryLight
+            AppTheme.FOREST_FIBER -> if (isDark) ForestFiberQuaternaryDark else ForestFiberQuaternaryLight
+            AppTheme.CLOUD_SOFT -> if (isDark) CloudSoftQuaternaryDark else CloudSoftQuaternaryLight
+            AppTheme.YARN_CANDY -> if (isDark) YarnCandyQuaternaryDark else YarnCandyQuaternaryLight
+            AppTheme.DUSTY_ROSE -> if (isDark) DustyRoseQuaternaryDark else DustyRoseQuaternaryLight
         }
     }
     
     fun getOnQuaternaryColor(theme: AppTheme, isDark: Boolean): Color {
         return when (theme) {
-            AppTheme.SEA_COTTAGE -> Color.White // Dark blue needs white text
-            AppTheme.RETRO_SUMMER -> Color.White // Orange-red needs white text
-            AppTheme.PURPLE -> if (isDark) Color.Black else Color.White // Light purple-pink in dark theme needs black, dark in light theme needs white
+            AppTheme.SEA_COTTAGE -> Color.White
+            AppTheme.RETRO_SUMMER -> if (isDark) Color.Black else Color.White
+            AppTheme.GOLDEN_HEARTH -> if (isDark) Color.Black else Color.White
+            AppTheme.FOREST_FIBER -> Color.White
+            AppTheme.CLOUD_SOFT -> Color.Black
+            AppTheme.YARN_CANDY -> Color.Black
+            AppTheme.DUSTY_ROSE -> if (isDark) Color.Black else Color.White
         }
     }
     
-    /**
-     * Returns color information for UI display (Settings screen color swatches)
-     */
     fun getThemeColors(theme: AppTheme): List<ThemeColor> {
         return when (theme) {
             AppTheme.SEA_COTTAGE -> listOf(
-                ThemeColor("Mint", SeaCottageMint40, SeaCottageMint80),
-                ThemeColor("Surf", SeaCottageSurf40, SeaCottageSurf80),
-                ThemeColor("Whale Light", SeaCottageWhaleLight40, SeaCottageWhaleLight80),
-                ThemeColor("Whale Dark", SeaCottageWhaleDark40, SeaCottageWhaleDark80)
+                ThemeColor("Mint", SeaCottageSecondaryLight, SeaCottageSecondaryDark),
+                ThemeColor("Surf", SeaCottagePrimaryLight, SeaCottagePrimaryDark),
+                ThemeColor("Whale Light", SeaCottageTertiaryLight, SeaCottageTertiaryDark),
+                ThemeColor("Whale Dark", SeaCottageQuaternaryLight, SeaCottageQuaternaryDark)
             )
             AppTheme.RETRO_SUMMER -> listOf(
                 ThemeColor("Cactus", RetroSummerCactus40, RetroSummerCactus80),
@@ -63,11 +76,35 @@ class ThemeManager @Inject constructor() {
                 ThemeColor("Orange Light", RetroSummerOrangeLight40, RetroSummerOrangeLight80),
                 ThemeColor("Orange Dark", RetroSummerOrangeDark40, RetroSummerOrangeDark80)
             )
-            AppTheme.PURPLE -> listOf(
-                ThemeColor("Purple", Purple40, Purple80),
-                ThemeColor("Purple Grey", PurpleGrey40, PurpleGrey80),
-                ThemeColor("Pink", Pink40, Pink80),
-                ThemeColor("Violet", PurpleViolet40, PurpleViolet80)
+            AppTheme.GOLDEN_HEARTH -> listOf(
+                ThemeColor("Terracotta", GoldenHearthPrimaryLight, GoldenHearthPrimaryDark),
+                ThemeColor("Honey", GoldenHearthSecondaryLight, GoldenHearthSecondaryDark),
+                ThemeColor("Sage", GoldenHearthTertiaryLight, GoldenHearthTertiaryDark),
+                ThemeColor("Plum", GoldenHearthQuaternaryLight, GoldenHearthQuaternaryDark)
+            )
+            AppTheme.FOREST_FIBER -> listOf(
+                ThemeColor("Moss", ForestFiberPrimaryLight, ForestFiberPrimaryDark),
+                ThemeColor("Sage", ForestFiberSecondaryLight, ForestFiberSecondaryDark),
+                ThemeColor("Wood", ForestFiberTertiaryLight, ForestFiberTertiaryDark),
+                ThemeColor("Clay", ForestFiberQuaternaryLight, ForestFiberQuaternaryDark)
+            )
+            AppTheme.CLOUD_SOFT -> listOf(
+                ThemeColor("Misty Blue", CloudSoftPrimaryLight, CloudSoftPrimaryDark),
+                ThemeColor("Pale Sky", CloudSoftSecondaryLight, CloudSoftSecondaryDark),
+                ThemeColor("Linen", CloudSoftTertiaryLight, CloudSoftTertiaryDark),
+                ThemeColor("Mauve", CloudSoftQuaternaryLight, CloudSoftQuaternaryDark)
+            )
+            AppTheme.YARN_CANDY -> listOf(
+                ThemeColor("Periwinkle", YarnCandyPrimaryLight, YarnCandyPrimaryDark),
+                ThemeColor("Cotton Candy", YarnCandySecondaryLight, YarnCandySecondaryDark),
+                ThemeColor("Lavender", YarnCandyTertiaryLight, YarnCandyTertiaryDark),
+                ThemeColor("Peachy Pink", YarnCandyQuaternaryLight, YarnCandyQuaternaryDark)
+            )
+            AppTheme.DUSTY_ROSE -> listOf(
+                ThemeColor("Rose", DustyRosePrimaryLight, DustyRosePrimaryDark),
+                ThemeColor("Blush", DustyRoseSecondaryLight, DustyRoseSecondaryDark),
+                ThemeColor("Sage", DustyRoseTertiaryLight, DustyRoseTertiaryDark),
+                ThemeColor("Plum", DustyRoseQuaternaryLight, DustyRoseQuaternaryDark)
             )
         }
     }
@@ -78,6 +115,6 @@ class ThemeManager @Inject constructor() {
  */
 data class ThemeColor(
     val name: String,
-    val lightColor: androidx.compose.ui.graphics.Color,
-    val darkColor: androidx.compose.ui.graphics.Color
+    val lightColor: Color,
+    val darkColor: Color
 )

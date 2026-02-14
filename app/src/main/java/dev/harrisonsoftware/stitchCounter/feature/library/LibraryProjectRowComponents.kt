@@ -200,7 +200,7 @@ fun StatBadge(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
             .background(
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                MaterialTheme.colorScheme.surfaceVariant
             )
             .padding(horizontal = 12.dp, vertical = 8.dp)
             .semantics(mergeDescendants = true) {
