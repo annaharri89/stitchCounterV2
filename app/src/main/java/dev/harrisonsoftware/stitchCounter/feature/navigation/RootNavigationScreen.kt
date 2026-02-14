@@ -29,7 +29,7 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
 
     val previousTab = remember { mutableStateOf<BottomNavTab?>(null) }
     LaunchedEffect(selectedTab) {
-        if (selectedTab == BottomNavTab.SETTINGS && previousTab.value != BottomNavTab.SETTINGS) {
+        if (previousTab.value != null && selectedTab != previousTab.value) {
             navigateToDestination(navController, getDestinationForTab(selectedTab))
         }
         previousTab.value = selectedTab

@@ -1,19 +1,40 @@
 package dev.harrisonsoftware.stitchCounter.feature.library
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.feature.destinations.ProjectDetailScreenDestination
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavGraph
@@ -24,7 +45,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 
-@RootNavGraph
+@RootNavGraph(start = true)
 @Destination
 @Composable
 fun LibraryScreen(
@@ -34,6 +55,7 @@ fun LibraryScreen(
 ) {
     val projects by viewModel.projects.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
+    var showNewProjectDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -51,6 +73,23 @@ fun LibraryScreen(
                     onEnterMultiSelect = { viewModel.toggleMultiSelectMode() },
                     hasProjects = projects.isNotEmpty()
                 )
+            }
+        },
+        floatingActionButton = {
+            if (!uiState.isMultiSelectMode) {
+                val fabDescription = stringResource(R.string.cd_create_new_project)
+                FloatingActionButton(
+                    onClick = { showNewProjectDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.semantics {
+                        contentDescription = fabDescription
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null
+                    )
+                }
             }
         }
     ) { paddingValues ->
@@ -116,5 +155,71 @@ fun LibraryScreen(
             onDismiss = { viewModel.cancelDelete() }
         )
     }
+
+    if (showNewProjectDialog) {
+        NewProjectDialog(
+            onSelectSingleCounter = {
+                showNewProjectDialog = false
+                rootNavigationViewModel.showBottomSheet(
+                    SheetScreen.ProjectDetail(projectId = null, projectType = ProjectType.SINGLE)
+                )
+            },
+            onSelectDoubleCounter = {
+                showNewProjectDialog = false
+                rootNavigationViewModel.showBottomSheet(
+                    SheetScreen.ProjectDetail(projectId = null, projectType = ProjectType.DOUBLE)
+                )
+            },
+            onDismiss = { showNewProjectDialog = false }
+        )
+    }
 }
 
+@Composable
+fun NewProjectDialog(
+    onSelectSingleCounter: () -> Unit,
+    onSelectDoubleCounter: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(R.string.new_project_dialog_title),
+                style = MaterialTheme.typography.headlineSmall
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = onSelectSingleCounter,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .sizeIn(minHeight = 48.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(stringResource(R.string.new_project_single_counter))
+                }
+
+                OutlinedButton(
+                    onClick = onSelectDoubleCounter,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .sizeIn(minHeight = 48.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(stringResource(R.string.new_project_double_counter))
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.action_cancel))
+            }
+        }
+    )
+}

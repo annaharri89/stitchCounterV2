@@ -9,11 +9,6 @@
     <string name="action_discard">Discard</string>
     <string name="action_ok">OK</string>
 
-    <!-- Main screen -->
-    <string name="main_title">Stitch Counter</string>
-    <string name="main_new_single_tracker">New Single Counter</string>
-    <string name="main_new_double_tracker">New Double Counter</string>
-
     <!-- Counter -->
     <string name="counter_type_stitches">Stitches</string>
     <string name="counter_type_rows_rounds">Rows/Rounds</string>
@@ -44,6 +39,7 @@
     <!-- Project detail -->
     <string name="project_detail_title">Project Details</string>
     <string name="label_project_title">Project Title</string>
+    <string name="label_project_completed">Finished</string>
     <string name="placeholder_project_title">Enter project title</string>
     <string name="label_total_rows">Total Rows</string>
     <string name="placeholder_total_rows">Enter total rows</string>
@@ -91,8 +87,13 @@
     <string name="settings_imported_count">Imported %1$d project(s)</string>
     <string name="settings_failed_import_count">Failed to import %1$d project(s)</string>
 
+    <!-- New project dialog -->
+    <string name="new_project_dialog_title">New Project</string>
+    <string name="new_project_single_counter">New Single Counter</string>
+    <string name="new_project_double_counter">New Double Counter</string>
+    <string name="cd_create_new_project">Create new project</string>
+
     <!-- Navigation tabs -->
-    <string name="nav_home">Home</string>
     <string name="nav_library">Library</string>
     <string name="nav_settings">Settings</string>
 
