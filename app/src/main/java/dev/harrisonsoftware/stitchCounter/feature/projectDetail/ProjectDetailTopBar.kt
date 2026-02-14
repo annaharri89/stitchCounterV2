@@ -14,7 +14,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import dev.harrisonsoftware.stitchCounter.R
 
 @Composable
 fun ProjectDetailTopBar(
@@ -31,7 +35,7 @@ fun ProjectDetailTopBar(
             IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
+                    contentDescription = stringResource(R.string.cd_back)
                 )
             }
         } else {
@@ -39,15 +43,16 @@ fun ProjectDetailTopBar(
         }
         
         Text(
-            text = "Project Details",
-            style = MaterialTheme.typography.headlineMedium
+            text = stringResource(R.string.project_detail_title),
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.semantics { heading() }
         )
         
         if (onCloseClick != null) {
             IconButton(onClick = onCloseClick) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Close"
+                    contentDescription = stringResource(R.string.cd_close)
                 )
             }
         } else {

@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.unit.dp
@@ -19,6 +20,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.activity.ComponentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavGraph
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.AdaptiveLayout
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.ProjectDetailsFAB
@@ -114,12 +116,12 @@ fun DoubleCounterScreen(
 
     resetDialogType.value?.let { type ->
         val counterName = when (type) {
-            CounterType.STITCH -> "Stitches"
-            CounterType.ROW -> "Rows/Rounds"
+            CounterType.STITCH -> stringResource(R.string.counter_type_stitches)
+            CounterType.ROW -> stringResource(R.string.counter_type_rows_rounds)
         }
         ResetConfirmationDialog(
-            title = "Reset $counterName Counter?",
-            message = "Are you sure you want to reset the $counterName counter to 0?",
+            title = stringResource(R.string.reset_named_counter_title, counterName),
+            message = stringResource(R.string.reset_named_counter_message, counterName),
             onConfirm = {
                 viewModel.reset(type)
                 resetDialogType.value = null
@@ -130,8 +132,8 @@ fun DoubleCounterScreen(
 
     if (showResetAllDialog.value) {
         ResetConfirmationDialog(
-            title = "Reset All Counters?",
-            message = "Are you sure you want to reset both Stitches and Rows/Rounds counters to 0?",
+            title = stringResource(R.string.reset_all_counters_title),
+            message = stringResource(R.string.reset_all_counters_message),
             onConfirm = {
                 viewModel.resetAll()
                 showResetAllDialog.value = false
@@ -140,5 +142,3 @@ fun DoubleCounterScreen(
         )
     }
 }
-
-

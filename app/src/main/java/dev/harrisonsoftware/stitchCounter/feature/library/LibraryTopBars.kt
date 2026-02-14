@@ -12,6 +12,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import dev.harrisonsoftware.stitchCounter.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -21,14 +23,14 @@ fun LibraryTopBar(
 ) {
     TopAppBar(
         title = {
-            Text("Library")
+
         },
         actions = {
             if (hasProjects) {
                 IconButton(onClick = onEnterMultiSelect) {
                     Icon(
                         imageVector = Icons.Default.SelectAll,
-                        contentDescription = "Select multiple"
+                        contentDescription = stringResource(R.string.cd_select_multiple)
                     )
                 }
             }
@@ -50,9 +52,9 @@ fun MultiSelectTopBar(
         title = {
             Text(
                 text = if (selectedCount > 0) {
-                    "$selectedCount selected"
+                    stringResource(R.string.library_selected_count, selectedCount)
                 } else {
-                    "Select projects"
+                    stringResource(R.string.library_select_projects)
                 }
             )
         },
@@ -60,7 +62,7 @@ fun MultiSelectTopBar(
             IconButton(onClick = onCancel) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Cancel selection"
+                    contentDescription = stringResource(R.string.cd_cancel_selection)
                 )
             }
         },
@@ -69,14 +71,14 @@ fun MultiSelectTopBar(
                 IconButton(onClick = onClearSelection) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Clear selection"
+                        contentDescription = stringResource(R.string.cd_clear_selection)
                     )
                 }
             } else {
                 IconButton(onClick = onSelectAll) {
                     Icon(
                         imageVector = Icons.Default.SelectAll,
-                        contentDescription = "Select all"
+                        contentDescription = stringResource(R.string.cd_select_all)
                     )
                 }
             }
@@ -86,7 +88,7 @@ fun MultiSelectTopBar(
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete selected",
+                    contentDescription = stringResource(R.string.cd_delete_selected),
                     tint = if (selectedCount > 0) {
                         MaterialTheme.colorScheme.error
                     } else {

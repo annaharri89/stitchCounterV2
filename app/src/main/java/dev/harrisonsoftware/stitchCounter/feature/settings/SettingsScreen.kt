@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.animation.AnimatedVisibility
@@ -18,9 +19,15 @@ import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Feedback
+import androidx.compose.material.icons.filled.LocalPolice
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material3.*
 import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,10 +37,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.domain.model.AppTheme
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavGraph
 import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeColor
@@ -94,6 +103,11 @@ fun SettingsScreen(
                         Constants.PRIVACY_POLICY_URL.toUri())
                     context.startActivity(browserIntent)
                 }
+                is SettingsEffect.OpenEULA -> {
+                    val browserIntent = Intent(Intent.ACTION_VIEW,
+                        Constants.EULA_URL.toUri())
+                    context.startActivity(browserIntent)
+                }
             }
         }
     }
@@ -106,13 +120,13 @@ fun SettingsScreen(
     ) {
         item {
             ExpandableSection(
-                title = "Theme Settings",
+                title = stringResource(R.string.settings_theme),
                 isExpanded = isThemeSectionExpanded.value,
                 onToggleExpanded = { isThemeSectionExpanded.value = !isThemeSectionExpanded.value }
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(
-                        text = "Choose a color scheme:",
+                        text = stringResource(R.string.settings_choose_color_scheme),
                         style = MaterialTheme.typography.titleMedium
                     )
                     
@@ -130,13 +144,13 @@ fun SettingsScreen(
         
         item {
             ExpandableSection(
-                title = "Backup & Restore",
+                title = stringResource(R.string.settings_backup_restore),
                 isExpanded = isBackupSectionExpanded.value,
                 onToggleExpanded = { isBackupSectionExpanded.value = !isBackupSectionExpanded.value }
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(
-                        text = "Export or import your library:",
+                        text = stringResource(R.string.settings_export_import_library),
                         style = MaterialTheme.typography.titleMedium
                     )
                     
@@ -158,7 +172,7 @@ fun SettingsScreen(
 
         item {
             ExpandableSection(
-                title = "Support",
+                title = stringResource(R.string.settings_support),
                 isExpanded = isSupportSectionExpanded.value,
                 onToggleExpanded = { isSupportSectionExpanded.value = !isSupportSectionExpanded.value }
             ) {
@@ -168,9 +182,23 @@ fun SettingsScreen(
                     },
                     onGiveFeedback = {
                         viewModel.onGiveFeedback()
-                    },
+                    }
+                )
+            }
+        }
+
+        item {
+            ExpandableSection(
+                title = stringResource(R.string.settings_privacy_legal),
+                isExpanded = isSupportSectionExpanded.value,
+                onToggleExpanded = { isSupportSectionExpanded.value = !isSupportSectionExpanded.value }
+            ) {
+                LegalCard(
                     onOpenPrivacyPolicy = {
                         viewModel.onOpenPrivacyPolicy()
+                    },
+                    onOpenEULA = {
+                        viewModel.onOpenEULA()
                     }
                 )
             }
@@ -207,7 +235,7 @@ private fun ExpandableSection(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onToggleExpanded() }
+                    .clickable(role = Role.Button) { onToggleExpanded() }
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -216,11 +244,12 @@ private fun ExpandableSection(
                     text = title,
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                    modifier = Modifier.semantics { heading() }
                 )
                 Icon(
                     imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = if (isExpanded) "Collapse" else "Expand"
+                    contentDescription = if (isExpanded) stringResource(R.string.cd_collapse) else stringResource(R.string.cd_expand)
                 )
             }
             
@@ -249,7 +278,11 @@ private fun ThemeOptionCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onThemeSelected() },
+            .selectable(
+                selected = isSelected,
+                role = Role.RadioButton,
+                onClick = onThemeSelected
+            ),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer
             else MaterialTheme.colorScheme.surface
@@ -281,7 +314,7 @@ private fun ThemeOptionCard(
             if (isSelected && themeColors.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "Colors in this theme:",
+                    text = stringResource(R.string.settings_colors_in_theme),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -302,6 +335,9 @@ private fun ThemeOptionCard(
 
 @Composable
 private fun ColorItem(themeColor: ThemeColor) {
+    val lightSwatchDescription = stringResource(R.string.cd_color_swatch_light, themeColor.name)
+    val darkSwatchDescription = stringResource(R.string.cd_color_swatch_dark, themeColor.name)
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -312,10 +348,11 @@ private fun ColorItem(themeColor: ThemeColor) {
                 .size(24.dp)
                 .clip(CircleShape)
                 .background(themeColor.lightColor)
+                .semantics { contentDescription = lightSwatchDescription }
         )
         
         Text(
-            text = "${themeColor.name} (Light)",
+            text = stringResource(R.string.settings_color_light_format, themeColor.name),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -327,10 +364,11 @@ private fun ColorItem(themeColor: ThemeColor) {
                 .size(24.dp)
                 .clip(CircleShape)
                 .background(themeColor.darkColor)
+                .semantics { contentDescription = darkSwatchDescription }
         )
         
         Text(
-            text = "Dark",
+            text = stringResource(R.string.settings_dark),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -366,12 +404,15 @@ private fun BackupRestoreCard(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(if (isExporting) "Exporting..." else "Export Library")
+                Text(
+                    if (isExporting) stringResource(R.string.settings_exporting)
+                    else stringResource(R.string.settings_export_library)
+                )
             }
             
             if (exportError != null) {
                 Text(
-                    text = "Error: $exportError",
+                    text = stringResource(R.string.settings_error_format, exportError),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -391,12 +432,15 @@ private fun BackupRestoreCard(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(if (isImporting) "Importing..." else "Import Library")
+                Text(
+                    if (isImporting) stringResource(R.string.settings_importing)
+                    else stringResource(R.string.settings_import_library)
+                )
             }
             
             if (importError != null) {
                 Text(
-                    text = "Error: $importError",
+                    text = stringResource(R.string.settings_error_format, importError),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -408,8 +452,7 @@ private fun BackupRestoreCard(
 @Composable
 private fun SupportCard(
     onReportBug: () -> Unit,
-    onGiveFeedback: () -> Unit,
-    onOpenPrivacyPolicy: () -> Unit
+    onGiveFeedback: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -430,7 +473,7 @@ private fun SupportCard(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Report a Bug")
+                Text(stringResource(R.string.settings_report_bug))
             }
 
             Button(
@@ -441,19 +484,37 @@ private fun SupportCard(
                 )
             ) {
                 Icon(
-                    imageVector = Icons.Default.Policy,
+                    imageVector = Icons.Default.Feedback,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Give Feedback")
+                Text(stringResource(R.string.settings_give_feedback))
             }
+        }
+    }
+}
+
+@Composable
+private fun LegalCard(
+    onOpenPrivacyPolicy: () -> Unit,
+    onOpenEULA: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors().copy(containerColor = MaterialTheme.colorScheme.primaryContainer)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
 
             Button(
                 onClick = onOpenPrivacyPolicy,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
                 Icon(
@@ -462,8 +523,26 @@ private fun SupportCard(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Privacy Policy")
+                Text(stringResource(R.string.settings_privacy_policy))
             }
+
+            Button(
+                onClick = onOpenEULA,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocalPolice,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(R.string.settings_eula))
+            }
+
+            Text(stringResource(R.string.settings_eula_description))
         }
     }
 }
@@ -475,13 +554,13 @@ private fun ImportResultDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Import Complete") },
+        title = { Text(stringResource(R.string.settings_import_complete)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Imported ${result.importedCount} project(s)")
+                Text(stringResource(R.string.settings_imported_count, result.importedCount))
                 if (result.failedCount > 0) {
                     Text(
-                        "Failed to import ${result.failedCount} project(s)",
+                        stringResource(R.string.settings_failed_import_count, result.failedCount),
                         color = MaterialTheme.colorScheme.error
                     )
                     if (result.failedProjectNames.isNotEmpty()) {
@@ -495,7 +574,7 @@ private fun ImportResultDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("OK")
+                Text(stringResource(R.string.action_ok))
             }
         }
     )

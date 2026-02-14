@@ -3,6 +3,7 @@ package dev.harrisonsoftware.stitchCounter.data.backup
 import android.net.Uri
 import android.util.Log
 import com.google.gson.Gson
+import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -20,7 +21,7 @@ class BackupManager(
     private val gson = Gson()
     private val tag = "BackupManager"
     
-    fun createBackupZip(backupData: BackupData, outputUri: Uri? = null): Result<Uri> {
+    fun createBackupZip(backupData: BackupData, outputContentUri: ContentUri? = null): Result<ContentUri> {
         return try {
             val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
             val zipFileName = "stitch_counter_backup_$timestamp.zip"
@@ -45,7 +46,8 @@ class BackupManager(
                 }
             }
             
-            val zipFile = if (outputUri != null) {
+            val outputUri = outputContentUri?.let { Uri.parse(it.value) }
+            val resultUri = if (outputUri != null) {
                 uriStreamProvider.openOutputStream(outputUri)?.use { outputStream ->
                     createZipFromDirectory(tempDir, outputStream)
                     outputUri
@@ -62,15 +64,16 @@ class BackupManager(
             
             tempDir.deleteRecursively()
             
-            Result.success(zipFile)
+            Result.success(ContentUri(resultUri.toString()))
         } catch (e: Exception) {
             Log.e(tag, "Error creating backup", e)
             Result.failure(e)
         }
     }
     
-    fun extractBackupZip(inputUri: Uri): Result<BackupExtraction> {
+    fun extractBackupZip(inputContentUri: ContentUri): Result<BackupExtraction> {
         return try {
+            val inputUri = Uri.parse(inputContentUri.value)
             val tempDir = File(fileSystemProvider.getCacheDirectory(), "backup_extract_${System.currentTimeMillis()}")
             tempDir.mkdirs()
             

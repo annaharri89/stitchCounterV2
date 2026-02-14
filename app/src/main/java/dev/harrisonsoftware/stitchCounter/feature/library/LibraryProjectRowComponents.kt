@@ -23,11 +23,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.domain.model.Project
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.RowProgressIndicator
@@ -55,7 +59,7 @@ internal fun ProjectImageOrCheckbox(
                         .data(imagePath)
                         .build()
                 ),
-                contentDescription = "Project image",
+                contentDescription = stringResource(R.string.cd_project_image),
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(12.dp)),
@@ -71,7 +75,7 @@ internal fun ProjectInfoSection(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.semantics(mergeDescendants = true) {},
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         ProjectTitle(project.title)
@@ -84,7 +88,7 @@ private fun ProjectTitle(
     title: String
 ) {
     Text(
-        text = title.ifBlank { "Untitled Project" },
+        text = title.ifBlank { stringResource(R.string.library_untitled_project) },
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold,
         maxLines = 1,
@@ -100,7 +104,7 @@ private fun ProjectStatsContent(
     when (project.type) {
         ProjectType.SINGLE -> {
             StatBadge(
-                label = "Count",
+                label = stringResource(R.string.label_count),
                 value = project.stitchCounterNumber.toString(),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -131,12 +135,12 @@ private fun DoubleProjectStats(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             StatBadge(
-                label = "Stitches",
+                label = stringResource(R.string.label_stitches),
                 value = project.stitchCounterNumber.toString(),
                 modifier = Modifier.weight(1f)
             )
             StatBadge(
-                label = "Rows",
+                label = stringResource(R.string.label_rows),
                 value = "${project.rowCounterNumber}${if (project.totalRows > 0) "/${project.totalRows}" else ""}",
                 modifier = Modifier.weight(1f)
             )
@@ -166,7 +170,7 @@ internal fun ProjectActionButtons(
         ) {
             Icon(
                 imageVector = Icons.Default.Info,
-                contentDescription = "Project details",
+                contentDescription = stringResource(R.string.cd_project_details),
                 tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                 modifier = Modifier.size(20.dp)
             )
@@ -177,7 +181,7 @@ internal fun ProjectActionButtons(
         ) {
             Icon(
                 imageVector = Icons.Default.Delete,
-                contentDescription = "Delete project",
+                contentDescription = stringResource(R.string.cd_delete_project),
                 tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
                 modifier = Modifier.size(20.dp)
             )
@@ -191,13 +195,17 @@ fun StatBadge(
     value: String,
     modifier: Modifier = Modifier
 ) {
+    val badgeDescription = stringResource(R.string.cd_stat_badge, label, value)
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
             .background(
                 MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
             )
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .semantics(mergeDescendants = true) {
+                contentDescription = badgeDescription
+            },
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Text(

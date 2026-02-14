@@ -3,13 +3,9 @@ package dev.harrisonsoftware.stitchCounter.feature.library
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.harrisonsoftware.stitchCounter.domain.model.Project
-import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.domain.usecase.DeleteProject
 import dev.harrisonsoftware.stitchCounter.domain.usecase.DeleteProjects
 import dev.harrisonsoftware.stitchCounter.domain.usecase.ObserveProjects
-import dev.harrisonsoftware.stitchCounter.feature.destinations.DoubleCounterScreenDestination
-import dev.harrisonsoftware.stitchCounter.feature.destinations.SingleCounterScreenDestination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -115,14 +111,6 @@ class LibraryViewModel @Inject constructor(
             showDeleteConfirmation = false,
             projectsToDelete = emptyList()
         )
-    }
-
-    fun navigateToEditProject(project: Project, navigator: DestinationsNavigator) {
-        val destination = when (project.type) {
-            ProjectType.SINGLE -> SingleCounterScreenDestination(projectId = project.id)
-            ProjectType.DOUBLE -> DoubleCounterScreenDestination(projectId = project.id)
-        }
-        navigator.navigate(destination)
     }
 }
 

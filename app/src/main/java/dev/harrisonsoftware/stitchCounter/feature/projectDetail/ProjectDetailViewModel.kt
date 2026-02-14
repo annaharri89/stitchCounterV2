@@ -1,7 +1,9 @@
 package dev.harrisonsoftware.stitchCounter.feature.projectDetail
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult
 import dev.harrisonsoftware.stitchCounter.domain.model.Project
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
@@ -27,8 +29,8 @@ data class ProjectDetailUiState(
     val imagePaths: List<String> = emptyList(),
     val isLoading: Boolean = false,
     val hasUnsavedChanges: Boolean = false,
-    val titleError: String? = null,
-    val totalRowsError: String? = null
+    @StringRes val titleError: Int? = null,
+    @StringRes val totalRowsError: Int? = null
 )
 
 @HiltViewModel
@@ -140,7 +142,7 @@ class ProjectDetailViewModel @Inject constructor(
             currentState.copy(
                 title = newTitle,
                 hasUnsavedChanges = newTitle != originalTitle || currentTotalRows != originalTotalRows || currentImagePaths != originalImagePaths,
-                titleError = if (newTitle.isBlank()) "Title is required" else null
+                titleError = if (newTitle.isBlank()) R.string.error_title_required else null
             )
         }
         triggerAutoSave()
@@ -153,9 +155,9 @@ class ProjectDetailViewModel @Inject constructor(
         val totalRowsValue = newTotalRows.toIntOrNull() ?: 0
         val isDoubleCounter = state.projectType == ProjectType.DOUBLE
         val totalRowsError = if (isDoubleCounter && totalRowsValue <= 0 && newTotalRows.isNotBlank()) {
-            "Total rows must be greater than 0"
+            R.string.error_total_rows_greater_than_zero
         } else if (isDoubleCounter && newTotalRows.isBlank()) {
-            "Total rows is required"
+            R.string.error_total_rows_required
         } else {
             null
         }
@@ -233,7 +235,7 @@ class ProjectDetailViewModel @Inject constructor(
             
             if (state.title.isBlank()) {
                 _uiState.update { currentState ->
-                    currentState.copy(titleError = "Title is required")
+                    currentState.copy(titleError = R.string.error_title_required)
                 }
                 _dismissalResult.send(DismissalResult.ShowDiscardDialog)
             } else if (state.hasUnsavedChanges) {
@@ -303,7 +305,7 @@ class ProjectDetailViewModel @Inject constructor(
             val state = _uiState.value
             if (state.title.isBlank()) {
                 _uiState.update { currentState ->
-                    currentState.copy(titleError = "Title is required")
+                    currentState.copy(titleError = R.string.error_title_required)
                 }
                 return@launch
             }
@@ -312,7 +314,7 @@ class ProjectDetailViewModel @Inject constructor(
             val totalRowsValue = state.totalRows.toIntOrNull() ?: 0
             if (isDoubleCounter && totalRowsValue <= 0) {
                 _uiState.update { currentState ->
-                    currentState.copy(totalRowsError = "Total rows is required and must be greater than 0")
+                    currentState.copy(totalRowsError = R.string.error_total_rows_required_and_greater)
                 }
                 return@launch
             }
@@ -348,9 +350,3 @@ class ProjectDetailViewModel @Inject constructor(
         }
     }
 }
-
-
-
-
-
-

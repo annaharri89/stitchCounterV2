@@ -1,3 +1,134 @@
 <resources>
-    <string name="app_name">Stitch Tracker</string>
+    <string name="app_name">Stitch Counter</string>
+
+    <!-- Common actions -->
+    <string name="action_reset">Reset</string>
+    <string name="action_reset_all">Reset All</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_discard">Discard</string>
+    <string name="action_ok">OK</string>
+
+    <!-- Main screen -->
+    <string name="main_title">Stitch Counter</string>
+    <string name="main_new_single_tracker">New Single Counter</string>
+    <string name="main_new_double_tracker">New Double Counter</string>
+
+    <!-- Counter -->
+    <string name="counter_type_stitches">Stitches</string>
+    <string name="counter_type_rows_rounds">Rows/Rounds</string>
+    <string name="reset_counter_title">Reset Counter?</string>
+    <string name="reset_counter_message">Are you sure you want to reset the counter to 0?</string>
+    <string name="reset_named_counter_title">Reset %1$s Counter?</string>
+    <string name="reset_named_counter_message">Are you sure you want to reset the %1$s counter to 0?</string>
+    <string name="reset_all_counters_title">Reset All Counters?</string>
+    <string name="reset_all_counters_message">Are you sure you want to reset both Stitches and Rows/Rounds counters to 0?</string>
+
+    <!-- Library -->
+    <string name="library_title">Library</string>
+    <string name="library_select_projects">Select projects</string>
+    <string name="library_selected_count">%1$d selected</string>
+    <string name="library_empty_title">No Projects Yet</string>
+    <string name="library_empty_message">Create your first project to start tracking your stitches</string>
+    <string name="library_untitled_project">Untitled Project</string>
+    <string name="label_count">Count</string>
+    <string name="label_stitches">Stitches</string>
+    <string name="label_rows">Rows</string>
+
+    <!-- Library delete dialog -->
+    <string name="delete_project_title">Delete Project?</string>
+    <string name="delete_projects_title">Delete Projects?</string>
+    <string name="delete_project_message">Are you sure you want to delete this project? This action cannot be undone.</string>
+    <string name="delete_projects_message">Are you sure you want to delete %1$d projects? This action cannot be undone.</string>
+
+    <!-- Project detail -->
+    <string name="project_detail_title">Project Details</string>
+    <string name="label_project_title">Project Title</string>
+    <string name="placeholder_project_title">Enter project title</string>
+    <string name="label_total_rows">Total Rows</string>
+    <string name="placeholder_total_rows">Enter total rows</string>
+    <string name="action_create_project">Create Project</string>
+    <string name="dialog_title_required">Title Required</string>
+    <string name="dialog_discard_changes">Discard Changes?</string>
+    <string name="dialog_title_required_message">Project title is required. Do you want to discard this project?</string>
+    <string name="dialog_discard_changes_message">You have unsaved changes. Are you sure you want to discard them?</string>
+    <string name="error_title_required">Title is required</string>
+    <string name="error_total_rows_greater_than_zero">Total rows must be greater than 0</string>
+    <string name="error_total_rows_required">Total rows is required</string>
+    <string name="error_total_rows_required_and_greater">Total rows is required and must be greater than 0</string>
+
+    <!-- Project images -->
+    <string name="project_photos_header">Project Photos</string>
+    <string name="max_photos_reached">Maximum %1$d photos reached</string>
+    <string name="add_another_photo">Add Another Photo</string>
+    <string name="add_photo">Add Photo</string>
+    <string name="photo_count_format">%1$d/%2$d</string>
+
+    <!-- Row progress -->
+    <string name="row_progress_format">%1$d/%2$d</string>
+
+    <!-- Settings -->
+    <string name="settings_theme">Theme Settings</string>
+    <string name="settings_backup_restore">Backup &amp; Restore</string>
+    <string name="settings_support">Support</string>
+    <string name="settings_privacy_legal">Privacy &amp; Legal</string>
+    <string name="settings_choose_color_scheme">Choose a color scheme:</string>
+    <string name="settings_export_import_library">Export or import your library:</string>
+    <string name="settings_colors_in_theme">Colors in this theme:</string>
+    <string name="settings_dark">Dark</string>
+    <string name="settings_color_light_format">%1$s (Light)</string>
+    <string name="settings_exporting">Exporting…</string>
+    <string name="settings_export_library">Export Library</string>
+    <string name="settings_importing">Importing…</string>
+    <string name="settings_import_library">Import Library</string>
+    <string name="settings_error_format">Error: %1$s</string>
+    <string name="settings_report_bug">Report a Bug</string>
+    <string name="settings_give_feedback">Give Feedback</string>
+    <string name="settings_privacy_policy">Privacy Policy</string>
+    <string name="settings_eula">EULA</string>
+    <string name="settings_eula_description">By using Stitch Counter, you agree to the EULA.</string>
+    <string name="settings_import_complete">Import Complete</string>
+    <string name="settings_imported_count">Imported %1$d project(s)</string>
+    <string name="settings_failed_import_count">Failed to import %1$d project(s)</string>
+
+    <!-- Navigation tabs -->
+    <string name="nav_home">Home</string>
+    <string name="nav_library">Library</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_select_multiple">Select multiple</string>
+    <string name="cd_cancel_selection">Cancel selection</string>
+    <string name="cd_clear_selection">Clear selection</string>
+    <string name="cd_select_all">Select all</string>
+    <string name="cd_delete_selected">Delete selected</string>
+    <string name="cd_delete">Delete</string>
+    <string name="cd_project_image">Project image</string>
+    <string name="cd_project_details">Project details</string>
+    <string name="cd_delete_project">Delete project</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_close">Close</string>
+    <string name="cd_remove_image">Remove image</string>
+    <string name="cd_add_photo">Add photo</string>
+    <string name="cd_add_another_photo">Add another photo</string>
+    <string name="cd_collapse">Collapse</string>
+    <string name="cd_expand">Expand</string>
+    <string name="cd_increase_count">Increase count</string>
+    <string name="cd_decrease_count">Decrease count</string>
+    <string name="cd_increase_named_count">Increase %1$s count</string>
+    <string name="cd_decrease_named_count">Decrease %1$s count</string>
+    <string name="cd_current_count">Current count: %1$d</string>
+    <string name="cd_named_current_count">%1$s: %2$d</string>
+    <string name="cd_adjustment_amount">Adjust by %1$s</string>
+    <string name="cd_adjustment_amount_selected">Adjust by %1$s, selected</string>
+    <string name="cd_row_progress">Row progress: %1$d of %2$d</string>
+    <string name="cd_color_swatch_light">%1$s light color</string>
+    <string name="cd_color_swatch_dark">%1$s dark color</string>
+    <string name="cd_enter_multi_select">Select multiple projects</string>
+    <string name="cd_empty_library">Empty folder</string>
+    <string name="cd_stat_badge">%1$s: %2$s</string>
+    <string name="cd_dismiss_sheet">Dismiss</string>
+    <string name="cd_drag_handle">Drag handle</string>
+    <string name="cd_loading">Loading</string>
+    <string name="cd_project_photos_header">Project photos, %1$d of %2$d</string>
 </resources>

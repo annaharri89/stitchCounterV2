@@ -132,6 +132,12 @@ class SettingsViewModel @Inject constructor(
             _effect.send(SettingsEffect.OpenPrivacyPolicy)
         }
     }
+
+    fun onOpenEULA() {
+        viewModelScope.launch {
+            _effect.send(SettingsEffect.OpenEULA)
+        }
+    }
 }
 
 data class SettingsUiState(
@@ -149,4 +155,5 @@ data class SettingsUiState(
 sealed interface SettingsEffect {
     data class OpenEmailClient(val subject: String) : SettingsEffect
     object OpenPrivacyPolicy : SettingsEffect
+    object OpenEULA : SettingsEffect
 }

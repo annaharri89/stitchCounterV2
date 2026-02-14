@@ -19,7 +19,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import dev.harrisonsoftware.stitchCounter.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult
@@ -124,10 +128,12 @@ fun BottomSheetManager(
                 label = "backdrop_alpha"
             )
 
+            val dismissSheetDescription = stringResource(R.string.cd_dismiss_sheet)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = backdropAlpha.value))
+                    .semantics { contentDescription = dismissSheetDescription }
                     .clickable(enabled = isSheetVisible) {
                         onDismissRequestHandler()
                     }
@@ -303,6 +309,7 @@ fun BottomSheetManager(
                                     .imePadding()
                                     .windowInsetsPadding(WindowInsets.navigationBars)
                             ) {
+                                val dragHandleDescription = stringResource(R.string.cd_drag_handle)
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -317,6 +324,7 @@ fun BottomSheetManager(
                                             .background(
                                                 MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                                             )
+                                            .semantics { contentDescription = dragHandleDescription }
                                     )
                                 }
                                 

@@ -5,6 +5,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import dev.harrisonsoftware.stitchCounter.R
 
 @Composable
 fun ResetConfirmationDialog(
@@ -19,12 +21,12 @@ fun ResetConfirmationDialog(
         text = { Text(message) },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text("Reset")
+                Text(stringResource(R.string.action_reset))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )

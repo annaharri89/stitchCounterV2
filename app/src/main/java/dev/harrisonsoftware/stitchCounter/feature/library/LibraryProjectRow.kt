@@ -32,9 +32,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.domain.model.Project
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
 import kotlin.math.roundToInt
 
 @Composable
@@ -65,8 +70,22 @@ fun SwipeableProjectRow(
         }
     }
 
+    val deleteActionLabel = stringResource(R.string.cd_delete_project)
+    val multiSelectActionLabel = stringResource(R.string.cd_enter_multi_select)
+    val detailsActionLabel = stringResource(R.string.cd_project_details)
+
     Box(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics {
+                customActions = buildList {
+                    if (!isMultiSelectMode) {
+                        add(CustomAccessibilityAction(deleteActionLabel) { onDelete(); true })
+                        add(CustomAccessibilityAction(multiSelectActionLabel) { onToggleMultiSelect(); onSelect(); true })
+                        add(CustomAccessibilityAction(detailsActionLabel) { onInfoClick(); true })
+                    }
+                }
+            }
     ) {
         if (!isMultiSelectMode) {
             Box(
@@ -89,7 +108,7 @@ fun SwipeableProjectRow(
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
+                    contentDescription = stringResource(R.string.cd_delete),
                     tint = MaterialTheme.colorScheme.onError,
                     modifier = Modifier.size(24.dp)
                 )
@@ -216,4 +235,3 @@ fun ProjectRow(
         }
     }
 }
-

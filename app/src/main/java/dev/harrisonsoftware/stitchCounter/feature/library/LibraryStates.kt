@@ -18,18 +18,27 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import dev.harrisonsoftware.stitchCounter.R
 
 @Composable
 fun LoadingState(
     modifier: Modifier = Modifier
 ) {
+    val loadingDescription = stringResource(R.string.cd_loading)
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator()
+        CircularProgressIndicator(
+            modifier = Modifier.semantics { contentDescription = loadingDescription }
+        )
     }
 }
 
@@ -48,18 +57,20 @@ fun EmptyLibraryState(
         ) {
             Icon(
                 imageVector = Icons.Default.FolderOpen,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.cd_empty_library),
                 modifier = Modifier.size(80.dp),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
             )
             Text(
-                text = "No Projects Yet",
+                text = stringResource(R.string.library_empty_title),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.semantics { heading() }
             )
             Text(
-                text = "Create your first project to start tracking your stitches",
+                text = stringResource(R.string.library_empty_message),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
@@ -78,18 +89,18 @@ fun DeleteConfirmationDialog(
         title = {
             Text(
                 text = if (projectCount == 1) {
-                    "Delete Project?"
+                    stringResource(R.string.delete_project_title)
                 } else {
-                    "Delete Projects?"
+                    stringResource(R.string.delete_projects_title)
                 }
             )
         },
         text = {
             Text(
                 text = if (projectCount == 1) {
-                    "Are you sure you want to delete this project? This action cannot be undone."
+                    stringResource(R.string.delete_project_message)
                 } else {
-                    "Are you sure you want to delete $projectCount projects? This action cannot be undone."
+                    stringResource(R.string.delete_projects_message, projectCount)
                 }
             )
         },
@@ -100,12 +111,12 @@ fun DeleteConfirmationDialog(
                     contentColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Text("Delete")
+                Text(stringResource(R.string.action_delete))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )

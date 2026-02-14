@@ -1,9 +1,9 @@
 package dev.harrisonsoftware.stitchCounter.domain.usecase
 
-import android.net.Uri
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupManager
 import dev.harrisonsoftware.stitchCounter.data.repo.ProjectRepository
 import dev.harrisonsoftware.stitchCounter.domain.mapper.toEntity
+import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
 import dev.harrisonsoftware.stitchCounter.domain.model.Project
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import kotlinx.coroutines.Dispatchers
@@ -17,10 +17,10 @@ class ImportLibrary @Inject constructor(
     private val projectRepository: ProjectRepository,
     private val backupManager: BackupManager
 ) {
-    suspend operator fun invoke(inputUri: Uri, replaceExisting: Boolean = false): Result<ImportResult> {
+    suspend operator fun invoke(inputContentUri: ContentUri, replaceExisting: Boolean = false): Result<ImportResult> {
         return withContext(Dispatchers.IO) {
             try {
-                val extractionResult = backupManager.extractBackupZip(inputUri)
+                val extractionResult = backupManager.extractBackupZip(inputContentUri)
                 val extraction = extractionResult.getOrElse {
                     return@withContext Result.failure(it)
                 }
