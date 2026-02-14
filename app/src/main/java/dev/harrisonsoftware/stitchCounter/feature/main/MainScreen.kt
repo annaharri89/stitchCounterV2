@@ -7,6 +7,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavigationViewModel
 import dev.harrisonsoftware.stitchCounter.feature.navigation.SheetScreen
@@ -29,7 +31,11 @@ fun MainScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(stringResource(R.string.main_title), style = MaterialTheme.typography.headlineMedium)
+            Text(
+                text = stringResource(R.string.main_title),
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.semantics { heading() }
+            )
 
             Button(onClick = {
                 viewModel.showBottomSheet(SheetScreen.ProjectDetail(projectId = null, projectType = dev.harrisonsoftware.stitchCounter.domain.model.ProjectType.SINGLE))

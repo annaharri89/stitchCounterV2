@@ -75,7 +75,7 @@ internal fun ProjectInfoSection(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.semantics(mergeDescendants = true) {},
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         ProjectTitle(project.title)

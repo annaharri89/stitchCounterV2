@@ -127,4 +127,8 @@
     <string name="cd_enter_multi_select">Select multiple projects</string>
     <string name="cd_empty_library">Empty folder</string>
     <string name="cd_stat_badge">%1$s: %2$s</string>
+    <string name="cd_dismiss_sheet">Dismiss</string>
+    <string name="cd_drag_handle">Drag handle</string>
+    <string name="cd_loading">Loading</string>
+    <string name="cd_project_photos_header">Project photos, %1$d of %2$d</string>
 </resources>

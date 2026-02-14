@@ -15,7 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.harrisonsoftware.stitchCounter.R
@@ -61,7 +63,10 @@ fun CounterView(
             ResizableText(
                 modifier = Modifier
                     .weight(1f)
-                    .semantics { contentDescription = countDescription },
+                    .semantics {
+                        contentDescription = countDescription
+                        liveRegion = LiveRegionMode.Polite
+                    },
                 text = "$count",
                 heightRatio = 0.6f,
                 widthRatio = 0.3f,
@@ -80,7 +85,10 @@ fun CounterView(
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = textPaddingEnd.dp)
-                        .semantics { contentDescription = countDescription },
+                        .semantics {
+                            contentDescription = countDescription
+                            liveRegion = LiveRegionMode.Polite
+                        },
                     text = "$count",
                     heightRatio = 0.6f,
                     widthRatio = 0.3f,

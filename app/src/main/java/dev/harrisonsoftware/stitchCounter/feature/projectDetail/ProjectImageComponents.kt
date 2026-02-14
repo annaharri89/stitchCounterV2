@@ -33,6 +33,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
@@ -187,7 +190,7 @@ private fun ProjectImagePlaceholder(
         modifier = modifier
             .then(
                 if (!isAtMax) {
-                    Modifier.clickable { onImageClick() }
+                    Modifier.clickable(role = Role.Button) { onImageClick() }
                 } else {
                     Modifier
                 }
@@ -239,7 +242,7 @@ private fun AddPhotoButton(
             .height(120.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f))
-            .clickable { onImageClick() },
+            .clickable(role = Role.Button) { onImageClick() },
         contentAlignment = Alignment.Center
     ) {
         Icon(
@@ -266,7 +269,8 @@ private fun ProjectPhotosSectionHeader(
             text = stringResource(R.string.project_photos_header),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.semantics { heading() }
         )
         Text(
             text = stringResource(R.string.photo_count_format, currentCount, maxCount),
