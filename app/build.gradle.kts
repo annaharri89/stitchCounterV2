@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.google.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -88,8 +89,8 @@ dependencies {
     // Coil for image loading
     implementation(libs.coil.compose)
     
-    // Gson for JSON serialization
-    implementation("com.google.code.gson:gson:2.10.1")
+    // Kotlinx Serialization for JSON
+    implementation(libs.kotlinx.serialization.json)
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
