@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
-import dev.harrisonsoftware.stitchCounter.feature.destinations.ProjectDetailScreenDestination
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavGraph
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavigationViewModel
 import dev.harrisonsoftware.stitchCounter.feature.navigation.SheetScreen
@@ -137,7 +136,12 @@ fun LibraryScreen(
                                 onToggleMultiSelect = { viewModel.toggleMultiSelectMode() },
                                 onInfoClick = {
                                     if (!uiState.isMultiSelectMode && project.id > 0) {
-                                        navigator.navigate(ProjectDetailScreenDestination(projectId = project.id))
+                                        rootNavigationViewModel.showBottomSheet(
+                                            SheetScreen.ProjectDetail(
+                                                projectId = project.id,
+                                                projectType = project.type
+                                            )
+                                        )
                                     }
                                 }
                             )
