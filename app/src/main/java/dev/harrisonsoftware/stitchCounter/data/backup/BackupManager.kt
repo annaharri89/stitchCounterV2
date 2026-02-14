@@ -2,8 +2,8 @@ package dev.harrisonsoftware.stitchCounter.data.backup
 
 import android.net.Uri
 import android.util.Log
-import com.google.gson.Gson
 import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
+import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -18,7 +18,7 @@ class BackupManager(
     private val fileSystemProvider: FileSystemProvider,
     private val uriStreamProvider: UriStreamProvider
 ) {
-    private val gson = Gson()
+    private val json = Json { ignoreUnknownKeys = true }
     private val tag = "BackupManager"
     
     fun createBackupZip(backupData: BackupData, outputContentUri: ContentUri? = null): Result<ContentUri> {
@@ -33,7 +33,7 @@ class BackupManager(
             val imagesDir = File(tempDir, "images")
             imagesDir.mkdirs()
             
-            jsonFile.writeText(gson.toJson(backupData))
+            jsonFile.writeText(json.encodeToString(BackupData.serializer(), backupData))
             
             backupData.projects.forEach { project ->
                 project.imagePaths.forEachIndexed { index, imagePath ->
@@ -86,7 +86,7 @@ class BackupManager(
                 throw Exception("backup.json not found in archive")
             }
             
-            val backupData = gson.fromJson(jsonFile.readText(), BackupData::class.java)
+            val backupData = json.decodeFromString(BackupData.serializer(), jsonFile.readText())
             val imagesDir = File(tempDir, "images")
             
             Result.success(BackupExtraction(backupData, imagesDir, tempDir))

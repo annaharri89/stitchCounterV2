@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -20,6 +21,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
@@ -159,6 +161,23 @@ fun ProjectDetailContent(
                 onRemoveImage = { imagePath -> viewModel.removeImagePath(imagePath) },
                 modifier = Modifier.fillMaxWidth()
             )
+
+            if (!isNewProject) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.label_project_completed),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Switch(
+                        checked = uiState.isCompleted,
+                        onCheckedChange = { viewModel.toggleCompleted(it) }
+                    )
+                }
+            }
 
             if (uiState.isLoading) {
                 CircularProgressIndicator(

@@ -25,6 +25,7 @@ data class SingleCounterUiState(
     val id: Int = 0,
     val title: String = "",
     val counterState: CounterState = CounterState(),
+    val totalStitchesEver: Int = 0,
 )
 
 @HiltViewModel
@@ -62,7 +63,8 @@ open class SingleCounterViewModel @Inject constructor(
                                 count = project.stitchCounterNumber,
                                 adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE
                             )
-                        }
+                        },
+                        totalStitchesEver = if (preserveCounter) currentState.totalStitchesEver else project.totalStitchesEver
                     )
                 }
             }
@@ -82,7 +84,8 @@ open class SingleCounterViewModel @Inject constructor(
     fun increment() {
         _uiState.update { currentState ->
             currentState.copy(
-                counterState = currentState.counterState.increment()
+                counterState = currentState.counterState.increment(),
+                totalStitchesEver = currentState.totalStitchesEver + currentState.counterState.adjustment.adjustmentAmount
             )
         }
         triggerAutoSave()
@@ -131,7 +134,11 @@ open class SingleCounterViewModel @Inject constructor(
                 title = existingProject?.title ?: "",
                 stitchCounterNumber = state.counterState.count,
                 stitchAdjustment = state.counterState.adjustment.adjustmentAmount,
-                imagePaths = existingProject?.imagePaths ?: emptyList()
+                imagePaths = existingProject?.imagePaths ?: emptyList(),
+                createdAt = existingProject?.createdAt ?: System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis(),
+                completedAt = existingProject?.completedAt,
+                totalStitchesEver = state.totalStitchesEver,
             )
             val newId = upsertProject(project).toInt()
             if (state.id == 0 && newId > 0) {

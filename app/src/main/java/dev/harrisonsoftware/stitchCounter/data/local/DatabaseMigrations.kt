@@ -3,7 +3,8 @@ package dev.harrisonsoftware.stitchCounter.data.local
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteStatement
-import com.google.gson.Gson
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 object DatabaseMigrations {
     val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -16,8 +17,6 @@ object DatabaseMigrations {
     
     val MIGRATION_2_3 = object : Migration(2, 3) {
         override fun migrate(database: SupportSQLiteDatabase) {
-            val gson = Gson()
-            
             database.execSQL("""
                 CREATE TABLE entry_new (
                     _id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -62,7 +61,7 @@ object DatabaseMigrations {
                     val imagePath = cursor.getString(imagePathIndex)
                     
                     val imagePathsJson = if (imagePath != null && imagePath.isNotBlank()) {
-                        gson.toJson(listOf(imagePath))
+                        Json.encodeToString(listOf(imagePath))
                     } else {
                         "[]"
                     }
@@ -85,6 +84,18 @@ object DatabaseMigrations {
             
             database.execSQL("DROP TABLE entry")
             database.execSQL("ALTER TABLE entry_new RENAME TO entry")
+        }
+    }
+
+    val MIGRATION_3_4 = object : Migration(3, 4) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE entry ADD COLUMN created_at INTEGER NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE entry ADD COLUMN updated_at INTEGER NOT NULL DEFAULT 0")
+            database.execSQL("ALTER TABLE entry ADD COLUMN completed_at INTEGER")
+            database.execSQL("ALTER TABLE entry ADD COLUMN total_stitches_ever INTEGER NOT NULL DEFAULT 0")
+
+            val now = System.currentTimeMillis()
+            database.execSQL("UPDATE entry SET total_stitches_ever = stitch_counter_number, created_at = $now, updated_at = $now")
         }
     }
 }

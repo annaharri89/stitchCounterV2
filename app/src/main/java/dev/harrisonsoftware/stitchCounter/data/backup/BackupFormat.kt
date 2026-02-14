@@ -1,42 +1,54 @@
 package dev.harrisonsoftware.stitchCounter.data.backup
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class BackupMetadata(
-    @SerializedName("version")
+    @SerialName("version")
     val version: Int = 1,
-    @SerializedName("export_date")
+    @SerialName("export_date")
     val exportDate: Long,
-    @SerializedName("app_version")
+    @SerialName("app_version")
     val appVersion: String,
-    @SerializedName("project_count")
+    @SerialName("project_count")
     val projectCount: Int
 )
 
+@Serializable
 data class BackupProject(
-    @SerializedName("id")
+    @SerialName("id")
     val id: Int,
-    @SerializedName("type")
+    @SerialName("type")
     val type: String,
-    @SerializedName("title")
+    @SerialName("title")
     val title: String,
-    @SerializedName("stitch_counter_number")
+    @SerialName("stitch_counter_number")
     val stitchCounterNumber: Int,
-    @SerializedName("stitch_adjustment")
+    @SerialName("stitch_adjustment")
     val stitchAdjustment: Int,
-    @SerializedName("row_counter_number")
+    @SerialName("row_counter_number")
     val rowCounterNumber: Int,
-    @SerializedName("row_adjustment")
+    @SerialName("row_adjustment")
     val rowAdjustment: Int,
-    @SerializedName("total_rows")
+    @SerialName("total_rows")
     val totalRows: Int,
-    @SerializedName("image_paths")
-    val imagePaths: List<String>
+    @SerialName("image_paths")
+    val imagePaths: List<String>,
+    @SerialName("created_at")
+    val createdAt: Long = 0L,
+    @SerialName("updated_at")
+    val updatedAt: Long = 0L,
+    @SerialName("completed_at")
+    val completedAt: Long? = null,
+    @SerialName("total_stitches_ever")
+    val totalStitchesEver: Int = 0,
 )
 
+@Serializable
 data class BackupData(
-    @SerializedName("metadata")
+    @SerialName("metadata")
     val metadata: BackupMetadata,
-    @SerializedName("projects")
+    @SerialName("projects")
     val projects: List<BackupProject>
 )

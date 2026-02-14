@@ -27,6 +27,7 @@ data class DoubleCounterUiState(
     val stitchCounterState: CounterState = CounterState(),
     val rowCounterState: CounterState = CounterState(),
     val totalRows: Int = 0,
+    val totalStitchesEver: Int = 0,
 ) {
     val rowProgress: Float? = if (totalRows > 0) {
         (rowCounterState.count.toFloat() / totalRows.toFloat()).coerceIn(0f, 1f)
@@ -85,7 +86,8 @@ open class DoubleCounterViewModel @Inject constructor(
                                 adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.rowAdjustment } ?: AdjustmentAmount.ONE
                             )
                         },
-                        totalRows = project.totalRows
+                        totalRows = project.totalRows,
+                        totalStitchesEver = if (preserveCounters) currentState.totalStitchesEver else project.totalStitchesEver
                     )
                 }
             }
@@ -115,7 +117,13 @@ open class DoubleCounterViewModel @Inject constructor(
         triggerAutoSave()
     }
 
-    fun increment(type: CounterType) = updateCounter(type) { it.increment() }
+    fun increment(type: CounterType) {
+        if (type == CounterType.STITCH) {
+            val adjustmentAmount = _uiState.value.stitchCounterState.adjustment.adjustmentAmount
+            _uiState.update { it.copy(totalStitchesEver = it.totalStitchesEver + adjustmentAmount) }
+        }
+        updateCounter(type) { it.increment() }
+    }
     fun decrement(type: CounterType) = updateCounter(type) { it.decrement() }
     fun reset(type: CounterType) = updateCounter(type) { it.reset() }
     fun changeAdjustment(type: CounterType, value: AdjustmentAmount) = 
@@ -145,7 +153,11 @@ open class DoubleCounterViewModel @Inject constructor(
                 rowCounterNumber = s.rowCounterState.count,
                 rowAdjustment = s.rowCounterState.adjustment.adjustmentAmount,
                 totalRows = existingProject?.totalRows ?: s.totalRows,
-                imagePaths = existingProject?.imagePaths ?: emptyList()
+                imagePaths = existingProject?.imagePaths ?: emptyList(),
+                createdAt = existingProject?.createdAt ?: System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis(),
+                completedAt = existingProject?.completedAt,
+                totalStitchesEver = s.totalStitchesEver,
             )
             val newId = upsertProject(project).toInt()
             if (s.id == 0 && newId > 0) {

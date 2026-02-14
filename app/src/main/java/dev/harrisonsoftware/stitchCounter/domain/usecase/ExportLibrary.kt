@@ -31,7 +31,11 @@ class ExportLibrary @Inject constructor(
                     rowCounterNumber = project.rowCounterNumber,
                     rowAdjustment = project.rowAdjustment,
                     totalRows = project.totalRows,
-                    imagePaths = project.imagePaths
+                    imagePaths = project.imagePaths,
+                    createdAt = project.createdAt,
+                    updatedAt = project.updatedAt,
+                    completedAt = project.completedAt,
+                    totalStitchesEver = project.totalStitchesEver,
                 )
             }
             
