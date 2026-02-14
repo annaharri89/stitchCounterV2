@@ -32,7 +32,7 @@ class ThemeManager @Inject constructor() {
     
     fun getQuaternaryColor(theme: AppTheme, isDark: Boolean): Color {
         return when (theme) {
-            AppTheme.SEA_COTTAGE -> if (isDark) SeaCottageWhaleDark80 else SeaCottageWhaleDark40
+            AppTheme.SEA_COTTAGE -> if (isDark) SeaCottageQuaternaryDark else SeaCottageQuaternaryLight
             AppTheme.RETRO_SUMMER -> if (isDark) RetroSummerOrangeDark80 else RetroSummerOrangeDark40
             AppTheme.PURPLE -> if (isDark) PurpleViolet80 else PurpleViolet40
         }
@@ -52,10 +52,10 @@ class ThemeManager @Inject constructor() {
     fun getThemeColors(theme: AppTheme): List<ThemeColor> {
         return when (theme) {
             AppTheme.SEA_COTTAGE -> listOf(
-                ThemeColor("Mint", SeaCottageMint40, SeaCottageMint80),
-                ThemeColor("Surf", SeaCottageSurf40, SeaCottageSurf80),
-                ThemeColor("Whale Light", SeaCottageWhaleLight40, SeaCottageWhaleLight80),
-                ThemeColor("Whale Dark", SeaCottageWhaleDark40, SeaCottageWhaleDark80)
+                ThemeColor("Mint", SeaCottageSecondaryLight, SeaCottageSecondaryDark),
+                ThemeColor("Surf", SeaCottagePrimaryLight, SeaCottagePrimaryDark),
+                ThemeColor("Whale Light", SeaCottageTertiaryLight, SeaCottageTertiaryDark),
+                ThemeColor("Whale Dark", SeaCottageQuaternaryLight, SeaCottageQuaternaryDark)
             )
             AppTheme.RETRO_SUMMER -> listOf(
                 ThemeColor("Cactus", RetroSummerCactus40, RetroSummerCactus80),
@@ -78,6 +78,6 @@ class ThemeManager @Inject constructor() {
  */
 data class ThemeColor(
     val name: String,
-    val lightColor: androidx.compose.ui.graphics.Color,
-    val darkColor: androidx.compose.ui.graphics.Color
+    val lightColor: Color,
+    val darkColor: Color
 )

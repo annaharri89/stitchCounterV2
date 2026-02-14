@@ -20,13 +20,12 @@ val LocalOnQuaternaryColor = compositionLocalOf<Color> {
 }
 
 fun seaCottageLightColors() = lightColorScheme(
-    primary = SeaCottageSurf40,
-    secondary = SeaCottageMint40,
-    tertiary = SeaCottageWhaleLight40,
-    primaryContainer = SeaCottagePrimaryContainer40,
-    secondaryContainer = SeaCottageSecondaryContainer40,
-    tertiaryContainer = SeaCottageTertiaryContainer40,
-    onTertiaryContainer = SeaCottageOnTertiaryContainer40,
+    primary = SeaCottagePrimaryLight,
+    secondary = SeaCottageSecondaryLight,
+    tertiary = SeaCottageTertiaryLight,
+    primaryContainer = SeaCottagePrimaryContainerLight,
+    secondaryContainer = SeaCottageSecondaryContainerLight,
+    tertiaryContainer = SeaCottageTertiaryContainerLight,
     error = SeaCottageError40,
     onError = Color.White,
     onPrimary = Color.White,
@@ -36,13 +35,12 @@ fun seaCottageLightColors() = lightColorScheme(
 
 
 fun seaCottageDarkColors() = darkColorScheme(
-    primary = SeaCottageSurf80,
-    secondary = SeaCottageMint80,
-    tertiary = SeaCottageWhaleLight80,
-    primaryContainer = SeaCottagePrimaryContainer80,
-    secondaryContainer = SeaCottageSecondaryContainer80,
-    tertiaryContainer = SeaCottageTertiaryContainer80,
-    onTertiaryContainer = SeaCottageOnTertiaryContainer80,
+    primary = SeaCottagePrimaryDark,
+    secondary = SeaCottageSecondaryDark,
+    tertiary = SeaCottageTertiaryDark,
+    primaryContainer = SeaCottagePrimaryContainerDark,
+    secondaryContainer = SeaCottageSecondaryContainerDark,
+    tertiaryContainer = SeaCottageTertiaryContainerDark,
     error = SeaCottageError80,
     onPrimary = Color.Black,
     onSecondary = Color.Black,
