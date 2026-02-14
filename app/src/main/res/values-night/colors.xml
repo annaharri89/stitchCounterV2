@@ -22,16 +22,60 @@
     <color name="icon_retro_summer_accent">#FFC47A5A</color>
     <color name="icon_retro_summer_base">#FFE76F51</color>
     
-    <!-- Purple Theme - Dark -->
-    <color name="icon_purple_depth_darkest">#FF4A2C3A</color>
-    <color name="icon_purple_depth_dark">#FF7D5260</color>
-    <color name="icon_purple_depth_medium">#FFB88FA3</color>
-    <color name="icon_purple_depth_light">#FFCCC2DC</color>
-    <color name="icon_purple_depth_lightest">#FFD0BCFF</color>
-    <color name="icon_purple_depth_very_dark">#FF3A1C2A</color>
-    <color name="icon_purple_depth_very_light">#FFE8D4F8</color>
-    <color name="icon_purple_accent">#FF4F378B</color>
-    <color name="icon_purple_base">#FFD0BCFF</color>
+    <!-- Golden Hearth Theme - Dark -->
+    <color name="icon_golden_hearth_depth_darkest">#FF4A2A22</color>
+    <color name="icon_golden_hearth_depth_dark">#FFD9875A</color>
+    <color name="icon_golden_hearth_depth_medium">#FFE6C065</color>
+    <color name="icon_golden_hearth_depth_light">#FFFAD4A8</color>
+    <color name="icon_golden_hearth_depth_lightest">#FFFFF0E0</color>
+    <color name="icon_golden_hearth_depth_very_dark">#FF3A1A10</color>
+    <color name="icon_golden_hearth_depth_very_light">#FFFDE8C0</color>
+    <color name="icon_golden_hearth_accent">#FF6A3A28</color>
+    <color name="icon_golden_hearth_base">#FFD9875A</color>
+    
+    <!-- Forest Fiber Theme - Dark -->
+    <color name="icon_forest_fiber_depth_darkest">#FF2F3A33</color>
+    <color name="icon_forest_fiber_depth_dark">#FF8FB996</color>
+    <color name="icon_forest_fiber_depth_medium">#FFCFE1B9</color>
+    <color name="icon_forest_fiber_depth_light">#FFE0F0D0</color>
+    <color name="icon_forest_fiber_depth_lightest">#FFE8F5E0</color>
+    <color name="icon_forest_fiber_depth_very_dark">#FF1A2A1A</color>
+    <color name="icon_forest_fiber_depth_very_light">#FFE8F5E0</color>
+    <color name="icon_forest_fiber_accent">#FF3A4A3D</color>
+    <color name="icon_forest_fiber_base">#FF8FB996</color>
+    
+    <!-- Cloud Soft Theme - Dark -->
+    <color name="icon_cloud_soft_depth_darkest">#FF2A3A40</color>
+    <color name="icon_cloud_soft_depth_dark">#FF9FC5D5</color>
+    <color name="icon_cloud_soft_depth_medium">#FFCDE7F0</color>
+    <color name="icon_cloud_soft_depth_light">#FFE0F0F8</color>
+    <color name="icon_cloud_soft_depth_lightest">#FFE8F4FA</color>
+    <color name="icon_cloud_soft_depth_very_dark">#FF1A2A30</color>
+    <color name="icon_cloud_soft_depth_very_light">#FFE8F4FA</color>
+    <color name="icon_cloud_soft_accent">#FF34474F</color>
+    <color name="icon_cloud_soft_base">#FF9FC5D5</color>
+    
+    <!-- Yarn Candy Theme - Dark -->
+    <color name="icon_yarn_candy_depth_darkest">#FF2E3350</color>
+    <color name="icon_yarn_candy_depth_dark">#FFB8C0FF</color>
+    <color name="icon_yarn_candy_depth_medium">#FFFFD6E0</color>
+    <color name="icon_yarn_candy_depth_light">#FFE7C6FF</color>
+    <color name="icon_yarn_candy_depth_lightest">#FFFFE0EA</color>
+    <color name="icon_yarn_candy_depth_very_dark">#FF1A1A30</color>
+    <color name="icon_yarn_candy_depth_very_light">#FFFFE8F0</color>
+    <color name="icon_yarn_candy_accent">#FF4A2E3A</color>
+    <color name="icon_yarn_candy_base">#FFB8C0FF</color>
+    
+    <!-- Dusty Rose Theme - Dark -->
+    <color name="icon_dusty_rose_depth_darkest">#FF4A2E33</color>
+    <color name="icon_dusty_rose_depth_dark">#FFE6A1AA</color>
+    <color name="icon_dusty_rose_depth_medium">#FFF2C1C6</color>
+    <color name="icon_dusty_rose_depth_light">#FFF8D0D4</color>
+    <color name="icon_dusty_rose_depth_lightest">#FFFFE0E4</color>
+    <color name="icon_dusty_rose_depth_very_dark">#FF3A1C2A</color>
+    <color name="icon_dusty_rose_depth_very_light">#FFFAD6DA</color>
+    <color name="icon_dusty_rose_accent">#FF5A3A40</color>
+    <color name="icon_dusty_rose_base">#FFE6A1AA</color>
     
     <!-- Text colors -->
     <color name="icon_text_color">#333333</color>

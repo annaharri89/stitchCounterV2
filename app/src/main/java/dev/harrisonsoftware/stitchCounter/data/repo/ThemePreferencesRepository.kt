@@ -34,7 +34,11 @@ class ThemePreferencesRepository @Inject constructor(
      */
     val selectedTheme: Flow<AppTheme> = context.dataStore.data.map { preferences ->
         val themeName = preferences[themeKey] ?: AppTheme.SEA_COTTAGE.name
-        AppTheme.valueOf(themeName)
+        try {
+            AppTheme.valueOf(themeName)
+        } catch (_: IllegalArgumentException) {
+            AppTheme.SEA_COTTAGE
+        }
     }
 
     /**
