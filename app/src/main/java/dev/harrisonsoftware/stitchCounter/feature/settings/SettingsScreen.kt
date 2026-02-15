@@ -201,6 +201,9 @@ fun SettingsScreen(
                         },
                         onGiveFeedback = {
                             viewModel.onGiveFeedback()
+                        },
+                        onRequestFeature = {
+                            viewModel.onRequestFeature()
                         }
                     )
                 }
@@ -561,7 +564,8 @@ private fun BackupRestoreCard(
 @Composable
 private fun SupportCard(
     onReportBug: () -> Unit,
-    onGiveFeedback: () -> Unit
+    onGiveFeedback: () -> Unit,
+    onRequestFeature: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -599,6 +603,22 @@ private fun SupportCard(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(stringResource(R.string.settings_give_feedback))
+            }
+
+            Button(
+                onClick = onRequestFeature,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Lightbulb,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(R.string.settings_request_feature))
             }
         }
     }

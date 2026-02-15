@@ -6,4 +6,5 @@ object Constants {
     const val SUPPORT_EMAIL = "support@harrisonsoftware.dev"
     const val BUG_REPORT_SUBJECT = "Stitch Counter - Bug Report"
     const val FEEDBACK_SUBJECT = "Stitch Counter - Feedback"
+    const val FEATURE_REQUEST_SUBJECT = "Stitch Counter - Feature Request"
 }

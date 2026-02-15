@@ -126,6 +126,12 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun onRequestFeature() {
+        viewModelScope.launch {
+            _effect.send(SettingsEffect.OpenEmailClient(Constants.FEATURE_REQUEST_SUBJECT))
+        }
+    }
+
     fun onOpenPrivacyPolicy() {
         viewModelScope.launch {
             _effect.send(SettingsEffect.OpenPrivacyPolicy)
