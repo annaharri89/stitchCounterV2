@@ -80,12 +80,21 @@
     <string name="settings_error_format">Error: %1$s</string>
     <string name="settings_report_bug">Report a Bug</string>
     <string name="settings_give_feedback">Give Feedback</string>
+    <string name="settings_request_feature">Request a Feature</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
     <string name="settings_eula">EULA</string>
     <string name="settings_eula_description">By using Stitch Counter, you agree to the EULA.</string>
     <string name="settings_import_complete">Import Complete</string>
     <string name="settings_imported_count">Imported %1$d project(s)</string>
     <string name="settings_failed_import_count">Failed to import %1$d project(s)</string>
+
+    <!-- Support -->
+    <string name="support_title">Support the App</string>
+    <string name="support_description">This app works entirely offline and doesn\'t use accounts or tracking. It is completely free and ad-free. No analytics are gathered. If you\'d like to support its development, you can do so with a coffee ☕</string>
+    <string name="support_buy_coffee">Buy Me a Coffee ☕</string>
+    <string name="support_i_supported">I Supported</string>
+    <string name="support_thank_you_title">Thank you for supporting the app!</string>
+    <string name="support_thank_you_message">Your generosity helps keep this app free, offline, and ad-free for everyone.</string>
 
     <!-- New project dialog -->
     <string name="new_project_dialog_title">New Project</string>
@@ -133,4 +142,9 @@
     <string name="cd_drag_handle">Drag handle</string>
     <string name="cd_loading">Loading</string>
     <string name="cd_project_photos_header">Project photos, %1$d of %2$d</string>
+    <string name="cd_support_the_app">Support the app</string>
+    <string name="cd_support_the_app_hint">Opens the support page</string>
+    <string name="cd_open_kofi">Opens Ko-Fi donation page in browser</string>
+    <string name="cd_i_supported_on">I supported toggle, currently on</string>
+    <string name="cd_i_supported_off">I supported toggle, currently off</string>
 </resources>
