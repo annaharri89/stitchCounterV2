@@ -55,7 +55,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         super.onStop()
-        launcherIconManager.applyPendingIconChangeIfNeeded()
+        if (!isChangingConfigurations) {
+            launcherIconManager.applyPendingIconChangeIfNeeded()
+        }
     }
 
     private fun initializeLauncherIcon() {
