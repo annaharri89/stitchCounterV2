@@ -2,7 +2,6 @@ package dev.harrisonsoftware.stitchCounter.domain.model
 
 enum class AppTheme(val displayName: String) {
     SEA_COTTAGE("Sea Cottage"),
-    RETRO_SUMMER("Retro Summer"),
     GOLDEN_HEARTH("Golden Hearth"),
     FOREST_FIBER("Forest Fiber"),
     CLOUD_SOFT("Cloud Soft"),

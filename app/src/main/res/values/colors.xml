@@ -16,17 +16,6 @@
     <color name="icon_sea_cottage_accent">#FFE8E9FF</color>
     <color name="icon_sea_cottage_base">#FF1F8A9A</color>
     
-    <!-- Retro Summer Theme - Light -->
-    <color name="icon_retro_summer_depth_darkest">#FF2A7B5A</color>
-    <color name="icon_retro_summer_depth_dark">#FF3A8B6A</color>
-    <color name="icon_retro_summer_depth_medium">#FFC86A2A</color>
-    <color name="icon_retro_summer_depth_light">#FFF4A261</color>
-    <color name="icon_retro_summer_depth_lightest">#FF9B4A2A</color>
-    <color name="icon_retro_summer_depth_very_dark">#FFF4A261</color>
-    <color name="icon_retro_summer_depth_very_light">#FFFFB88A</color>
-    <color name="icon_retro_summer_accent">#FFFFF4F0</color>
-    <color name="icon_retro_summer_base">#FF2A7B5A</color>
-    
     <!-- Golden Hearth Theme - Light -->
     <color name="icon_golden_hearth_depth_darkest">#FF8A3A20</color>
     <color name="icon_golden_hearth_depth_dark">#FFB85C38</color>

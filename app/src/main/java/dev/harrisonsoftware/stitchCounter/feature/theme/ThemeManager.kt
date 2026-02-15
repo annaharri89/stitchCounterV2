@@ -17,7 +17,6 @@ class ThemeManager @Inject constructor() {
     fun getLightColorScheme(theme: AppTheme): ColorScheme {
         return when (theme) {
             AppTheme.SEA_COTTAGE -> seaCottageLightColors()
-            AppTheme.RETRO_SUMMER -> retroSummerLightColors()
             AppTheme.GOLDEN_HEARTH -> goldenHearthLightColors()
             AppTheme.FOREST_FIBER -> forestFiberLightColors()
             AppTheme.CLOUD_SOFT -> cloudSoftLightColors()
@@ -29,7 +28,6 @@ class ThemeManager @Inject constructor() {
     fun getDarkColorScheme(theme: AppTheme): ColorScheme {
         return when (theme) {
             AppTheme.SEA_COTTAGE -> seaCottageDarkColors()
-            AppTheme.RETRO_SUMMER -> retroSummerDarkColors()
             AppTheme.GOLDEN_HEARTH -> goldenHearthDarkColors()
             AppTheme.FOREST_FIBER -> forestFiberDarkColors()
             AppTheme.CLOUD_SOFT -> cloudSoftDarkColors()
@@ -41,7 +39,6 @@ class ThemeManager @Inject constructor() {
     fun getQuaternaryColor(theme: AppTheme, isDark: Boolean): Color {
         return when (theme) {
             AppTheme.SEA_COTTAGE -> if (isDark) SeaCottageQuaternaryDark else SeaCottageQuaternaryLight
-            AppTheme.RETRO_SUMMER -> if (isDark) RetroSummerOrangeDark80 else RetroSummerOrangeDark40
             AppTheme.GOLDEN_HEARTH -> if (isDark) GoldenHearthQuaternaryDark else GoldenHearthQuaternaryLight
             AppTheme.FOREST_FIBER -> if (isDark) ForestFiberQuaternaryDark else ForestFiberQuaternaryLight
             AppTheme.CLOUD_SOFT -> if (isDark) CloudSoftQuaternaryDark else CloudSoftQuaternaryLight
@@ -53,7 +50,6 @@ class ThemeManager @Inject constructor() {
     fun getOnQuaternaryColor(theme: AppTheme, isDark: Boolean): Color {
         return when (theme) {
             AppTheme.SEA_COTTAGE -> Color.White
-            AppTheme.RETRO_SUMMER -> if (isDark) Color.Black else Color.White
             AppTheme.GOLDEN_HEARTH -> if (isDark) Color.Black else Color.White
             AppTheme.FOREST_FIBER -> Color.White
             AppTheme.CLOUD_SOFT -> Color.Black
@@ -69,12 +65,6 @@ class ThemeManager @Inject constructor() {
                 ThemeColor("Surf", SeaCottagePrimaryLight, SeaCottagePrimaryDark),
                 ThemeColor("Whale Light", SeaCottageTertiaryLight, SeaCottageTertiaryDark),
                 ThemeColor("Whale Dark", SeaCottageQuaternaryLight, SeaCottageQuaternaryDark)
-            )
-            AppTheme.RETRO_SUMMER -> listOf(
-                ThemeColor("Cactus", RetroSummerCactus40, RetroSummerCactus80),
-                ThemeColor("Sun", RetroSummerSun40, RetroSummerSun80),
-                ThemeColor("Orange Light", RetroSummerOrangeLight40, RetroSummerOrangeLight80),
-                ThemeColor("Orange Dark", RetroSummerOrangeDark40, RetroSummerOrangeDark80)
             )
             AppTheme.GOLDEN_HEARTH -> listOf(
                 ThemeColor("Terracotta", GoldenHearthPrimaryLight, GoldenHearthPrimaryDark),
