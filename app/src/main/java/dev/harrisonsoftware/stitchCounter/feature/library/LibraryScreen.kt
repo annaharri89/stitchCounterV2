@@ -36,12 +36,15 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
+import dev.harrisonsoftware.stitchCounter.feature.destinations.SupportAppScreenDestination
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavGraph
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavigationViewModel
 import dev.harrisonsoftware.stitchCounter.feature.navigation.SheetScreen
 import dev.harrisonsoftware.stitchCounter.feature.navigation.createSheetScreenForProjectType
+import dev.harrisonsoftware.stitchCounter.feature.supportApp.SupportAppViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
@@ -51,11 +54,13 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @Composable
 fun LibraryScreen(
     viewModel: LibraryViewModel = hiltViewModel(),
+    supportAppViewModel: SupportAppViewModel = hiltViewModel(),
     rootNavigationViewModel: RootNavigationViewModel,
     navigator: DestinationsNavigator
 ) {
     val projects by viewModel.projects.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
+    val hasSupported by supportAppViewModel.hasSupported.collectAsStateWithLifecycle()
     var showNewProjectDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -71,6 +76,8 @@ fun LibraryScreen(
                 )
             } else {
                 LibraryTopBar(
+                    onSupportClick = { navigator.navigate(SupportAppScreenDestination) },
+                    hasSupported = hasSupported,
                     onEnterMultiSelect = { viewModel.toggleMultiSelectMode() },
                     hasProjects = projects.isNotEmpty()
                 )

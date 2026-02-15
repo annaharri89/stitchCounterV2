@@ -1,10 +1,12 @@
 package dev.harrisonsoftware.stitchCounter.feature.library
 
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -12,15 +14,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import dev.harrisonsoftware.stitchCounter.R
+import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.SparklingHeartIcon
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryTopBar(
+    onSupportClick: () -> Unit,
+    hasSupported: Boolean,
     onEnterMultiSelect: () -> Unit,
     hasProjects: Boolean = true
 ) {
+    val supportLabel = stringResource(R.string.cd_support_the_app)
+    val supportDescription = if (hasSupported) "$supportLabel ${stringResource(R.string.support_thank_you_title)}" else supportLabel
     TopAppBar(
         title = {
 
@@ -31,6 +42,23 @@ fun LibraryTopBar(
                     Icon(
                         imageVector = Icons.Default.SelectAll,
                         contentDescription = stringResource(R.string.cd_select_multiple)
+                    )
+                }
+            }
+
+            IconButton(
+                onClick = onSupportClick,
+                modifier = Modifier.semantics {
+                    contentDescription = supportDescription
+                }
+            ) {
+                if (hasSupported) {
+                    SparklingHeartIcon(modifier = Modifier.size(48.dp))
+                } else {
+                    Icon(
+                        imageVector = Icons.Outlined.FavoriteBorder,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
