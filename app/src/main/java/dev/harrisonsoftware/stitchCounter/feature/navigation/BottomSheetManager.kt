@@ -17,7 +17,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -29,8 +28,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.feature.doublecounter.DoubleCounterScreen
+import dev.harrisonsoftware.stitchCounter.feature.doublecounter.DoubleCounterViewModel
 import dev.harrisonsoftware.stitchCounter.feature.projectDetail.ProjectDetailScreenContent
+import dev.harrisonsoftware.stitchCounter.feature.projectDetail.ProjectDetailViewModel
 import dev.harrisonsoftware.stitchCounter.feature.singleCounter.SingleCounterScreen
+import dev.harrisonsoftware.stitchCounter.feature.singleCounter.SingleCounterViewModel
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -83,12 +85,6 @@ fun BottomSheetManager(
             is DismissalResult.Allowed -> {
                 isDismissalAllowedState.value = true
                 viewModel.showBottomSheet(null)
-            }
-
-            is DismissalResult.Blocked -> {
-                isDismissalAllowedState.value = false
-                dragOffset.value = 0.dp
-                isDragging.value = false
             }
 
             is DismissalResult.ShowDiscardDialog -> {
@@ -176,16 +172,11 @@ fun BottomSheetManager(
                     }
             ) {
                 currentSheetScreen?.let { screen ->
-                    val singleCounterViewModel =
-                        hiltViewModel<dev.harrisonsoftware.stitchCounter.feature.singleCounter.SingleCounterViewModel>()
-                    val doubleCounterViewModel =
-                        hiltViewModel<dev.harrisonsoftware.stitchCounter.feature.doublecounter.DoubleCounterViewModel>()
-                    val projectDetailViewModel =
-                        hiltViewModel<dev.harrisonsoftware.stitchCounter.feature.projectDetail.ProjectDetailViewModel>()
-                    val projectDetailUiState by projectDetailViewModel.uiState.collectAsStateWithLifecycle()
-
                     when (screen) {
                         is SheetScreen.SingleCounter -> {
+                            val singleCounterViewModel =
+                                hiltViewModel<SingleCounterViewModel>()
+
                             LaunchedEffect(screen.projectId) {
                                 singleCounterViewModel.loadProject(screen.projectId)
                             }
@@ -203,6 +194,9 @@ fun BottomSheetManager(
                         }
 
                         is SheetScreen.DoubleCounter -> {
+                            val doubleCounterViewModel =
+                                hiltViewModel<DoubleCounterViewModel>()
+
                             LaunchedEffect(screen.projectId) {
                                 doubleCounterViewModel.loadProject(screen.projectId)
                             }
@@ -220,12 +214,9 @@ fun BottomSheetManager(
                         }
 
                         is SheetScreen.ProjectDetail -> {
-                            LaunchedEffect(screen) {
-                                if (screen.projectId == null) {
-                                    singleCounterViewModel.resetState()
-                                    doubleCounterViewModel.resetState()
-                                }
-                            }
+                            val projectDetailViewModel =
+                                hiltViewModel<ProjectDetailViewModel>()
+                            val projectDetailUiState by projectDetailViewModel.uiState.collectAsStateWithLifecycle()
 
                             SheetDismissalHandler(
                                 screen = screen,
@@ -254,7 +245,7 @@ fun BottomSheetManager(
                                 val currentProjectId = projectDetailUiState.project?.id
 
                                 val wasNewProject =
-                                    lastObservedProjectId == null || lastObservedProjectId.value == 0
+                                    lastObservedProjectId.value == null || lastObservedProjectId.value == 0
                                 val isNowSaved = currentProjectId != null && currentProjectId > 0
                                 val isNewProjectScreen = screen.projectId == null
                                 val isProjectIdChanged =
@@ -331,6 +322,8 @@ fun BottomSheetManager(
                                 Box(modifier = Modifier.fillMaxSize()) {
                                     when (currentScreen) {
                                     is SheetScreen.SingleCounter -> {
+                                        val singleCounterViewModel =
+                                            hiltViewModel<SingleCounterViewModel>()
                                         Box(modifier = Modifier.fillMaxSize()) {
                                             SingleCounterScreen(
                                                 projectId = currentScreen.projectId,
@@ -348,6 +341,8 @@ fun BottomSheetManager(
                                     }
 
                                     is SheetScreen.DoubleCounter -> {
+                                        val doubleCounterViewModel =
+                                            hiltViewModel<DoubleCounterViewModel>()
                                         Box(modifier = Modifier.fillMaxSize()) {
                                             DoubleCounterScreen(
                                                 projectId = currentScreen.projectId,
@@ -365,6 +360,9 @@ fun BottomSheetManager(
                                     }
 
                                     is SheetScreen.ProjectDetail -> {
+                                        val projectDetailViewModel =
+                                            hiltViewModel<ProjectDetailViewModel>()
+                                        val projectDetailUiState by projectDetailViewModel.uiState.collectAsStateWithLifecycle()
                                         ProjectDetailScreenContent(
                                             projectId = currentScreen.projectId,
                                             projectType = currentScreen.projectType,
