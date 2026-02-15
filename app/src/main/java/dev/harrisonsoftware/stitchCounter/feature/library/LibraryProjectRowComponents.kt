@@ -79,7 +79,7 @@ internal fun ProjectInfoSection(
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         ProjectTitle(project.title)
-        ProjectStatsContent(project = project)
+        //todo put the project finished UI
     }
 }
 
@@ -98,20 +98,22 @@ private fun ProjectTitle(
 }
 
 @Composable
-private fun ProjectStatsContent(
-    project: Project
+fun ProjectStatsContent(
+    project: Project,
+    modifier: Modifier = Modifier
 ) {
     when (project.type) {
         ProjectType.SINGLE -> {
             StatBadge(
                 label = stringResource(R.string.label_count),
                 value = project.stitchCounterNumber.toString(),
-                modifier = Modifier.fillMaxWidth()
+                modifier = modifier.fillMaxWidth()
             )
         }
         ProjectType.DOUBLE -> {
             DoubleProjectStats(
-                project = project
+                project = project,
+                modifier = modifier
             )
         }
     }
@@ -119,7 +121,8 @@ private fun ProjectStatsContent(
 
 @Composable
 private fun DoubleProjectStats(
-    project: Project
+    project: Project,
+    modifier: Modifier = Modifier
 ) {
     val rowProgress: Float? = if (project.totalRows > 0) {
         (project.rowCounterNumber.toFloat() / project.totalRows.toFloat()).coerceIn(0f, 1f)
@@ -128,6 +131,7 @@ private fun DoubleProjectStats(
     }
     
     Column(
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
