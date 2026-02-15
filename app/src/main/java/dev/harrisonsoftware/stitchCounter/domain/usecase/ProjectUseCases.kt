@@ -48,3 +48,30 @@ class DeleteProjects @Inject constructor(
     }
 }
 
+@Singleton
+class UpdateSingleCounterValues @Inject constructor(
+    private val repo: ProjectRepository
+) {
+    suspend operator fun invoke(
+        id: Int,
+        stitchCount: Int,
+        stitchAdjustment: Int,
+        totalStitchesEver: Int,
+        updatedAt: Long
+    ) = repo.updateSingleCounterValues(id, stitchCount, stitchAdjustment, totalStitchesEver, updatedAt)
+}
+
+@Singleton
+class UpdateDoubleCounterValues @Inject constructor(
+    private val repo: ProjectRepository
+) {
+    suspend operator fun invoke(
+        id: Int,
+        stitchCount: Int,
+        stitchAdjustment: Int,
+        rowCount: Int,
+        rowAdjustment: Int,
+        totalStitchesEver: Int,
+        updatedAt: Long
+    ) = repo.updateDoubleCounterValues(id, stitchCount, stitchAdjustment, rowCount, rowAdjustment, totalStitchesEver, updatedAt)
+}

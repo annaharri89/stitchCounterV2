@@ -5,7 +5,6 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -51,17 +50,6 @@ interface ProjectDao {
     suspend fun upsert(entity: ProjectEntity): Long
 
     /**
-     * Updates an existing project in the database.
-     * 
-     * The project must already exist in the database. If the project doesn't exist,
-     * this operation will have no effect.
-     * 
-     * @param entity The project entity with updated data
-     */
-    @Update
-    suspend fun update(entity: ProjectEntity)
-
-    /**
      * Deletes a project from the database.
      * 
      * The project must exist in the database. If the project doesn't exist,
@@ -81,5 +69,41 @@ interface ProjectDao {
      */
     @Query("DELETE FROM entry WHERE _id IN (:ids)")
     suspend fun deleteByIds(ids: List<Int>)
+
+    @Query("""
+        UPDATE entry 
+        SET stitch_counter_number = :stitchCount,
+            stitch_adjustment = :stitchAdjustment,
+            total_stitches_ever = :totalStitchesEver,
+            updated_at = :updatedAt
+        WHERE _id = :id
+    """)
+    suspend fun updateSingleCounterValues(
+        id: Int,
+        stitchCount: Int,
+        stitchAdjustment: Int,
+        totalStitchesEver: Int,
+        updatedAt: Long
+    )
+
+    @Query("""
+        UPDATE entry 
+        SET stitch_counter_number = :stitchCount,
+            stitch_adjustment = :stitchAdjustment,
+            row_counter_number = :rowCount,
+            row_adjustment = :rowAdjustment,
+            total_stitches_ever = :totalStitchesEver,
+            updated_at = :updatedAt
+        WHERE _id = :id
+    """)
+    suspend fun updateDoubleCounterValues(
+        id: Int,
+        stitchCount: Int,
+        stitchAdjustment: Int,
+        rowCount: Int,
+        rowAdjustment: Int,
+        totalStitchesEver: Int,
+        updatedAt: Long
+    )
 }
 
