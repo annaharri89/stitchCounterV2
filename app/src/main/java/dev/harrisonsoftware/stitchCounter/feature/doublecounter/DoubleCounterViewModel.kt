@@ -1,5 +1,6 @@
 package dev.harrisonsoftware.stitchCounter.feature.doublecounter
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount
@@ -11,9 +12,11 @@ import dev.harrisonsoftware.stitchCounter.domain.usecase.GetProject
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpsertProject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,18 +46,28 @@ enum class CounterType {
 
 @HiltViewModel
 open class DoubleCounterViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val getProject: GetProject,
     private val upsertProject: UpsertProject,
 ) : ViewModel() {
 
+    companion object {
+        private const val SAVED_STATE_KEY_PROJECT_ID = "double_project_id"
+        private const val SAVED_STATE_KEY_STITCH_COUNT = "double_stitch_count"
+        private const val SAVED_STATE_KEY_STITCH_ADJUSTMENT = "double_stitch_adjustment"
+        private const val SAVED_STATE_KEY_ROW_COUNT = "double_row_count"
+        private const val SAVED_STATE_KEY_ROW_ADJUSTMENT = "double_row_adjustment"
+        private const val SAVED_STATE_KEY_TOTAL_ROWS = "double_total_rows"
+        private const val SAVED_STATE_KEY_TOTAL_STITCHES_EVER = "double_total_stitches_ever"
+    }
+
     private val _uiState = MutableStateFlow(DoubleCounterUiState())
     open val uiState: StateFlow<DoubleCounterUiState> = _uiState.asStateFlow()
-    
+
     private val _dismissalResult = Channel<DismissalResult>(Channel.BUFFERED)
     val dismissalResult = _dismissalResult.receiveAsFlow()
-    
-    private var autoSaveJob: Job? = null
-    private val autoSaveDelayMs = 1000L // 1 second debounce
+
+    private var persistJob: Job? = null
 
     fun loadProject(projectId: Int?) {
         viewModelScope.launch {
@@ -66,34 +79,65 @@ open class DoubleCounterViewModel @Inject constructor(
             if (project != null) {
                 val currentState = _uiState.value
                 val preserveCounters = currentState.id == project.id && currentState.id > 0
-                _uiState.update { currentState ->
-                    currentState.copy(
+                val savedProjectId = savedStateHandle.get<Int>(SAVED_STATE_KEY_PROJECT_ID)
+                val restoreFromSavedState = !preserveCounters && savedProjectId == project.id
+
+                val restoredStitchCount = when {
+                    preserveCounters -> currentState.stitchCounterState.count
+                    restoreFromSavedState -> savedStateHandle.get<Int>(SAVED_STATE_KEY_STITCH_COUNT) ?: project.stitchCounterNumber
+                    else -> project.stitchCounterNumber
+                }
+                val restoredStitchAdjustment = when {
+                    preserveCounters -> currentState.stitchCounterState.adjustment
+                    restoreFromSavedState -> {
+                        val saved = savedStateHandle.get<Int>(SAVED_STATE_KEY_STITCH_ADJUSTMENT)
+                        AdjustmentAmount.entries.find { it.adjustmentAmount == saved } ?: AdjustmentAmount.ONE
+                    }
+                    else -> AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE
+                }
+                val restoredRowCount = when {
+                    preserveCounters -> currentState.rowCounterState.count
+                    restoreFromSavedState -> savedStateHandle.get<Int>(SAVED_STATE_KEY_ROW_COUNT) ?: project.rowCounterNumber
+                    else -> project.rowCounterNumber
+                }
+                val restoredRowAdjustment = when {
+                    preserveCounters -> currentState.rowCounterState.adjustment
+                    restoreFromSavedState -> {
+                        val saved = savedStateHandle.get<Int>(SAVED_STATE_KEY_ROW_ADJUSTMENT)
+                        AdjustmentAmount.entries.find { it.adjustmentAmount == saved } ?: AdjustmentAmount.ONE
+                    }
+                    else -> AdjustmentAmount.entries.find { it.adjustmentAmount == project.rowAdjustment } ?: AdjustmentAmount.ONE
+                }
+                val restoredTotalStitchesEver = when {
+                    preserveCounters -> currentState.totalStitchesEver
+                    restoreFromSavedState -> savedStateHandle.get<Int>(SAVED_STATE_KEY_TOTAL_STITCHES_EVER) ?: project.totalStitchesEver
+                    else -> project.totalStitchesEver
+                }
+
+                _uiState.update {
+                    DoubleCounterUiState(
                         id = project.id,
                         title = project.title,
-                        stitchCounterState = if (preserveCounters) {
-                            currentState.stitchCounterState
-                        } else {
-                            CounterState(
-                                count = project.stitchCounterNumber,
-                                adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE
-                            )
-                        },
-                        rowCounterState = if (preserveCounters) {
-                            currentState.rowCounterState
-                        } else {
-                            CounterState(
-                                count = project.rowCounterNumber,
-                                adjustment = AdjustmentAmount.entries.find { it.adjustmentAmount == project.rowAdjustment } ?: AdjustmentAmount.ONE
-                            )
-                        },
+                        stitchCounterState = CounterState(
+                            count = restoredStitchCount,
+                            adjustment = restoredStitchAdjustment
+                        ),
+                        rowCounterState = CounterState(
+                            count = restoredRowCount,
+                            adjustment = restoredRowAdjustment
+                        ),
                         totalRows = project.totalRows,
-                        totalStitchesEver = if (preserveCounters) currentState.totalStitchesEver else project.totalStitchesEver
+                        totalStitchesEver = restoredTotalStitchesEver
                     )
+                }
+                persistToSavedState()
+
+                if (restoreFromSavedState) {
+                    persistToRoom()
                 }
             }
         }
     }
-
 
     private fun updateCounter(type: CounterType, update: (CounterState) -> CounterState) {
         _uiState.update { currentState ->
@@ -114,7 +158,8 @@ open class DoubleCounterViewModel @Inject constructor(
                 }
             }
         }
-        triggerAutoSave()
+        persistToSavedState()
+        persistToRoom()
     }
 
     fun increment(type: CounterType) {
@@ -124,63 +169,91 @@ open class DoubleCounterViewModel @Inject constructor(
         }
         updateCounter(type) { it.increment() }
     }
+
     fun decrement(type: CounterType) = updateCounter(type) { it.decrement() }
     fun reset(type: CounterType) = updateCounter(type) { it.reset() }
-    fun changeAdjustment(type: CounterType, value: AdjustmentAmount) = 
+    fun changeAdjustment(type: CounterType, value: AdjustmentAmount) =
         updateCounter(type) { it.copy(adjustment = value) }
-    
-    private fun triggerAutoSave() {
-        autoSaveJob?.cancel()
-        val state = _uiState.value
-        if (state.id > 0) {
-            autoSaveJob = viewModelScope.launch {
-                delay(autoSaveDelayMs)
-                save()
-            }
-        }
-    }
 
-    private fun save() {
-        viewModelScope.launch {
-            val s = _uiState.value
-            val existingProject = if (s.id > 0) getProject(s.id) else null
-            val project = Project(
-                id = s.id,
-                type = ProjectType.DOUBLE,
-                title = existingProject?.title ?: "",
-                stitchCounterNumber = s.stitchCounterState.count,
-                stitchAdjustment = s.stitchCounterState.adjustment.adjustmentAmount,
-                rowCounterNumber = s.rowCounterState.count,
-                rowAdjustment = s.rowCounterState.adjustment.adjustmentAmount,
-                totalRows = existingProject?.totalRows ?: s.totalRows,
-                imagePaths = existingProject?.imagePaths ?: emptyList(),
-                createdAt = existingProject?.createdAt ?: System.currentTimeMillis(),
-                updatedAt = System.currentTimeMillis(),
-                completedAt = existingProject?.completedAt,
-                totalStitchesEver = s.totalStitchesEver,
-            )
-            val newId = upsertProject(project).toInt()
-            if (s.id == 0 && newId > 0) {
-                _uiState.update { currentState -> currentState.copy(id = newId) }
-            }
-        }
-    }
-    
     fun attemptDismissal() {
         viewModelScope.launch {
-            autoSaveJob?.cancel()
-            save()
+            persistJob?.cancel()
+            saveToRoom()
             _dismissalResult.send(DismissalResult.Allowed)
         }
     }
 
     fun resetState() {
         _uiState.update { _ -> DoubleCounterUiState() }
+        clearSavedState()
     }
 
     fun resetAll() {
         reset(CounterType.STITCH)
         reset(CounterType.ROW)
     }
-}
 
+    override fun onCleared() {
+        super.onCleared()
+        val state = _uiState.value
+        if (state.id > 0) {
+            CoroutineScope(Dispatchers.IO + NonCancellable).launch {
+                saveToRoom()
+            }
+        }
+    }
+
+    private fun persistToRoom() {
+        persistJob?.cancel()
+        val state = _uiState.value
+        if (state.id > 0) {
+            persistJob = viewModelScope.launch { saveToRoom() }
+        }
+    }
+
+    private suspend fun saveToRoom() {
+        val state = _uiState.value
+        val existingProject = if (state.id > 0) getProject(state.id) else null
+        val project = Project(
+            id = state.id,
+            type = ProjectType.DOUBLE,
+            title = existingProject?.title ?: "",
+            stitchCounterNumber = state.stitchCounterState.count,
+            stitchAdjustment = state.stitchCounterState.adjustment.adjustmentAmount,
+            rowCounterNumber = state.rowCounterState.count,
+            rowAdjustment = state.rowCounterState.adjustment.adjustmentAmount,
+            totalRows = existingProject?.totalRows ?: state.totalRows,
+            imagePaths = existingProject?.imagePaths ?: emptyList(),
+            createdAt = existingProject?.createdAt ?: System.currentTimeMillis(),
+            updatedAt = System.currentTimeMillis(),
+            completedAt = existingProject?.completedAt,
+            totalStitchesEver = state.totalStitchesEver,
+        )
+        val newId = upsertProject(project).toInt()
+        if (state.id == 0 && newId > 0) {
+            _uiState.update { currentState -> currentState.copy(id = newId) }
+            persistToSavedState()
+        }
+    }
+
+    private fun persistToSavedState() {
+        val state = _uiState.value
+        savedStateHandle[SAVED_STATE_KEY_PROJECT_ID] = state.id
+        savedStateHandle[SAVED_STATE_KEY_STITCH_COUNT] = state.stitchCounterState.count
+        savedStateHandle[SAVED_STATE_KEY_STITCH_ADJUSTMENT] = state.stitchCounterState.adjustment.adjustmentAmount
+        savedStateHandle[SAVED_STATE_KEY_ROW_COUNT] = state.rowCounterState.count
+        savedStateHandle[SAVED_STATE_KEY_ROW_ADJUSTMENT] = state.rowCounterState.adjustment.adjustmentAmount
+        savedStateHandle[SAVED_STATE_KEY_TOTAL_ROWS] = state.totalRows
+        savedStateHandle[SAVED_STATE_KEY_TOTAL_STITCHES_EVER] = state.totalStitchesEver
+    }
+
+    private fun clearSavedState() {
+        savedStateHandle.remove<Int>(SAVED_STATE_KEY_PROJECT_ID)
+        savedStateHandle.remove<Int>(SAVED_STATE_KEY_STITCH_COUNT)
+        savedStateHandle.remove<Int>(SAVED_STATE_KEY_STITCH_ADJUSTMENT)
+        savedStateHandle.remove<Int>(SAVED_STATE_KEY_ROW_COUNT)
+        savedStateHandle.remove<Int>(SAVED_STATE_KEY_ROW_ADJUSTMENT)
+        savedStateHandle.remove<Int>(SAVED_STATE_KEY_TOTAL_ROWS)
+        savedStateHandle.remove<Int>(SAVED_STATE_KEY_TOTAL_STITCHES_EVER)
+    }
+}
