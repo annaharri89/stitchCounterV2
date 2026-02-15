@@ -10,7 +10,14 @@ A modern Android app for counting stitches with support for multiple themes and 
 - Responsive design for all device sizes using Jetpack Compose. Optimized for portrait and landscape orientations.
 - The user can upload up to 10 photos to each project. Photos are saved to the device's file system, and file paths are stored in Room. Images are loaded with Coil using these stored paths.
 - An import/export library feature to backup your library of projects since the app storage is local to your device and not uploaded to any cloud based service.
+- Stitch Counter does not collect analytics, tracking data, or personal information. All data is stored locally on the user’s device.
 
-## Privacy
-Stitch Counter does not collect analytics, tracking data, or personal information.
-All data is stored locally on the user’s device.
+## Support This Project
+
+This app is developed independently and provided without ads, tracking, or data collection.
+
+If you'd like to support its development:
+
+☕ https://ko-fi.com/annaharri
+
+Thank you for supporting privacy-friendly software 💖
