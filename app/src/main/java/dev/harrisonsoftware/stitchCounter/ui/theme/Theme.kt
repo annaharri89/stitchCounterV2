@@ -57,40 +57,6 @@ fun seaCottageDarkColors() = darkColorScheme(
     onTertiary = Color.White
 )
 
-fun retroSummerLightColors() = lightColorScheme(
-    primary = RetroSummerCactus40,
-    secondary = RetroSummerSun40,
-    tertiary = RetroSummerOrangeLight40,
-    primaryContainer = RetroSummerPrimaryContainer40,
-    secondaryContainer = RetroSummerSecondaryContainer40,
-    tertiaryContainer = RetroSummerTertiaryContainer40,
-    onPrimaryContainer = RetroSummerOnPrimaryContainer40,
-    onSecondaryContainer = RetroSummerOnSecondaryContainer40,
-    onTertiaryContainer = RetroSummerOnTertiaryContainer40,
-    error = RetroSummerError40,
-    onError = Color.White,
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White
-)
-
-fun retroSummerDarkColors() = darkColorScheme(
-    primary = RetroSummerCactus80,
-    secondary = RetroSummerSun80,
-    tertiary = RetroSummerOrangeLight80,
-    primaryContainer = RetroSummerPrimaryContainer80,
-    secondaryContainer = RetroSummerSecondaryContainer80,
-    tertiaryContainer = RetroSummerTertiaryContainer80,
-    onPrimaryContainer = RetroSummerOnPrimaryContainer80,
-    onSecondaryContainer = RetroSummerOnSecondaryContainer80,
-    onTertiaryContainer = RetroSummerOnTertiaryContainer80,
-    error = RetroSummerError80,
-    onError = Color.White,
-    onPrimary = Color.Black,
-    onSecondary = Color.Black,
-    onTertiary = Color.Black
-)
-
 fun goldenHearthLightColors() = lightColorScheme(
     primary = GoldenHearthPrimaryLight,
     secondary = GoldenHearthSecondaryLight,
