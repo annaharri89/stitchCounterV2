@@ -1,5 +1,8 @@
 package dev.harrisonsoftware.stitchCounter.domain.model
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class Project(
     val id: Int = 0,
     val type: ProjectType,
