@@ -408,16 +408,6 @@ class ProjectDetailViewModel @Inject constructor(
         triggerAutoSave()
     }
 
-    fun updateImagePaths(imagePaths: List<String>) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                imagePaths = imagePaths,
-                hasUnsavedChanges = hasChanges(imagePaths = imagePaths)
-            )
-        }
-        triggerAutoSave()
-    }
-
     fun createProject() {
         viewModelScope.launch {
             val state = _uiState.value
