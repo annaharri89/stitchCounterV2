@@ -6,8 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val themeViewModel: ThemeViewModel = hiltViewModel()
             val rootNavigationViewModel: RootNavigationViewModel = hiltViewModel()
-            val themeUiState by themeViewModel.uiState.collectAsState()
+            val themeUiState by themeViewModel.uiState.collectAsStateWithLifecycle()
             
             StitchCounterV3Theme(theme = themeUiState.selectedTheme) {
                 Surface(modifier = Modifier.fillMaxSize()) {
