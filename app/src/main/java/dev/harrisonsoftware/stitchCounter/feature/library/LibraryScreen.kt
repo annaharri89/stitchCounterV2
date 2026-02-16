@@ -127,7 +127,7 @@ fun LibraryScreen(
                         ),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(projects) { project ->
+                        items(projects, key = { it.id }) { project ->
                             SwipeableProjectRow(
                                 project = project,
                                 isSelected = uiState.selectedProjectIds.contains(project.id),
