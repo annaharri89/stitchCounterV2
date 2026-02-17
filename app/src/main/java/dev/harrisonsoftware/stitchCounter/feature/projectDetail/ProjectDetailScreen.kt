@@ -272,8 +272,6 @@ fun ProjectDetailScreenContent(
                 is dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult.Allowed -> {
                     onDismiss?.invoke()
                 }
-                is dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult.Blocked -> {
-                }
                 is dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult.ShowDiscardDialog -> {
                     showDiscardDialog.value = true
                 }
