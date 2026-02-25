@@ -6,10 +6,8 @@ import androidx.lifecycle.viewModelScope
 import dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount
 import dev.harrisonsoftware.stitchCounter.domain.model.CounterState
 import dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult
-import dev.harrisonsoftware.stitchCounter.domain.model.Project
-import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.domain.usecase.GetProject
-import dev.harrisonsoftware.stitchCounter.domain.usecase.UpsertProject
+import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateSingleCounterValues
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -35,7 +33,7 @@ data class SingleCounterUiState(
 open class SingleCounterViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getProject: GetProject,
-    private val upsertProject: UpsertProject,
+    private val updateSingleCounterValues: UpdateSingleCounterValues,
 ) : ViewModel() {
 
     companion object {
@@ -179,23 +177,14 @@ open class SingleCounterViewModel @Inject constructor(
 
     private suspend fun saveToRoom() {
         val state = _uiState.value
-        val existingProject = if (state.id > 0) getProject(state.id) else null
-        val project = Project(
-            id = state.id,
-            type = ProjectType.SINGLE,
-            title = existingProject?.title ?: "",
-            stitchCounterNumber = state.counterState.count,
-            stitchAdjustment = state.counterState.adjustment.adjustmentAmount,
-            imagePaths = existingProject?.imagePaths ?: emptyList(),
-            createdAt = existingProject?.createdAt ?: System.currentTimeMillis(),
-            updatedAt = System.currentTimeMillis(),
-            completedAt = existingProject?.completedAt,
-            totalStitchesEver = state.totalStitchesEver,
-        )
-        val newId = upsertProject(project).toInt()
-        if (state.id == 0 && newId > 0) {
-            _uiState.update { currentState -> currentState.copy(id = newId) }
-            persistToSavedState()
+        if (state.id > 0) {
+            updateSingleCounterValues(
+                id = state.id,
+                stitchCount = state.counterState.count,
+                stitchAdjustment = state.counterState.adjustment.adjustmentAmount,
+                totalStitchesEver = state.totalStitchesEver,
+                updatedAt = System.currentTimeMillis()
+            )
         }
     }
 

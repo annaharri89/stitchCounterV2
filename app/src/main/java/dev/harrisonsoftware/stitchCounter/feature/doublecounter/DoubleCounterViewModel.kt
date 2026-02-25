@@ -6,10 +6,8 @@ import androidx.lifecycle.viewModelScope
 import dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount
 import dev.harrisonsoftware.stitchCounter.domain.model.CounterState
 import dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult
-import dev.harrisonsoftware.stitchCounter.domain.model.Project
-import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.domain.usecase.GetProject
-import dev.harrisonsoftware.stitchCounter.domain.usecase.UpsertProject
+import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateDoubleCounterValues
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -48,7 +46,7 @@ enum class CounterType {
 open class DoubleCounterViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getProject: GetProject,
-    private val upsertProject: UpsertProject,
+    private val updateDoubleCounterValues: UpdateDoubleCounterValues,
 ) : ViewModel() {
 
     companion object {
@@ -213,26 +211,16 @@ open class DoubleCounterViewModel @Inject constructor(
 
     private suspend fun saveToRoom() {
         val state = _uiState.value
-        val existingProject = if (state.id > 0) getProject(state.id) else null
-        val project = Project(
-            id = state.id,
-            type = ProjectType.DOUBLE,
-            title = existingProject?.title ?: "",
-            stitchCounterNumber = state.stitchCounterState.count,
-            stitchAdjustment = state.stitchCounterState.adjustment.adjustmentAmount,
-            rowCounterNumber = state.rowCounterState.count,
-            rowAdjustment = state.rowCounterState.adjustment.adjustmentAmount,
-            totalRows = existingProject?.totalRows ?: state.totalRows,
-            imagePaths = existingProject?.imagePaths ?: emptyList(),
-            createdAt = existingProject?.createdAt ?: System.currentTimeMillis(),
-            updatedAt = System.currentTimeMillis(),
-            completedAt = existingProject?.completedAt,
-            totalStitchesEver = state.totalStitchesEver,
-        )
-        val newId = upsertProject(project).toInt()
-        if (state.id == 0 && newId > 0) {
-            _uiState.update { currentState -> currentState.copy(id = newId) }
-            persistToSavedState()
+        if (state.id > 0) {
+            updateDoubleCounterValues(
+                id = state.id,
+                stitchCount = state.stitchCounterState.count,
+                stitchAdjustment = state.stitchCounterState.adjustment.adjustmentAmount,
+                rowCount = state.rowCounterState.count,
+                rowAdjustment = state.rowCounterState.adjustment.adjustmentAmount,
+                totalStitchesEver = state.totalStitchesEver,
+                updatedAt = System.currentTimeMillis()
+            )
         }
     }
 

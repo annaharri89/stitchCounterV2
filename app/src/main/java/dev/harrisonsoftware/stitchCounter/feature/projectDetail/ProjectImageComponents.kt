@@ -1,8 +1,5 @@
 package dev.harrisonsoftware.stitchCounter.feature.projectDetail
 
-import android.content.Context
-import android.net.Uri
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -38,12 +35,10 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
+import androidx.compose.ui.graphics.painter.ColorPainter
+import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import dev.harrisonsoftware.stitchCounter.R
-import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
 
 private const val MAX_PHOTOS = 10
 
@@ -132,15 +127,18 @@ private fun ProjectImageThumbnail(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    
+    val placeholderColor = MaterialTheme.colorScheme.surfaceVariant
+    val errorColor = MaterialTheme.colorScheme.errorContainer
+
     Box(modifier = modifier) {
-        Image(
-            painter = rememberAsyncImagePainter(
-                ImageRequest.Builder(context)
-                    .data(imagePath)
-                    .build()
-            ),
+        AsyncImage(
+            model = ImageRequest.Builder(context)
+                .data(imagePath)
+                .crossfade(true)
+                .build(),
             contentDescription = stringResource(R.string.cd_project_image),
+            placeholder = ColorPainter(placeholderColor),
+            error = ColorPainter(errorColor),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp)
@@ -280,25 +278,3 @@ private fun ProjectPhotosSectionHeader(
     }
 }
 
-fun saveImageToInternalStorage(context: Context, uri: Uri, projectId: Int, imageIndex: Int = 0): String? {
-    return try {
-        val imagesDir = File(context.filesDir, "project_images")
-        if (!imagesDir.exists()) {
-            imagesDir.mkdirs()
-        }
-        
-        val fileName = "project_${projectId}_${System.currentTimeMillis()}_${imageIndex}.jpg"
-        val file = File(imagesDir, fileName)
-        
-        context.contentResolver.openInputStream(uri)?.use { inputStream: InputStream ->
-            FileOutputStream(file).use { outputStream ->
-                inputStream.copyTo(outputStream)
-            }
-        }
-        
-        file.absolutePath
-    } catch (e: Exception) {
-        android.util.Log.e("ProjectDetailScreen", "Error saving image", e)
-        null
-    }
-}

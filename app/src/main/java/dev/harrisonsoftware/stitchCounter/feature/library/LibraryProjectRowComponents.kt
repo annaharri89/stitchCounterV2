@@ -1,6 +1,5 @@
 package dev.harrisonsoftware.stitchCounter.feature.library
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Checkbox
@@ -29,7 +29,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
+import androidx.compose.ui.graphics.painter.ColorPainter
+import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.domain.model.Project
@@ -44,7 +45,9 @@ internal fun ProjectImageOrCheckbox(
     onSelect: () -> Unit
 ) {
     val context = LocalContext.current
-    
+    val placeholderColor = MaterialTheme.colorScheme.surfaceVariant
+    val errorColor = MaterialTheme.colorScheme.errorContainer
+
     if (isMultiSelectMode) {
         Checkbox(
             checked = isSelected,
@@ -53,13 +56,14 @@ internal fun ProjectImageOrCheckbox(
         )
     } else {
         project.imagePaths.firstOrNull()?.let { imagePath ->
-            Image(
-                painter = rememberAsyncImagePainter(
-                    ImageRequest.Builder(context)
-                        .data(imagePath)
-                        .build()
-                ),
+            AsyncImage(
+                model = ImageRequest.Builder(context)
+                    .data(imagePath)
+                    .crossfade(true)
+                    .build(),
                 contentDescription = stringResource(R.string.cd_project_image),
+                placeholder = ColorPainter(placeholderColor),
+                error = ColorPainter(errorColor),
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(12.dp)),

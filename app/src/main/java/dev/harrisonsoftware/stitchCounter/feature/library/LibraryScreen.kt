@@ -24,7 +24,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.window.Dialog
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,8 +57,8 @@ fun LibraryScreen(
     rootNavigationViewModel: RootNavigationViewModel,
     navigator: DestinationsNavigator
 ) {
-    val projects by viewModel.projects.collectAsState()
-    val uiState by viewModel.uiState.collectAsState()
+    val projects by viewModel.projects.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val hasSupported by supportAppViewModel.hasSupported.collectAsStateWithLifecycle()
     var showNewProjectDialog by remember { mutableStateOf(false) }
 
@@ -128,7 +127,7 @@ fun LibraryScreen(
                         ),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(projects) { project ->
+                        items(projects, key = { it.id }) { project ->
                             SwipeableProjectRow(
                                 project = project,
                                 isSelected = uiState.selectedProjectIds.contains(project.id),

@@ -50,5 +50,23 @@ class ProjectRepository @Inject constructor(
      * Deletes multiple projects from the database by their IDs.
      */
     suspend fun deleteByIds(ids: List<Int>) = projectDao.deleteByIds(ids)
+
+    suspend fun updateSingleCounterValues(
+        id: Int,
+        stitchCount: Int,
+        stitchAdjustment: Int,
+        totalStitchesEver: Int,
+        updatedAt: Long
+    ) = projectDao.updateSingleCounterValues(id, stitchCount, stitchAdjustment, totalStitchesEver, updatedAt)
+
+    suspend fun updateDoubleCounterValues(
+        id: Int,
+        stitchCount: Int,
+        stitchAdjustment: Int,
+        rowCount: Int,
+        rowAdjustment: Int,
+        totalStitchesEver: Int,
+        updatedAt: Long
+    ) = projectDao.updateDoubleCounterValues(id, stitchCount, stitchAdjustment, rowCount, rowAdjustment, totalStitchesEver, updatedAt)
 }
 

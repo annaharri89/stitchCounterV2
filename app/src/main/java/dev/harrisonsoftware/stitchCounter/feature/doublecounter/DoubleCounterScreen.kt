@@ -67,16 +67,18 @@ fun DoubleCounterScreen(
     val resetDialogType = remember { mutableStateOf<CounterType?>(null) }
     val showResetAllDialog = remember { mutableStateOf(false) }
 
-    val actions = object : DoubleCounterActions {
-        override fun increment(type: CounterType) = viewModel.increment(type)
-        override fun decrement(type: CounterType) = viewModel.decrement(type)
-        override fun reset(type: CounterType) {
-            resetDialogType.value = type
-        }
-        override fun changeAdjustment(type: CounterType, value: dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount) = 
-            viewModel.changeAdjustment(type, value)
-        override fun resetAll() {
-            showResetAllDialog.value = true
+    val actions = remember(viewModel) {
+        object : DoubleCounterActions {
+            override fun increment(type: CounterType) = viewModel.increment(type)
+            override fun decrement(type: CounterType) = viewModel.decrement(type)
+            override fun reset(type: CounterType) {
+                resetDialogType.value = type
+            }
+            override fun changeAdjustment(type: CounterType, value: dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount) =
+                viewModel.changeAdjustment(type, value)
+            override fun resetAll() {
+                showResetAllDialog.value = true
+            }
         }
     }
 
