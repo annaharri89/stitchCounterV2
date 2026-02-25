@@ -90,7 +90,6 @@ fun SettingsScreen(
         }
     }
 
-    ScrollToRevealExpandedItem(isThemeSectionExpanded.value, 0, lazyListState)
     ScrollToRevealExpandedItem(isBackupSectionExpanded.value, 1, lazyListState)
     ScrollToRevealExpandedItem(isSupportSectionExpanded.value, 2, lazyListState)
     ScrollToRevealExpandedItem(isLegalSectionExpanded.value, 3, lazyListState)
@@ -98,6 +97,7 @@ fun SettingsScreen(
     Surface {
         LazyColumn(
             state = lazyListState,
+            contentPadding = PaddingValues(vertical = 16.dp),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp),
