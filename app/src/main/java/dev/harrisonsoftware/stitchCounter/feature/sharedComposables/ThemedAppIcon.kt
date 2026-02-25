@@ -29,7 +29,7 @@ fun ThemedAppIcon(
 ) {
     val backgroundResourceId = theme.launcherBackgroundRes()
     val foregroundResourceId = theme.foregroundIconRes()
-    val themeIconDescription = stringResource(R.string.cd_theme_icon, theme.displayName)
+    val themeIconDescription = stringResource(R.string.cd_theme_icon, stringResource(theme.displayName))
     val iconShape = RoundedCornerShape(iconCornerRadius)
 
     Box(
