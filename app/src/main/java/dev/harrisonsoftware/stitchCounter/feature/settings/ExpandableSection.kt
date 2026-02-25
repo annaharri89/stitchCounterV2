@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -39,6 +40,7 @@ internal fun ScrollToRevealExpandedItem(
     itemIndex: Int,
     lazyListState: LazyListState
 ) {
+    val bottomRevealPaddingPx = with(LocalDensity.current) { 16.dp.toPx() }
     LaunchedEffect(isExpanded) {
         if (isExpanded) {
             val trackingStartTime = System.currentTimeMillis()
@@ -47,9 +49,11 @@ internal fun ScrollToRevealExpandedItem(
                 .collect { layoutInfo ->
                     val itemInfo = layoutInfo.visibleItemsInfo.find { it.index == itemIndex }
                     if (itemInfo != null) {
-                        val overflowBeyondViewport = (itemInfo.offset + itemInfo.size) - layoutInfo.viewportEndOffset
+                        val viewportEndOffsetWithPadding = layoutInfo.viewportEndOffset - bottomRevealPaddingPx
+                        val overflowBeyondViewport =
+                            (itemInfo.offset + itemInfo.size).toFloat() - viewportEndOffsetWithPadding
                         if (overflowBeyondViewport > 0) {
-                            lazyListState.scrollBy(overflowBeyondViewport.toFloat())
+                            lazyListState.scrollBy(overflowBeyondViewport)
                         }
                     }
                 }

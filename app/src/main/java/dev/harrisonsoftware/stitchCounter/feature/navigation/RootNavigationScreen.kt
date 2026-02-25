@@ -40,8 +40,7 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
             if (isCompact) {
                 BottomNavigationLayout(
                     selectedTab = selectedTab,
-                    onTabSelected = viewModel::selectTab,
-                    navController = navController
+                    onTabSelected = viewModel::selectTab
                 )
             }
         }
@@ -50,8 +49,7 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
             if (!isCompact) {
                 NavigationRailLayout(
                     selectedTab = selectedTab,
-                    onTabSelected = viewModel::selectTab,
-                    navController = navController
+                    onTabSelected = viewModel::selectTab
                 )
             }
 
