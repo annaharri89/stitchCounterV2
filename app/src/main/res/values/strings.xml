@@ -104,7 +104,13 @@
 
     <!-- Navigation tabs -->
     <string name="nav_library">Library</string>
+    <string name="nav_stats">Stats</string>
     <string name="nav_settings">Settings</string>
+
+    <!-- Stats -->
+    <string name="stats_coming_soon_title">Coming Soon</string>
+    <string name="stats_coming_soon_message">Track your stitching stats and progress over time</string>
+    <string name="cd_stats_coming_soon">Stats feature coming soon</string>
 
     <!-- Content descriptions -->
     <string name="cd_select_multiple">Select multiple</string>
