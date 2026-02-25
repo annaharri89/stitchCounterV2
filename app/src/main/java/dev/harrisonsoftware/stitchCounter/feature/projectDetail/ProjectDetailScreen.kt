@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -26,8 +27,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -35,6 +38,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -63,14 +67,14 @@ fun ProjectDetailContent(
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let {
-            val projectId = uiState.project?.id ?: 0
-            val imageIndex = uiState.imagePaths.size
-            val savedImagePath = saveImageToInternalStorage(context, it, projectId, imageIndex)
-            savedImagePath?.let { path ->
-                viewModel.addImagePath(path)
-            }
-        }
+        uri?.let { viewModel.saveAndAddImage(context, it) }
+    }
+
+    var showImagePreview by remember { mutableStateOf(false) }
+    var imagePreviewStartIndex by remember { mutableIntStateOf(0) }
+
+    BackHandler(enabled = showImagePreview) {
+        showImagePreview = false
     }
 
     val scrollState = rememberScrollState()
@@ -159,6 +163,10 @@ fun ProjectDetailContent(
                 imagePaths = uiState.imagePaths,
                 onImageClick = { imagePickerLauncher.launch("image/*") },
                 onRemoveImage = { imagePath -> viewModel.removeImagePath(imagePath) },
+                onTapImage = { index ->
+                    imagePreviewStartIndex = index
+                    showImagePreview = true
+                },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -239,6 +247,14 @@ fun ProjectDetailContent(
                     Text(stringResource(R.string.action_cancel))
                 }
             }
+        )
+    }
+
+    if (showImagePreview && uiState.imagePaths.isNotEmpty()) {
+        ImagePreviewBottomSheet(
+            imagePaths = uiState.imagePaths,
+            initialPageIndex = imagePreviewStartIndex,
+            onDismiss = { showImagePreview = false }
         )
     }
 }

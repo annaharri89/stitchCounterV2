@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.semantics.contentDescription
@@ -56,10 +57,12 @@ internal fun ProjectImageOrCheckbox(
         )
     } else {
         project.imagePaths.firstOrNull()?.let { imagePath ->
+            val thumbnailSizePx = with(LocalDensity.current) { 100.dp.roundToPx() }
             AsyncImage(
                 model = ImageRequest.Builder(context)
                     .data(imagePath)
                     .crossfade(true)
+                    .size(thumbnailSizePx)
                     .build(),
                 contentDescription = stringResource(R.string.cd_project_image),
                 placeholder = ColorPainter(placeholderColor),
