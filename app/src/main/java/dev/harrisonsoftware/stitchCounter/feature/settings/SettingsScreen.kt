@@ -48,7 +48,7 @@ fun SettingsScreen(
     
     val context = LocalContext.current
     val showImportDialog = remember { mutableStateOf(false) }
-    val isThemeSectionExpanded = remember { mutableStateOf(true) }
+    val isThemeSectionExpanded = remember { mutableStateOf(false) }
     val isBackupSectionExpanded = remember { mutableStateOf(false) }
     val isSupportSectionExpanded = remember { mutableStateOf(false) }
     val isLegalSectionExpanded = remember { mutableStateOf(false) }
