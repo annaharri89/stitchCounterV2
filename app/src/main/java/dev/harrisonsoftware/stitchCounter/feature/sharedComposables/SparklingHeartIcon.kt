@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -134,6 +135,9 @@ fun SparklingHeartIcon(
         label = "heart_pulse"
     )
 
+    val heartPath = remember { Path() }
+    val sparklePath = remember { Path() }
+
     Box(
         modifier = modifier
             .size(24.dp)
@@ -152,7 +156,7 @@ fun SparklingHeartIcon(
             val heartBottomY = centerY + heartHeight * 0.52f
 
             // ── Heart shape ─────────────────────────────────────────
-            drawHeartShape(centerX, heartBottomY, heartHeight, heartColor)
+            drawHeartShape(centerX, heartBottomY, heartHeight, heartColor, heartPath)
 
             // ── Highlight (gives the 💖 sheen) ─────────────────────
             val highlightCenterX = centerX + canvasWidth * HIGHLIGHT_OFFSET_X_FRACTION
@@ -175,7 +179,8 @@ fun SparklingHeartIcon(
                 anglePhase = orbitPhase,
                 pulsePhase = sparklePulsePhase,
                 sparkleColor = SparkleWhiteColor,
-                outerLength = canvasWidth * SPARKLE_OUTER_LENGTH_FRACTION
+                outerLength = canvasWidth * SPARKLE_OUTER_LENGTH_FRACTION,
+                reusablePath = sparklePath
             )
 
             // Sparkle 2 — medium, yellow, outer orbit, offset
@@ -187,7 +192,8 @@ fun SparklingHeartIcon(
                 anglePhase = secondaryOrbitPhase,
                 pulsePhase = (sparklePulsePhase + 0.33f) % 1f,
                 sparkleColor = SparkleYellowColor,
-                outerLength = canvasWidth * SPARKLE_OUTER_LENGTH_FRACTION * 0.75f
+                outerLength = canvasWidth * SPARKLE_OUTER_LENGTH_FRACTION * 0.75f,
+                reusablePath = sparklePath
             )
 
             // Sparkle 3 — small, pink, inner orbit, opposite side
@@ -199,7 +205,8 @@ fun SparklingHeartIcon(
                 anglePhase = tertiaryOrbitPhase,
                 pulsePhase = (sparklePulsePhase + 0.66f) % 1f,
                 sparkleColor = SparklePinkColor,
-                outerLength = canvasWidth * SPARKLE_OUTER_LENGTH_FRACTION * 0.60f
+                outerLength = canvasWidth * SPARKLE_OUTER_LENGTH_FRACTION * 0.60f,
+                reusablePath = sparklePath
             )
 
             // Sparkle 4 — medium, white, middle orbit, phase-shifted
@@ -211,7 +218,8 @@ fun SparklingHeartIcon(
                 anglePhase = (orbitPhase + 0.50f) % 1f,
                 pulsePhase = (sparklePulsePhase + 0.50f) % 1f,
                 sparkleColor = SparkleWhiteColor,
-                outerLength = canvasWidth * SPARKLE_OUTER_LENGTH_FRACTION * 0.70f
+                outerLength = canvasWidth * SPARKLE_OUTER_LENGTH_FRACTION * 0.70f,
+                reusablePath = sparklePath
             )
 
             // Sparkle 5 — tiny, yellow, outer orbit, phase-shifted
@@ -223,7 +231,8 @@ fun SparklingHeartIcon(
                 anglePhase = (secondaryOrbitPhase + 0.55f) % 1f,
                 pulsePhase = (sparklePulsePhase + 0.15f) % 1f,
                 sparkleColor = SparkleYellowColor,
-                outerLength = canvasWidth * SPARKLE_OUTER_LENGTH_FRACTION * 0.50f
+                outerLength = canvasWidth * SPARKLE_OUTER_LENGTH_FRACTION * 0.50f,
+                reusablePath = sparklePath
             )
         }
     }
@@ -236,39 +245,37 @@ private fun DrawScope.drawHeartShape(
     bottomY: Float,
     heartHeight: Float,
     color: Color,
+    reusablePath: Path,
 ) {
     val topY = bottomY - heartHeight
     val halfWidth = heartHeight * HEART_WIDTH_RATIO
     val cleftY = topY + heartHeight * HEART_CLEFT_DEPTH_RATIO
 
-    val heartPath = Path().apply {
-        moveTo(centerX, bottomY)
+    reusablePath.reset()
+    reusablePath.moveTo(centerX, bottomY)
+    reusablePath.cubicTo(
+        centerX - halfWidth * 0.10f, bottomY - heartHeight * 0.22f,
+        centerX - halfWidth * 1.12f, bottomY - heartHeight * 0.55f,
+        centerX - halfWidth * 0.90f, topY + heartHeight * 0.15f
+    )
+    reusablePath.cubicTo(
+        centerX - halfWidth * 0.68f, topY - heartHeight * 0.06f,
+        centerX - halfWidth * 0.15f, topY - heartHeight * 0.01f,
+        centerX, cleftY
+    )
+    reusablePath.cubicTo(
+        centerX + halfWidth * 0.15f, topY - heartHeight * 0.01f,
+        centerX + halfWidth * 0.68f, topY - heartHeight * 0.06f,
+        centerX + halfWidth * 0.90f, topY + heartHeight * 0.15f
+    )
+    reusablePath.cubicTo(
+        centerX + halfWidth * 1.12f, bottomY - heartHeight * 0.55f,
+        centerX + halfWidth * 0.10f, bottomY - heartHeight * 0.22f,
+        centerX, bottomY
+    )
+    reusablePath.close()
 
-        cubicTo(
-            centerX - halfWidth * 0.10f, bottomY - heartHeight * 0.22f,
-            centerX - halfWidth * 1.12f, bottomY - heartHeight * 0.55f,
-            centerX - halfWidth * 0.90f, topY + heartHeight * 0.15f
-        )
-        cubicTo(
-            centerX - halfWidth * 0.68f, topY - heartHeight * 0.06f,
-            centerX - halfWidth * 0.15f, topY - heartHeight * 0.01f,
-            centerX, cleftY
-        )
-        cubicTo(
-            centerX + halfWidth * 0.15f, topY - heartHeight * 0.01f,
-            centerX + halfWidth * 0.68f, topY - heartHeight * 0.06f,
-            centerX + halfWidth * 0.90f, topY + heartHeight * 0.15f
-        )
-        cubicTo(
-            centerX + halfWidth * 1.12f, bottomY - heartHeight * 0.55f,
-            centerX + halfWidth * 0.10f, bottomY - heartHeight * 0.22f,
-            centerX, bottomY
-        )
-
-        close()
-    }
-
-    drawPath(heartPath, color)
+    drawPath(reusablePath, color)
 }
 
 private fun DrawScope.drawOrbitingSparkle(
@@ -280,6 +287,7 @@ private fun DrawScope.drawOrbitingSparkle(
     pulsePhase: Float,
     sparkleColor: Color,
     outerLength: Float,
+    reusablePath: Path,
 ) {
     val angle = anglePhase * TWO_PI_F
     val sparkleX = centerX + cos(angle) * orbitRadiusX
@@ -298,7 +306,8 @@ private fun DrawScope.drawOrbitingSparkle(
         outerLength = scaledOuterLength,
         innerLength = innerLength,
         color = sparkleColor,
-        alpha = alpha
+        alpha = alpha,
+        reusablePath = reusablePath
     )
 }
 
@@ -309,34 +318,24 @@ private fun DrawScope.drawFourPointedSparkle(
     innerLength: Float,
     color: Color,
     alpha: Float,
+    reusablePath: Path,
 ) {
-    // Soft glow behind the sparkle
     drawCircle(
         color = color.copy(alpha = alpha * SPARKLE_GLOW_ALPHA_RATIO),
         radius = outerLength * SPARKLE_GLOW_RADIUS_RATIO,
         center = Offset(centerX, centerY)
     )
 
-    // Four-pointed star: points at N, E, S, W with diagonal inner vertices
-    val sparklePath = Path().apply {
-        // Top point
-        moveTo(centerX, centerY - outerLength)
-        // Upper-right inner
-        lineTo(centerX + innerLength, centerY - innerLength)
-        // Right point
-        lineTo(centerX + outerLength, centerY)
-        // Lower-right inner
-        lineTo(centerX + innerLength, centerY + innerLength)
-        // Bottom point
-        lineTo(centerX, centerY + outerLength)
-        // Lower-left inner
-        lineTo(centerX - innerLength, centerY + innerLength)
-        // Left point
-        lineTo(centerX - outerLength, centerY)
-        // Upper-left inner
-        lineTo(centerX - innerLength, centerY - innerLength)
-        close()
-    }
+    reusablePath.reset()
+    reusablePath.moveTo(centerX, centerY - outerLength)
+    reusablePath.lineTo(centerX + innerLength, centerY - innerLength)
+    reusablePath.lineTo(centerX + outerLength, centerY)
+    reusablePath.lineTo(centerX + innerLength, centerY + innerLength)
+    reusablePath.lineTo(centerX, centerY + outerLength)
+    reusablePath.lineTo(centerX - innerLength, centerY + innerLength)
+    reusablePath.lineTo(centerX - outerLength, centerY)
+    reusablePath.lineTo(centerX - innerLength, centerY - innerLength)
+    reusablePath.close()
 
-    drawPath(sparklePath, color.copy(alpha = alpha))
+    drawPath(reusablePath, color.copy(alpha = alpha))
 }
