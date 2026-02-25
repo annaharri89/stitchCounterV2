@@ -47,6 +47,7 @@ fun ProjectImageSelector(
     imagePaths: List<String>,
     onImageClick: () -> Unit,
     onRemoveImage: (String) -> Unit,
+    onTapImage: (index: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val photoCount = imagePaths.size
@@ -102,9 +103,11 @@ fun ProjectImageSelector(
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 } else {
+                                    val imageIndex = imagePaths.indexOf(item)
                                     ProjectImageThumbnail(
                                         imagePath = item,
                                         onRemoveImage = { onRemoveImage(item) },
+                                        onTapImage = { onTapImage(imageIndex) },
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 }
@@ -124,6 +127,7 @@ fun ProjectImageSelector(
 private fun ProjectImageThumbnail(
     imagePath: String,
     onRemoveImage: () -> Unit,
+    onTapImage: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -142,7 +146,11 @@ private fun ProjectImageThumbnail(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp)
-                .clip(RoundedCornerShape(12.dp)),
+                .clip(RoundedCornerShape(12.dp))
+                .clickable(
+                    role = Role.Image,
+                    onClick = onTapImage
+                ),
             contentScale = ContentScale.Crop
         )
         ProjectImageDeleteButton(
