@@ -4,11 +4,13 @@ import androidx.navigation.NavHostController
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.feature.destinations.LibraryScreenDestination
 import dev.harrisonsoftware.stitchCounter.feature.destinations.SettingsScreenDestination
+import dev.harrisonsoftware.stitchCounter.feature.destinations.StatsScreenDestination
 import com.ramcosta.composedestinations.navigation.navigate
 import com.ramcosta.composedestinations.spec.Direction
 
 fun getDestinationForTab(tab: BottomNavTab): Direction = when(tab) {
     BottomNavTab.LIBRARY -> LibraryScreenDestination
+    BottomNavTab.STATS -> StatsScreenDestination
     BottomNavTab.SETTINGS -> SettingsScreenDestination
 }
 
