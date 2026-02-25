@@ -80,10 +80,32 @@ internal fun ProjectInfoSection(
 ) {
     Column(
         modifier = modifier.semantics(mergeDescendants = true) {},
-        verticalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         ProjectTitle(project.title)
-        //todo put the project finished UI
+        if (project.completedAt != null) {
+            ProjectFinishedBadge()
+        }
+    }
+}
+
+@Composable
+private fun ProjectFinishedBadge() {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.Check,
+            contentDescription = null,
+            modifier = Modifier.size(14.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = stringResource(R.string.label_project_completed),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
