@@ -31,6 +31,9 @@ data class ProjectEntity(
     @ColumnInfo(name = "title")
     val title: String = "",
 
+    @ColumnInfo(name = "notes")
+    val notes: String = "",
+
     @ColumnInfo(name = "stitch_counter_number")
     val stitchCounterNumber: Int = 0,
 

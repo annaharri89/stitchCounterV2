@@ -66,6 +66,7 @@ class ImportLibrary @Inject constructor(
                                 id = if (replaceExisting) backupProject.id else 0,
                                 type = if (backupProject.type == "double") ProjectType.DOUBLE else ProjectType.SINGLE,
                                 title = backupProject.title,
+                                notes = backupProject.notes,
                                 stitchCounterNumber = backupProject.stitchCounterNumber,
                                 stitchAdjustment = backupProject.stitchAdjustment,
                                 rowCounterNumber = backupProject.rowCounterNumber,

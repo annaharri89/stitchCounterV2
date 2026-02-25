@@ -26,6 +26,7 @@ class ExportLibrary @Inject constructor(
                     id = project.id,
                     type = if (project.type.name == "DOUBLE") "double" else "single",
                     title = project.title,
+                    notes = project.notes,
                     stitchCounterNumber = project.stitchCounterNumber,
                     stitchAdjustment = project.stitchAdjustment,
                     rowCounterNumber = project.rowCounterNumber,

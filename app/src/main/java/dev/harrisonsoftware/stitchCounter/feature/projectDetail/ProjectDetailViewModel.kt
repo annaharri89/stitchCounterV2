@@ -10,6 +10,8 @@ import dev.harrisonsoftware.stitchCounter.domain.model.Project
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.domain.usecase.GetProject
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpsertProject
+import android.content.Context
+import android.net.Uri
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -24,10 +26,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class ProjectDetailUiState(
     val project: Project? = null,
     val title: String = "",
+    val notes: String = "",
     val projectType: ProjectType = ProjectType.SINGLE,
     val totalRows: String = "",
     val imagePaths: List<String> = emptyList(),
@@ -48,6 +52,7 @@ class ProjectDetailViewModel @Inject constructor(
     companion object {
         private const val SAVED_STATE_KEY_PROJECT_ID = "detail_project_id"
         private const val SAVED_STATE_KEY_TITLE = "detail_title"
+        private const val SAVED_STATE_KEY_NOTES = "detail_notes"
         private const val SAVED_STATE_KEY_PROJECT_TYPE = "detail_project_type"
         private const val SAVED_STATE_KEY_TOTAL_ROWS = "detail_total_rows"
         private const val SAVED_STATE_KEY_IS_COMPLETED = "detail_is_completed"
@@ -62,6 +67,7 @@ class ProjectDetailViewModel @Inject constructor(
 
     private var autoSaveJob: Job? = null
     private var originalTitle: String = ""
+    private var originalNotes: String = ""
     private var originalTotalRows: String = ""
     private var originalImagePaths: List<String> = emptyList()
     private var originalIsCompleted: Boolean = false
@@ -72,6 +78,7 @@ class ProjectDetailViewModel @Inject constructor(
 
             if (projectId == null || projectId == 0) {
                 val restoredTitle = savedStateHandle.get<String>(SAVED_STATE_KEY_TITLE)
+                val restoredNotes = savedStateHandle.get<String>(SAVED_STATE_KEY_NOTES)
                 val restoredTotalRows = savedStateHandle.get<String>(SAVED_STATE_KEY_TOTAL_ROWS)
                 val restoredIsCompleted = savedStateHandle.get<Boolean>(SAVED_STATE_KEY_IS_COMPLETED)
                 val hasSavedNewProjectState = restoredTitle != null
@@ -90,6 +97,7 @@ class ProjectDetailViewModel @Inject constructor(
                     currentState.copy(
                         project = newProject,
                         title = if (hasSavedNewProjectState) restoredTitle ?: "" else "",
+                        notes = if (hasSavedNewProjectState) restoredNotes ?: "" else "",
                         projectType = projectType,
                         totalRows = if (hasSavedNewProjectState) restoredTotalRows ?: "" else "",
                         imagePaths = emptyList(),
@@ -101,6 +109,7 @@ class ProjectDetailViewModel @Inject constructor(
                     )
                 }
                 originalTitle = ""
+                originalNotes = ""
                 originalTotalRows = ""
                 originalImagePaths = emptyList()
                 originalIsCompleted = false
@@ -117,6 +126,11 @@ class ProjectDetailViewModel @Inject constructor(
                 } else {
                     project.title
                 }
+                val restoredNotes = if (restoreFromSavedState) {
+                    savedStateHandle.get<String>(SAVED_STATE_KEY_NOTES) ?: project.notes
+                } else {
+                    project.notes
+                }
                 val restoredTotalRows = if (restoreFromSavedState) {
                     savedStateHandle.get<String>(SAVED_STATE_KEY_TOTAL_ROWS)
                         ?: if (project.totalRows > 0) project.totalRows.toString() else ""
@@ -130,12 +144,14 @@ class ProjectDetailViewModel @Inject constructor(
                 }
 
                 originalTitle = project.title
+                originalNotes = project.notes
                 originalTotalRows = if (project.totalRows > 0) project.totalRows.toString() else ""
                 originalImagePaths = project.imagePaths
                 originalIsCompleted = project.completedAt != null
 
                 val hasChangesFromSavedState = restoreFromSavedState && (
                     restoredTitle != originalTitle
+                        || restoredNotes != originalNotes
                         || restoredTotalRows != originalTotalRows
                         || restoredIsCompleted != originalIsCompleted
                 )
@@ -144,6 +160,7 @@ class ProjectDetailViewModel @Inject constructor(
                     currentState.copy(
                         project = project,
                         title = restoredTitle,
+                        notes = restoredNotes,
                         projectType = project.type,
                         totalRows = restoredTotalRows,
                         imagePaths = project.imagePaths,
@@ -177,6 +194,11 @@ class ProjectDetailViewModel @Inject constructor(
                 } else {
                     project.title
                 }
+                val restoredNotes = if (restoreFromSavedState) {
+                    savedStateHandle.get<String>(SAVED_STATE_KEY_NOTES) ?: project.notes
+                } else {
+                    project.notes
+                }
                 val restoredTotalRows = if (restoreFromSavedState) {
                     savedStateHandle.get<String>(SAVED_STATE_KEY_TOTAL_ROWS)
                         ?: if (project.totalRows > 0) project.totalRows.toString() else ""
@@ -190,12 +212,14 @@ class ProjectDetailViewModel @Inject constructor(
                 }
 
                 originalTitle = project.title
+                originalNotes = project.notes
                 originalTotalRows = if (project.totalRows > 0) project.totalRows.toString() else ""
                 originalImagePaths = project.imagePaths
                 originalIsCompleted = project.completedAt != null
 
                 val hasChangesFromSavedState = restoreFromSavedState && (
                     restoredTitle != originalTitle
+                        || restoredNotes != originalNotes
                         || restoredTotalRows != originalTotalRows
                         || restoredIsCompleted != originalIsCompleted
                 )
@@ -204,6 +228,7 @@ class ProjectDetailViewModel @Inject constructor(
                     currentState.copy(
                         project = project,
                         title = restoredTitle,
+                        notes = restoredNotes,
                         projectType = project.type,
                         totalRows = restoredTotalRows,
                         imagePaths = project.imagePaths,
@@ -226,11 +251,13 @@ class ProjectDetailViewModel @Inject constructor(
 
     private fun hasChanges(
         title: String = _uiState.value.title,
+        notes: String = _uiState.value.notes,
         totalRows: String = _uiState.value.totalRows,
         imagePaths: List<String> = _uiState.value.imagePaths,
         isCompleted: Boolean = _uiState.value.isCompleted
     ): Boolean =
         title != originalTitle
+                || notes != originalNotes
                 || totalRows != originalTotalRows
                 || imagePaths != originalImagePaths
                 || isCompleted != originalIsCompleted
@@ -241,6 +268,17 @@ class ProjectDetailViewModel @Inject constructor(
                 title = newTitle,
                 hasUnsavedChanges = hasChanges(title = newTitle),
                 titleError = if (newTitle.isBlank()) R.string.error_title_required else null
+            )
+        }
+        persistToSavedState()
+        triggerAutoSave()
+    }
+
+    fun updateNotes(newNotes: String) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                notes = newNotes,
+                hasUnsavedChanges = hasChanges(notes = newNotes)
             )
         }
         persistToSavedState()
@@ -312,6 +350,7 @@ class ProjectDetailViewModel @Inject constructor(
             id = projectId,
             type = state.projectType,
             title = state.title,
+            notes = state.notes,
             stitchCounterNumber = baseProject?.stitchCounterNumber ?: 0,
             stitchAdjustment = baseProject?.stitchAdjustment ?: 1,
             rowCounterNumber = baseProject?.rowCounterNumber ?: 0,
@@ -327,6 +366,7 @@ class ProjectDetailViewModel @Inject constructor(
         if (projectId == 0 && newId > 0) {
             val updatedProject = project.copy(id = newId)
             originalTitle = state.title
+            originalNotes = state.notes
             originalTotalRows = state.totalRows
             originalImagePaths = updatedProject.imagePaths
             originalIsCompleted = state.isCompleted
@@ -341,6 +381,7 @@ class ProjectDetailViewModel @Inject constructor(
         } else if (projectId > 0) {
             val updatedProject = project.copy(id = projectId)
             originalTitle = state.title
+            originalNotes = state.notes
             originalTotalRows = state.totalRows
             originalImagePaths = updatedProject.imagePaths
             originalIsCompleted = state.isCompleted
@@ -375,6 +416,7 @@ class ProjectDetailViewModel @Inject constructor(
         _uiState.update { currentState ->
             currentState.copy(
                 title = originalTitle,
+                notes = originalNotes,
                 totalRows = originalTotalRows,
                 imagePaths = originalImagePaths,
                 isCompleted = originalIsCompleted,
@@ -384,6 +426,17 @@ class ProjectDetailViewModel @Inject constructor(
             )
         }
         clearSavedState()
+    }
+
+    fun saveAndAddImage(context: Context, uri: Uri) {
+        viewModelScope.launch {
+            val projectId = _uiState.value.project?.id ?: 0
+            val imageIndex = _uiState.value.imagePaths.size
+            val savedImagePath = withContext(Dispatchers.IO) {
+                saveImageToInternalStorage(context, uri, projectId, imageIndex)
+            }
+            savedImagePath?.let { addImagePath(it) }
+        }
     }
 
     fun addImagePath(imagePath: String) {
@@ -433,6 +486,7 @@ class ProjectDetailViewModel @Inject constructor(
                 id = 0,
                 type = state.projectType,
                 title = state.title,
+                notes = state.notes,
                 stitchCounterNumber = existingProject?.stitchCounterNumber ?: 0,
                 stitchAdjustment = existingProject?.stitchAdjustment ?: 1,
                 rowCounterNumber = existingProject?.rowCounterNumber ?: 0,
@@ -448,6 +502,7 @@ class ProjectDetailViewModel @Inject constructor(
             if (newId > 0) {
                 val updatedProject = project.copy(id = newId)
                 originalTitle = state.title
+                originalNotes = state.notes
                 originalTotalRows = state.totalRows
                 originalImagePaths = updatedProject.imagePaths
                 _uiState.update { currentState ->
@@ -479,6 +534,7 @@ class ProjectDetailViewModel @Inject constructor(
         val state = _uiState.value
         savedStateHandle[SAVED_STATE_KEY_PROJECT_ID] = state.project?.id ?: 0
         savedStateHandle[SAVED_STATE_KEY_TITLE] = state.title
+        savedStateHandle[SAVED_STATE_KEY_NOTES] = state.notes
         savedStateHandle[SAVED_STATE_KEY_PROJECT_TYPE] = state.projectType.name
         savedStateHandle[SAVED_STATE_KEY_TOTAL_ROWS] = state.totalRows
         savedStateHandle[SAVED_STATE_KEY_IS_COMPLETED] = state.isCompleted
@@ -487,6 +543,7 @@ class ProjectDetailViewModel @Inject constructor(
     private fun clearSavedState() {
         savedStateHandle.remove<Int>(SAVED_STATE_KEY_PROJECT_ID)
         savedStateHandle.remove<String>(SAVED_STATE_KEY_TITLE)
+        savedStateHandle.remove<String>(SAVED_STATE_KEY_NOTES)
         savedStateHandle.remove<String>(SAVED_STATE_KEY_PROJECT_TYPE)
         savedStateHandle.remove<String>(SAVED_STATE_KEY_TOTAL_ROWS)
         savedStateHandle.remove<Boolean>(SAVED_STATE_KEY_IS_COMPLETED)

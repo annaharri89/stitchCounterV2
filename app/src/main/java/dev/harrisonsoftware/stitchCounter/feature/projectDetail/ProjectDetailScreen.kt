@@ -38,7 +38,9 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -149,15 +151,20 @@ fun ProjectDetailContent(
                         }
                     )
                 )
-                
-                uiState.project?.let { project ->
-                    RowProgressWithLabel(
-                        currentRowCount = project.rowCounterNumber,
-                        totalRows = project.totalRows,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
             }
+
+            OutlinedTextField(
+                value = uiState.notes,
+                onValueChange = { viewModel.updateNotes(it) },
+                label = { Text(stringResource(R.string.label_project_notes)) },
+                placeholder = { Text(stringResource(R.string.placeholder_project_notes)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics {
+                        contentDescription = context.getString(R.string.label_project_notes)
+                    },
+                minLines = 4
+            )
 
             ProjectImageSelector(
                 imagePaths = uiState.imagePaths,
@@ -171,8 +178,24 @@ fun ProjectDetailContent(
             )
 
             if (!isNewProject) {
+                if (isDoubleCounter) {
+                    uiState.project?.let { project ->
+                        RowProgressWithLabel(
+                            currentRowCount = project.rowCounterNumber,
+                            totalRows = project.totalRows,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .toggleable(
+                            value = uiState.isCompleted,
+                            onValueChange = { viewModel.toggleCompleted(it) },
+                            role = Role.Switch
+                        ),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -182,7 +205,7 @@ fun ProjectDetailContent(
                     )
                     Switch(
                         checked = uiState.isCompleted,
-                        onCheckedChange = { viewModel.toggleCompleted(it) }
+                        onCheckedChange = null
                     )
                 }
             }

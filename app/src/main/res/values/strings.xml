@@ -39,8 +39,10 @@
     <!-- Project detail -->
     <string name="project_detail_title">Project Details</string>
     <string name="label_project_title">Project Title</string>
+    <string name="label_project_notes">Notes</string>
     <string name="label_project_completed">Finished</string>
     <string name="placeholder_project_title">Enter project title</string>
+    <string name="placeholder_project_notes">Add notes about this project</string>
     <string name="label_total_rows">Total Rows</string>
     <string name="placeholder_total_rows">Enter total rows</string>
     <string name="action_create_project">Create Project</string>
