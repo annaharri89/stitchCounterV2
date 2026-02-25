@@ -66,8 +66,8 @@ class MainActivity : ComponentActivity() {
                 val currentTheme = themePreferencesRepository.selectedTheme.first()
                 launcherIconManager.updateLauncherIcon(currentTheme)
             } catch (e: Exception) {
-                // If there's an error reading the theme, default to Sea Cottage
-                launcherIconManager.updateLauncherIcon(AppTheme.SEA_COTTAGE)
+                // If there's an error reading the theme, default to Dusty Rose
+                launcherIconManager.updateLauncherIcon(AppTheme.DUSTY_ROSE)
             }
         }
     }

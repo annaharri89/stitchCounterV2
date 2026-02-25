@@ -21,7 +21,7 @@ class SupportAppViewModel @Inject constructor(
     private val _hasSupported = MutableStateFlow(false)
     val hasSupported: StateFlow<Boolean> = _hasSupported.asStateFlow()
 
-    private val _selectedTheme = MutableStateFlow(AppTheme.SEA_COTTAGE)
+    private val _selectedTheme = MutableStateFlow(AppTheme.DUSTY_ROSE)
     val selectedTheme: StateFlow<AppTheme> = _selectedTheme.asStateFlow()
 
     init {

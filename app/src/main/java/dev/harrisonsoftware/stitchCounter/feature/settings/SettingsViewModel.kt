@@ -146,7 +146,7 @@ class SettingsViewModel @Inject constructor(
 }
 
 data class SettingsUiState(
-    val selectedTheme: AppTheme = AppTheme.SEA_COTTAGE,
+    val selectedTheme: AppTheme = AppTheme.DUSTY_ROSE,
     val themeColors: List<ThemeColor> = emptyList(),
     val isExporting: Boolean = false,
     val exportSuccess: Boolean = false,

@@ -42,6 +42,11 @@ class LauncherIconManager @Inject constructor(
         val targetComponent = themeToComponentName[theme]
             ?: return // Unknown theme, do nothing
 
+        // Avoid unnecessary component toggling when the right launcher alias is already active.
+        if (isTargetAliasAlreadyActive(targetComponent)) {
+            return
+        }
+
         // Disable all aliases first
         themeToComponentName.values.forEach { componentName ->
             try {
@@ -64,6 +69,21 @@ class LauncherIconManager @Inject constructor(
             )
         } catch (e: Exception) {
             // Component might not exist or permission issue - ignore
+        }
+    }
+
+    private fun isTargetAliasAlreadyActive(targetComponent: ComponentName): Boolean {
+        return try {
+            themeToComponentName.values.all { componentName ->
+                val enabledState = packageManager.getComponentEnabledSetting(componentName)
+                when (componentName) {
+                    targetComponent -> enabledState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                    else -> enabledState == PackageManager.COMPONENT_ENABLED_STATE_DISABLED ||
+                        enabledState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+                }
+            }
+        } catch (_: Exception) {
+            false
         }
     }
 }

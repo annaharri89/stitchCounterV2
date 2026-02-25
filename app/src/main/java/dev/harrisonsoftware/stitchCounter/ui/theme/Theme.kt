@@ -256,7 +256,7 @@ fun dustyRoseDarkColors() = darkColorScheme(
 @Composable
 fun StitchCounterV3Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    theme: AppTheme = AppTheme.SEA_COTTAGE,
+    theme: AppTheme = AppTheme.DUSTY_ROSE,
     content: @Composable () -> Unit
 ) {
     val themeManager = ThemeManager()

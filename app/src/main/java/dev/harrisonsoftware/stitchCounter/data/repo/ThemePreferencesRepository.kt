@@ -29,11 +29,11 @@ class ThemePreferencesRepository @Inject constructor(
      * Reactive stream of selected theme. Emits current theme and updates when changed.
      */
     val selectedTheme: Flow<AppTheme> = context.dataStore.data.map { preferences ->
-        val themeName = preferences[themeKey] ?: AppTheme.SEA_COTTAGE.name
+        val themeName = preferences[themeKey] ?: AppTheme.DUSTY_ROSE.name
         try {
             AppTheme.valueOf(themeName)
         } catch (_: IllegalArgumentException) {
-            AppTheme.SEA_COTTAGE
+            AppTheme.DUSTY_ROSE
         }
     }
 

@@ -88,6 +88,12 @@
     <string name="settings_import_complete">Import Complete</string>
     <string name="settings_imported_count">Imported %1$d project(s)</string>
     <string name="settings_failed_import_count">Failed to import %1$d project(s)</string>
+    <string name="theme_name_dusty_rose">Dusty Rose</string>
+    <string name="theme_name_golden_hearth">Golden Earth</string>
+    <string name="theme_name_sea_cottage">Sea Cottage</string>
+    <string name="theme_name_forest_fiber">Forest Fiber</string>
+    <string name="theme_name_cloud_soft">Cloud Soft</string>
+    <string name="theme_name_yarn_candy">Yarn Candy</string>
 
     <!-- Support -->
     <string name="support_title">Support the App</string>

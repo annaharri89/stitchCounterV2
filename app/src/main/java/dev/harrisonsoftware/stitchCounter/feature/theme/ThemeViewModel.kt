@@ -34,5 +34,5 @@ class ThemeViewModel @Inject constructor(
 }
 
 data class ThemeUiState(
-    val selectedTheme: AppTheme = AppTheme.SEA_COTTAGE
+    val selectedTheme: AppTheme = AppTheme.DUSTY_ROSE
 )

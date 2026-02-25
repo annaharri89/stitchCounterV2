@@ -73,7 +73,7 @@ internal fun ThemeOptionCard(
                         isSelected = isSelected
                     )
                     Text(
-                        text = theme.displayName,
+                        text = stringResource(theme.displayName),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
