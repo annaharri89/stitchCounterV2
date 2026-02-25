@@ -13,13 +13,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavHostController
 
 @Composable
 fun NavigationRailLayout(
     selectedTab: BottomNavTab,
-    onTabSelected: (BottomNavTab) -> Unit,
-    navController: NavHostController
+    onTabSelected: (BottomNavTab) -> Unit
 ) {
     AnimatedVisibility(
         visible = true,
@@ -34,7 +32,6 @@ fun NavigationRailLayout(
     ) {
         NavigationRailComponent(
             selectedTab = selectedTab,
-            navController = navController,
             onTabSelected = onTabSelected
         )
     }
@@ -43,7 +40,6 @@ fun NavigationRailLayout(
 @Composable
 private fun NavigationRailComponent(
     selectedTab: BottomNavTab,
-    navController: NavHostController,
     onTabSelected: (BottomNavTab) -> Unit
 ) {
     NavigationRail {
@@ -53,7 +49,6 @@ private fun NavigationRailComponent(
                 selected = selectedTab == tab,
                 onClick = {
                     onTabSelected(tab)
-                    navigateToDestination(navController, getDestinationForTab(tab))
                 },
                 icon = {
                     Icon(

@@ -13,14 +13,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavHostController
 
 
 @Composable
 fun BottomNavigationLayout(
     selectedTab: BottomNavTab,
-    onTabSelected: (BottomNavTab) -> Unit,
-    navController: NavHostController
+    onTabSelected: (BottomNavTab) -> Unit
 ) {
     AnimatedVisibility(
         visible = true,
@@ -35,7 +33,6 @@ fun BottomNavigationLayout(
     ) {
         BottomNavigationBar(
             selectedTab = selectedTab,
-            navController = navController,
             onTabSelected = onTabSelected
         )
     }
@@ -44,7 +41,6 @@ fun BottomNavigationLayout(
 @Composable
 private fun BottomNavigationBar(
     selectedTab: BottomNavTab,
-    navController: NavHostController,
     onTabSelected: (BottomNavTab) -> Unit
 ) {
     NavigationBar {
@@ -54,7 +50,6 @@ private fun BottomNavigationBar(
                 selected = selectedTab == tab,
                 onClick = {
                     onTabSelected(tab)
-                    navigateToDestination(navController, getDestinationForTab(tab))
                 },
                 icon = {
                     Icon(
