@@ -7,6 +7,7 @@ data class Project(
     val id: Int = 0,
     val type: ProjectType,
     val title: String = "",
+    val notes: String = "",
     val stitchCounterNumber: Int = 0,
     val stitchAdjustment: Int = 1,
     val rowCounterNumber: Int = 0,

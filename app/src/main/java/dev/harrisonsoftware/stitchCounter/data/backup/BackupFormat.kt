@@ -23,6 +23,8 @@ data class BackupProject(
     val type: String,
     @SerialName("title")
     val title: String,
+    @SerialName("notes")
+    val notes: String = "",
     @SerialName("stitch_counter_number")
     val stitchCounterNumber: Int,
     @SerialName("stitch_adjustment")
