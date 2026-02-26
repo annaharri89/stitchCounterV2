@@ -10,9 +10,15 @@ import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
+
+private const val BACKUP_JSON_FILE_NAME = "backup.json"
+private const val BACKUP_IMAGES_DIRECTORY_NAME = "images"
+private const val INTERNAL_PROJECT_IMAGES_DIRECTORY_NAME = "project_images"
+private const val PROJECT_IMAGE_FILE_PREFIX = "project_"
 
 class BackupManager(
     private val fileSystemProvider: FileSystemProvider,
@@ -29,19 +35,21 @@ class BackupManager(
             val tempDir = File(fileSystemProvider.getCacheDirectory(), "backup_temp_${System.currentTimeMillis()}")
             tempDir.mkdirs()
             
-            val jsonFile = File(tempDir, "backup.json")
-            val imagesDir = File(tempDir, "images")
+            val jsonFile = File(tempDir, BACKUP_JSON_FILE_NAME)
+            val imagesDir = File(tempDir, BACKUP_IMAGES_DIRECTORY_NAME)
             imagesDir.mkdirs()
             
             jsonFile.writeText(json.encodeToString(BackupData.serializer(), backupData))
             
             backupData.projects.forEach { project ->
-                project.imagePaths.forEachIndexed { index, imagePath ->
-                    val sourceFile = File(imagePath)
-                    if (sourceFile.exists()) {
-                        val fileName = "project_${project.id}_${index}_${sourceFile.name}"
-                        val destFile = File(imagesDir, fileName)
+                project.imagePaths.forEach { relativeImagePath ->
+                    val sourceFile = resolveSafeInternalFile(relativeImagePath)
+                    if (sourceFile != null && sourceFile.exists() && sourceFile.isFile) {
+                        val destFile = File(imagesDir, relativeImagePath)
+                        destFile.parentFile?.mkdirs()
                         sourceFile.copyTo(destFile, overwrite = true)
+                    } else {
+                        Log.w(tag, "Skipping missing image during export: $relativeImagePath")
                     }
                 }
             }
@@ -81,13 +89,13 @@ class BackupManager(
                 extractZipToDirectory(inputStream, tempDir)
             } ?: throw Exception("Failed to open input stream")
             
-            val jsonFile = File(tempDir, "backup.json")
+            val jsonFile = File(tempDir, BACKUP_JSON_FILE_NAME)
             if (!jsonFile.exists()) {
-                throw Exception("backup.json not found in archive")
+                throw Exception("$BACKUP_JSON_FILE_NAME not found in archive")
             }
             
             val backupData = json.decodeFromString(BackupData.serializer(), jsonFile.readText())
-            val imagesDir = File(tempDir, "images")
+            val imagesDir = File(tempDir, BACKUP_IMAGES_DIRECTORY_NAME)
             
             Result.success(BackupExtraction(backupData, imagesDir, tempDir))
         } catch (e: Exception) {
@@ -96,18 +104,19 @@ class BackupManager(
         }
     }
     
-    fun copyImageToInternalStorage(sourceFile: File, projectId: Int, imageIndex: Int): String? {
+    fun copyImageToInternalStorage(sourceFile: File): String? {
         return try {
-            val imagesDir = File(fileSystemProvider.getFilesDirectory(), "project_images")
+            val imagesDir = File(fileSystemProvider.getFilesDirectory(), INTERNAL_PROJECT_IMAGES_DIRECTORY_NAME)
             if (!imagesDir.exists()) {
                 imagesDir.mkdirs()
             }
             
-            val fileName = "project_${projectId}_${System.currentTimeMillis()}_${imageIndex}.jpg"
+            val extension = sourceFile.extension.ifBlank { "jpg" }
+            val fileName = "${PROJECT_IMAGE_FILE_PREFIX}${System.currentTimeMillis()}_${UUID.randomUUID()}.$extension"
             val destFile = File(imagesDir, fileName)
             sourceFile.copyTo(destFile, overwrite = true)
             
-            destFile.absolutePath
+            "$INTERNAL_PROJECT_IMAGES_DIRECTORY_NAME/$fileName"
         } catch (e: Exception) {
             Log.e(tag, "Error copying image", e)
             null
@@ -139,7 +148,7 @@ class BackupManager(
         ZipInputStream(inputStream).use { zipIn ->
             var entry: ZipEntry? = zipIn.nextEntry
             while (entry != null) {
-                val file = File(destDir, entry.name)
+                val file = resolveSecureZipEntryDestination(destDir, entry.name)
                 if (entry.isDirectory) {
                     file.mkdirs()
                 } else {
@@ -149,6 +158,34 @@ class BackupManager(
                 zipIn.closeEntry()
                 entry = zipIn.nextEntry
             }
+        }
+    }
+
+    private fun resolveSecureZipEntryDestination(destinationDirectory: File, zipEntryName: String): File {
+        val destinationFile = File(destinationDirectory, zipEntryName)
+        val canonicalDestinationDirectoryPath = destinationDirectory.canonicalPath + File.separator
+        val canonicalDestinationFilePath = destinationFile.canonicalPath
+        if (!canonicalDestinationFilePath.startsWith(canonicalDestinationDirectoryPath)) {
+            throw IllegalArgumentException("Zip entry is outside destination directory: $zipEntryName")
+        }
+        return destinationFile
+    }
+
+    private fun resolveSafeInternalFile(relativePath: String): File? {
+        return try {
+            val filesDirectory = fileSystemProvider.getFilesDirectory()
+            val candidateFile = File(filesDirectory, relativePath)
+            val canonicalFilesDirectoryPath = filesDirectory.canonicalPath + File.separator
+            val canonicalCandidatePath = candidateFile.canonicalPath
+            if (canonicalCandidatePath.startsWith(canonicalFilesDirectoryPath)) {
+                candidateFile
+            } else {
+                Log.w(tag, "Skipping unsafe image path in export: $relativePath")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e(tag, "Error resolving image path for export", e)
+            null
         }
     }
 }
