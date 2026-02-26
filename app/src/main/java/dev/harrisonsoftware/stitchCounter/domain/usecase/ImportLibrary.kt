@@ -1,5 +1,6 @@
 package dev.harrisonsoftware.stitchCounter.domain.usecase
 
+import android.util.Log
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupManager
 import dev.harrisonsoftware.stitchCounter.data.repo.ProjectRepository
 import dev.harrisonsoftware.stitchCounter.domain.mapper.toEntity
@@ -11,6 +12,9 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
+
+private const val SUPPORTED_BACKUP_VERSION = 1
+private const val IMPORT_LIBRARY_LOG_TAG = "ImportLibrary"
 
 @Singleton
 class ImportLibrary @Inject constructor(
@@ -24,6 +28,13 @@ class ImportLibrary @Inject constructor(
                 val extraction = extractionResult.getOrElse {
                     return@withContext Result.failure(it)
                 }
+
+                if (extraction.backupData.metadata.version != SUPPORTED_BACKUP_VERSION) {
+                    backupManager.cleanupTempDirectory(extraction.tempDir)
+                    return@withContext Result.failure(
+                        IllegalArgumentException("Unsupported backup version: ${extraction.backupData.metadata.version}")
+                    )
+                }
                 
                 try {
                     val importedProjects = mutableListOf<Project>()
@@ -33,31 +44,18 @@ class ImportLibrary @Inject constructor(
                         try {
                             val imagePaths = mutableListOf<String>()
                             
-                            backupProject.imagePaths.forEachIndexed { index, relativePath ->
-                                val imageFileName = "project_${backupProject.id}_${index}_${File(relativePath).name}"
-                                val sourceImageFile = File(extraction.imagesDir, imageFileName)
-                                
+                            backupProject.imagePaths.forEach { relativePath ->
+                                val sourceImageFile = File(extraction.imagesDir, relativePath)
                                 if (sourceImageFile.exists()) {
-                                    val newImagePath = backupManager.copyImageToInternalStorage(
-                                        sourceImageFile,
-                                        backupProject.id,
-                                        index
-                                    )
+                                    val newImagePath = backupManager.copyImageToInternalStorage(sourceImageFile)
                                     if (newImagePath != null) {
                                         imagePaths.add(newImagePath)
                                     }
                                 } else {
-                                    val fallbackImageFile = File(extraction.imagesDir, File(relativePath).name)
-                                    if (fallbackImageFile.exists()) {
-                                        val newImagePath = backupManager.copyImageToInternalStorage(
-                                            fallbackImageFile,
-                                            backupProject.id,
-                                            index
-                                        )
-                                        if (newImagePath != null) {
-                                            imagePaths.add(newImagePath)
-                                        }
-                                    }
+                                    Log.w(
+                                        IMPORT_LIBRARY_LOG_TAG,
+                                        "Skipping missing image for project ${backupProject.id}: $relativePath"
+                                    )
                                 }
                             }
                             

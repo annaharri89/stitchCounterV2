@@ -72,7 +72,7 @@
     <string name="settings_support">Support</string>
     <string name="settings_privacy_legal">Privacy &amp; Legal</string>
     <string name="settings_choose_color_scheme">Choose a color scheme:</string>
-    <string name="settings_export_import_library">Export or import your library:</string>
+    <string name="settings_export_import_library">Export or import your library and project photos:</string>
     <string name="settings_colors_in_theme">Colors in this theme:</string>
     <string name="settings_dark">Dark</string>
     <string name="settings_color_light_format">%1$s (Light)</string>
