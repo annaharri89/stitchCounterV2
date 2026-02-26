@@ -40,7 +40,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import dev.harrisonsoftware.stitchCounter.R
 
-private const val MAX_PHOTOS = 10
+private const val MAX_PHOTOS = 6
 
 @Composable
 fun ProjectImageSelector(
@@ -137,7 +137,7 @@ private fun ProjectImageThumbnail(
     Box(modifier = modifier) {
         AsyncImage(
             model = ImageRequest.Builder(context)
-                .data(imagePath)
+                .data(resolveImagePathToAbsolutePath(context, imagePath))
                 .crossfade(true)
                 .build(),
             contentDescription = stringResource(R.string.cd_project_image),

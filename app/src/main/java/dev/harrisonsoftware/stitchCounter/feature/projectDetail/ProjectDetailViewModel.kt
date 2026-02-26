@@ -430,10 +430,8 @@ class ProjectDetailViewModel @Inject constructor(
 
     fun saveAndAddImage(context: Context, uri: Uri) {
         viewModelScope.launch {
-            val projectId = _uiState.value.project?.id ?: 0
-            val imageIndex = _uiState.value.imagePaths.size
             val savedImagePath = withContext(Dispatchers.IO) {
-                saveImageToInternalStorage(context, uri, projectId, imageIndex)
+                saveImageToInternalStorage(context, uri)
             }
             savedImagePath?.let { addImagePath(it) }
         }

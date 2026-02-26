@@ -36,6 +36,7 @@ import coil.request.ImageRequest
 import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.domain.model.Project
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
+import dev.harrisonsoftware.stitchCounter.feature.projectDetail.resolveImagePathToAbsolutePath
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.RowProgressIndicator
 
 @Composable
@@ -60,7 +61,7 @@ internal fun ProjectImageOrCheckbox(
             val thumbnailSizePx = with(LocalDensity.current) { 100.dp.roundToPx() }
             AsyncImage(
                 model = ImageRequest.Builder(context)
-                    .data(imagePath)
+                    .data(resolveImagePathToAbsolutePath(context, imagePath))
                     .crossfade(true)
                     .size(thumbnailSizePx)
                     .build(),

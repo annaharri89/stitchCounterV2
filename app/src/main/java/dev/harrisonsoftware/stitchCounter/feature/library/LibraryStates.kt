@@ -72,6 +72,7 @@ fun EmptyLibraryState(
             Text(
                 text = stringResource(R.string.library_empty_message),
                 style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
         }

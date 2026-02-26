@@ -131,7 +131,7 @@ private fun FullSizeProjectImage(
     ) {
         AsyncImage(
             model = ImageRequest.Builder(context)
-                .data(imagePath)
+                .data(resolveImagePathToAbsolutePath(context, imagePath))
                 .crossfade(true)
                 .build(),
             contentDescription = imageDescription,
