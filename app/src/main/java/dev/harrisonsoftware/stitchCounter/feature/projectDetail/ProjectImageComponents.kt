@@ -137,7 +137,7 @@ private fun ProjectImageThumbnail(
     Box(modifier = modifier) {
         AsyncImage(
             model = ImageRequest.Builder(context)
-                .data(imagePath)
+                .data(resolveImagePathToAbsolutePath(context, imagePath))
                 .crossfade(true)
                 .build(),
             contentDescription = stringResource(R.string.cd_project_image),
