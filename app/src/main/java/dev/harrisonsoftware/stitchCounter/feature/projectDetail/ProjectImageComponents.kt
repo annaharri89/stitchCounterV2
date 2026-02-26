@@ -40,7 +40,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import dev.harrisonsoftware.stitchCounter.R
 
-private const val MAX_PHOTOS = 10
+private const val MAX_PHOTOS = 6
 
 @Composable
 fun ProjectImageSelector(
