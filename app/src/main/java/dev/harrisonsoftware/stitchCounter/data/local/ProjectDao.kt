@@ -21,11 +21,11 @@ interface ProjectDao {
      * Observes all projects in the database with reactive updates.
      * 
      * Returns a Flow that emits the complete list of projects whenever the database changes.
-     * Projects are ordered by ID in descending order (most recent first).
+     * Projects are ordered by ID in ascending order (oldest first).
      * 
      * @return Flow<List<ProjectEntity>> Reactive stream of all projects
      */
-    @Query("SELECT * FROM entry ORDER BY _id DESC")
+    @Query("SELECT * FROM entry ORDER BY _id ASC")
     fun observeAll(): Flow<List<ProjectEntity>>
 
     /**
