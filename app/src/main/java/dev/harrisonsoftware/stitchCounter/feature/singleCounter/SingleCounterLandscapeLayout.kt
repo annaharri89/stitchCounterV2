@@ -38,9 +38,11 @@ fun SingleCounterLandscapeLayout(
             modifier = Modifier.weight(1f),
             count = state.counterState.count,
             selectedAdjustmentAmount = state.counterState.adjustment,
+            customAdjustmentAmount = state.counterState.customAdjustmentAmount,
             onIncrement = actions::increment,
             onDecrement = actions::decrement,
             onAdjustmentClick = actions::changeAdjustment,
+            onCustomAdjustmentAmountChange = actions::setCustomAdjustmentAmount,
             onReset = actions::resetCount,
             showResetButton = false
         )
@@ -51,7 +53,7 @@ fun SingleCounterLandscapeLayout(
     }
 }
 
-@Preview
+@Preview(name = "Landscape", widthDp = 800, heightDp = 360, showBackground = true)
 @Composable
 private fun SingleCounterLandscapeScreenPreview() {
     StitchCounterV3Theme {
@@ -61,6 +63,7 @@ private fun SingleCounterLandscapeScreenPreview() {
                 override fun decrement() {}
                 override fun resetCount() {}
                 override fun changeAdjustment(value: AdjustmentAmount) {}
+                override fun setCustomAdjustmentAmount(value: Int) {}
             }
             
             SingleCounterLandscapeLayout(

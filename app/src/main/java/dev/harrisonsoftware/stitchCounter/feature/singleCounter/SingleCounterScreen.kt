@@ -1,14 +1,19 @@
 package dev.harrisonsoftware.stitchCounter.feature.singleCounter
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -16,8 +21,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import androidx.activity.ComponentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.harrisonsoftware.stitchCounter.R
@@ -27,13 +30,13 @@ import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.ProjectDetai
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.ResetConfirmationDialog
 import com.ramcosta.composedestinations.annotation.Destination
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @RootNavGraph
 @Destination
 @Composable
 fun SingleCounterScreen(
     projectId: Int? = null,
     viewModel: SingleCounterViewModel = hiltViewModel(),
+    windowSizeClass: WindowSizeClass,
     onNavigateToDetail: ((Int) -> Unit)? = null
 ) {
     LaunchedEffect(projectId) {
@@ -61,53 +64,74 @@ fun SingleCounterScreen(
     
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     
-    val activity = LocalContext.current as ComponentActivity
-    val windowSizeClass = calculateWindowSizeClass(activity)
+    val context = LocalContext.current
 
     val showResetDialog = remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    val actions = object : SingleCounterActions {
-        override fun increment() = viewModel.increment()
-        override fun decrement() = viewModel.decrement()
-        override fun resetCount() {
-            showResetDialog.value = true
+    val actions = remember(viewModel) {
+        object : SingleCounterActions {
+            override fun increment() = viewModel.increment()
+            override fun decrement() = viewModel.decrement()
+            override fun resetCount() {
+                showResetDialog.value = true
+            }
+            override fun changeAdjustment(value: dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount) = 
+                viewModel.changeAdjustment(value)
+            override fun setCustomAdjustmentAmount(value: Int) = viewModel.setCustomAdjustmentAmount(value)
         }
-        override fun changeAdjustment(value: dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount) = 
-            viewModel.changeAdjustment(value)
+    }
+
+    LaunchedEffect(state.shouldShowCustomAdjustmentTip) {
+        if (state.shouldShowCustomAdjustmentTip) {
+            snackbarHostState.showSnackbar(
+                message = context.getString(R.string.tip_custom_adjustment)
+            )
+            viewModel.onCustomAdjustmentTipShown()
+        }
     }
 
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
-        AdaptiveLayout(
-            windowSizeClass = windowSizeClass,
-            portraitContent = {
-                SingleCounterPortraitLayout(
-                    state = state,
-                    actions = actions,
-                    topBarContent = if (state.id > 0 && onNavigateToDetail != null) {
-                        {
-                            ProjectDetailsFAB(
-                                onClick = { onNavigateToDetail(state.id) }
-                            )
-                        }
-                    } else null
-                )
-            },
-            landscapeContent = {
-                SingleCounterLandscapeLayout(
-                    state = state,
-                    actions = actions,
-                    topBarContent = if (state.id > 0 && onNavigateToDetail != null) {
-                        {
-                            ProjectDetailsFAB(
-                                onClick = { onNavigateToDetail(state.id) }
-                            )
-                        }
-                    } else null
-                )
-            }
-        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            AdaptiveLayout(
+                windowSizeClass = windowSizeClass,
+                portraitContent = {
+                    SingleCounterPortraitLayout(
+                        state = state,
+                        actions = actions,
+                        topBarContent = if (state.id > 0 && onNavigateToDetail != null) {
+                            {
+                                ProjectDetailsFAB(
+                                    onClick = { onNavigateToDetail(state.id) }
+                                )
+                            }
+                        } else null
+                    )
+                },
+                landscapeContent = {
+                    SingleCounterLandscapeLayout(
+                        state = state,
+                        actions = actions,
+                        topBarContent = if (state.id > 0 && onNavigateToDetail != null) {
+                            {
+                                ProjectDetailsFAB(
+                                    onClick = { onNavigateToDetail(state.id) }
+                                )
+                            }
+                        } else null
+                    )
+                }
+            )
+
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp)
+            )
+        }
     }
 
     if (showResetDialog.value) {

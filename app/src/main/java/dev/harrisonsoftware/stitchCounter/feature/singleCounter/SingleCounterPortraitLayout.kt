@@ -23,6 +23,7 @@ interface SingleCounterActions {
     fun decrement()
     fun resetCount()
     fun changeAdjustment(value: AdjustmentAmount)
+    fun setCustomAdjustmentAmount(value: Int)
 }
 
 @Composable
@@ -46,9 +47,11 @@ fun SingleCounterPortraitLayout(
             modifier = Modifier.weight(1f),
             count = state.counterState.count,
             selectedAdjustmentAmount = state.counterState.adjustment,
+            customAdjustmentAmount = state.counterState.customAdjustmentAmount,
             onIncrement = actions::increment,
             onDecrement = actions::decrement,
             onAdjustmentClick = actions::changeAdjustment,
+            onCustomAdjustmentAmountChange = actions::setCustomAdjustmentAmount,
             onReset = actions::resetCount,
             showResetButton = false,
             counterNumberIsVertical = true
@@ -72,6 +75,7 @@ private fun SingleCounterPortraitPreview() {
                 override fun decrement() {}
                 override fun resetCount() {}
                 override fun changeAdjustment(value: AdjustmentAmount) {}
+                override fun setCustomAdjustmentAmount(value: Int) {}
             }
             
             SingleCounterPortraitLayout(
