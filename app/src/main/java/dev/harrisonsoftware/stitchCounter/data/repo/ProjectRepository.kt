@@ -20,7 +20,6 @@ import javax.inject.Singleton
 class ProjectRepository @Inject constructor(
     private val projectDao: ProjectDao
 ) {
-    
     /**
      * Observes all projects with reactive updates.
      * 
@@ -57,7 +56,9 @@ class ProjectRepository @Inject constructor(
         stitchAdjustment: Int,
         totalStitchesEver: Int,
         updatedAt: Long
-    ) = projectDao.updateSingleCounterValues(id, stitchCount, stitchAdjustment, totalStitchesEver, updatedAt)
+    ) {
+        projectDao.updateSingleCounterValues(id, stitchCount, stitchAdjustment, totalStitchesEver, updatedAt)
+    }
 
     suspend fun updateDoubleCounterValues(
         id: Int,
@@ -67,6 +68,8 @@ class ProjectRepository @Inject constructor(
         rowAdjustment: Int,
         totalStitchesEver: Int,
         updatedAt: Long
-    ) = projectDao.updateDoubleCounterValues(id, stitchCount, stitchAdjustment, rowCount, rowAdjustment, totalStitchesEver, updatedAt)
+    ) {
+        projectDao.updateDoubleCounterValues(id, stitchCount, stitchAdjustment, rowCount, rowAdjustment, totalStitchesEver, updatedAt)
+    }
 }
 

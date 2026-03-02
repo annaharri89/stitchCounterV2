@@ -2,7 +2,7 @@ package dev.harrisonsoftware.stitchCounter.feature.theme
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.harrisonsoftware.stitchCounter.data.repo.ThemePreferencesRepository
+import dev.harrisonsoftware.stitchCounter.data.repo.AppPreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AppTheme
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ThemeViewModel @Inject constructor(
-    private val themePreferencesRepository: ThemePreferencesRepository
+    private val appPreferencesRepository: AppPreferencesRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ThemeUiState())
@@ -26,7 +26,7 @@ class ThemeViewModel @Inject constructor(
 
     private fun observeTheme() {
         viewModelScope.launch {
-            themePreferencesRepository.selectedTheme.collect { theme ->
+            appPreferencesRepository.selectedTheme.collect { theme ->
                 _uiState.update { currentState -> currentState.copy(selectedTheme = theme) }
             }
         }

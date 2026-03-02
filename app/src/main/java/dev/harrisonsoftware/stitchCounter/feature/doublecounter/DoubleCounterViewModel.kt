@@ -3,6 +3,7 @@ package dev.harrisonsoftware.stitchCounter.feature.doublecounter
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.harrisonsoftware.stitchCounter.data.repo.AppPreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount
 import dev.harrisonsoftware.stitchCounter.domain.model.CounterState
 import dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult
@@ -29,6 +30,7 @@ data class DoubleCounterUiState(
     val rowCounterState: CounterState = CounterState(),
     val totalRows: Int = 0,
     val totalStitchesEver: Int = 0,
+    val shouldShowCustomAdjustmentTip: Boolean = false,
 ) {
     val rowProgress: Float? = if (totalRows > 0) {
         (rowCounterState.count.toFloat() / totalRows.toFloat()).coerceIn(0f, 1f)
@@ -47,6 +49,7 @@ open class DoubleCounterViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getProject: GetProject,
     private val updateDoubleCounterValues: UpdateDoubleCounterValues,
+    private val appPreferencesRepository: AppPreferencesRepository,
 ) : ViewModel() {
 
     companion object {
@@ -67,11 +70,22 @@ open class DoubleCounterViewModel @Inject constructor(
 
     private var persistJob: Job? = null
 
+    init {
+        viewModelScope.launch {
+            if (appPreferencesRepository.consumeShouldShowCustomAdjustmentTip()) {
+                showCustomAdjustmentTip()
+            }
+        }
+    }
+
     fun loadProject(projectId: Int?) {
         viewModelScope.launch {
             if (projectId == null || projectId == 0) {
                 resetState()
                 return@launch
+            }
+            if (_uiState.value.id != projectId) {
+                _uiState.update { DoubleCounterUiState() }
             }
             val project = getProject(projectId)
             if (project != null) {
@@ -89,9 +103,30 @@ open class DoubleCounterViewModel @Inject constructor(
                     preserveCounters -> currentState.stitchCounterState.adjustment
                     restoreFromSavedState -> {
                         val saved = savedStateHandle.get<Int>(SAVED_STATE_KEY_STITCH_ADJUSTMENT)
-                        AdjustmentAmount.entries.find { it.adjustmentAmount == saved } ?: AdjustmentAmount.ONE
+                        AdjustmentAmount.fromPersistedAmount(
+                            amount = saved ?: AdjustmentAmount.ONE.defaultAmount,
+                            previousCustomAdjustmentAmount = currentState.stitchCounterState.customAdjustmentAmount
+                        ).first
                     }
-                    else -> AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE
+                    else -> AdjustmentAmount.fromPersistedAmount(
+                        amount = project.stitchAdjustment,
+                        previousCustomAdjustmentAmount = AdjustmentAmount.CUSTOM.defaultAmount
+                    ).first
+                }
+                val restoredStitchCustomAdjustment = when {
+                    preserveCounters -> currentState.stitchCounterState.customAdjustmentAmount
+                    restoreFromSavedState -> {
+                        val saved = savedStateHandle.get<Int>(SAVED_STATE_KEY_STITCH_ADJUSTMENT)
+                            ?: AdjustmentAmount.ONE.defaultAmount
+                        AdjustmentAmount.fromPersistedAmount(
+                            amount = saved,
+                            previousCustomAdjustmentAmount = currentState.stitchCounterState.customAdjustmentAmount
+                        ).second
+                    }
+                    else -> AdjustmentAmount.fromPersistedAmount(
+                        amount = project.stitchAdjustment,
+                        previousCustomAdjustmentAmount = AdjustmentAmount.CUSTOM.defaultAmount
+                    ).second
                 }
                 val restoredRowCount = when {
                     preserveCounters -> currentState.rowCounterState.count
@@ -102,9 +137,30 @@ open class DoubleCounterViewModel @Inject constructor(
                     preserveCounters -> currentState.rowCounterState.adjustment
                     restoreFromSavedState -> {
                         val saved = savedStateHandle.get<Int>(SAVED_STATE_KEY_ROW_ADJUSTMENT)
-                        AdjustmentAmount.entries.find { it.adjustmentAmount == saved } ?: AdjustmentAmount.ONE
+                        AdjustmentAmount.fromPersistedAmount(
+                            amount = saved ?: AdjustmentAmount.ONE.defaultAmount,
+                            previousCustomAdjustmentAmount = currentState.rowCounterState.customAdjustmentAmount
+                        ).first
                     }
-                    else -> AdjustmentAmount.entries.find { it.adjustmentAmount == project.rowAdjustment } ?: AdjustmentAmount.ONE
+                    else -> AdjustmentAmount.fromPersistedAmount(
+                        amount = project.rowAdjustment,
+                        previousCustomAdjustmentAmount = AdjustmentAmount.CUSTOM.defaultAmount
+                    ).first
+                }
+                val restoredRowCustomAdjustment = when {
+                    preserveCounters -> currentState.rowCounterState.customAdjustmentAmount
+                    restoreFromSavedState -> {
+                        val saved = savedStateHandle.get<Int>(SAVED_STATE_KEY_ROW_ADJUSTMENT)
+                            ?: AdjustmentAmount.ONE.defaultAmount
+                        AdjustmentAmount.fromPersistedAmount(
+                            amount = saved,
+                            previousCustomAdjustmentAmount = currentState.rowCounterState.customAdjustmentAmount
+                        ).second
+                    }
+                    else -> AdjustmentAmount.fromPersistedAmount(
+                        amount = project.rowAdjustment,
+                        previousCustomAdjustmentAmount = AdjustmentAmount.CUSTOM.defaultAmount
+                    ).second
                 }
                 val restoredTotalStitchesEver = when {
                     preserveCounters -> currentState.totalStitchesEver
@@ -118,11 +174,13 @@ open class DoubleCounterViewModel @Inject constructor(
                         title = project.title,
                         stitchCounterState = CounterState(
                             count = restoredStitchCount,
-                            adjustment = restoredStitchAdjustment
+                            adjustment = restoredStitchAdjustment,
+                            customAdjustmentAmount = restoredStitchCustomAdjustment
                         ),
                         rowCounterState = CounterState(
                             count = restoredRowCount,
-                            adjustment = restoredRowAdjustment
+                            adjustment = restoredRowAdjustment,
+                            customAdjustmentAmount = restoredRowCustomAdjustment
                         ),
                         totalRows = project.totalRows,
                         totalStitchesEver = restoredTotalStitchesEver
@@ -162,7 +220,7 @@ open class DoubleCounterViewModel @Inject constructor(
 
     fun increment(type: CounterType) {
         if (type == CounterType.STITCH) {
-            val adjustmentAmount = _uiState.value.stitchCounterState.adjustment.adjustmentAmount
+            val adjustmentAmount = _uiState.value.stitchCounterState.resolvedAdjustmentAmount
             _uiState.update { it.copy(totalStitchesEver = it.totalStitchesEver + adjustmentAmount) }
         }
         updateCounter(type) { it.increment() }
@@ -172,6 +230,21 @@ open class DoubleCounterViewModel @Inject constructor(
     fun reset(type: CounterType) = updateCounter(type) { it.reset() }
     fun changeAdjustment(type: CounterType, value: AdjustmentAmount) =
         updateCounter(type) { it.copy(adjustment = value) }
+    fun setCustomAdjustmentAmount(type: CounterType, value: Int) =
+        updateCounter(type) {
+            it.copy(
+                adjustment = AdjustmentAmount.CUSTOM,
+                customAdjustmentAmount = value.coerceAtLeast(1)
+            )
+        }
+
+    fun onCustomAdjustmentTipShown() {
+        _uiState.update { it.copy(shouldShowCustomAdjustmentTip = false) }
+    }
+
+    fun showCustomAdjustmentTip() {
+        _uiState.update { it.copy(shouldShowCustomAdjustmentTip = true) }
+    }
 
     fun attemptDismissal() {
         viewModelScope.launch {
@@ -215,9 +288,9 @@ open class DoubleCounterViewModel @Inject constructor(
             updateDoubleCounterValues(
                 id = state.id,
                 stitchCount = state.stitchCounterState.count,
-                stitchAdjustment = state.stitchCounterState.adjustment.adjustmentAmount,
+                stitchAdjustment = state.stitchCounterState.resolvedAdjustmentAmount,
                 rowCount = state.rowCounterState.count,
-                rowAdjustment = state.rowCounterState.adjustment.adjustmentAmount,
+                rowAdjustment = state.rowCounterState.resolvedAdjustmentAmount,
                 totalStitchesEver = state.totalStitchesEver,
                 updatedAt = System.currentTimeMillis()
             )
@@ -228,9 +301,9 @@ open class DoubleCounterViewModel @Inject constructor(
         val state = _uiState.value
         savedStateHandle[SAVED_STATE_KEY_PROJECT_ID] = state.id
         savedStateHandle[SAVED_STATE_KEY_STITCH_COUNT] = state.stitchCounterState.count
-        savedStateHandle[SAVED_STATE_KEY_STITCH_ADJUSTMENT] = state.stitchCounterState.adjustment.adjustmentAmount
+        savedStateHandle[SAVED_STATE_KEY_STITCH_ADJUSTMENT] = state.stitchCounterState.resolvedAdjustmentAmount
         savedStateHandle[SAVED_STATE_KEY_ROW_COUNT] = state.rowCounterState.count
-        savedStateHandle[SAVED_STATE_KEY_ROW_ADJUSTMENT] = state.rowCounterState.adjustment.adjustmentAmount
+        savedStateHandle[SAVED_STATE_KEY_ROW_ADJUSTMENT] = state.rowCounterState.resolvedAdjustmentAmount
         savedStateHandle[SAVED_STATE_KEY_TOTAL_ROWS] = state.totalRows
         savedStateHandle[SAVED_STATE_KEY_TOTAL_STITCHES_EVER] = state.totalStitchesEver
     }

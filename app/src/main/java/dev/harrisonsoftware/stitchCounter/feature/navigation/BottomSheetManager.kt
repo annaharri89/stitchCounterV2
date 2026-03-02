@@ -39,6 +39,7 @@ import dev.harrisonsoftware.stitchCounter.feature.singleCounter.SingleCounterVie
 fun BottomSheetManager(
     currentSheetScreen: SheetScreen?,
     viewModel: RootNavigationViewModel,
+    isWideLayout: Boolean,
     onDismissalResult: (DismissalResult) -> Unit
 ) {
     val isDismissalAllowedState = remember { mutableStateOf(false) }
@@ -328,6 +329,7 @@ fun BottomSheetManager(
                                             SingleCounterScreen(
                                                 projectId = currentScreen.projectId,
                                                 viewModel = singleCounterViewModel,
+                                                isWideLayout = isWideLayout,
                                                 onNavigateToDetail = { projectId ->
                                                     viewModel.showBottomSheet(
                                                         SheetScreen.ProjectDetail(
@@ -347,6 +349,7 @@ fun BottomSheetManager(
                                             DoubleCounterScreen(
                                                 projectId = currentScreen.projectId,
                                                 viewModel = doubleCounterViewModel,
+                                                isWideLayout = isWideLayout,
                                                 onNavigateToDetail = { projectId ->
                                                     viewModel.showBottomSheet(
                                                         SheetScreen.ProjectDetail(

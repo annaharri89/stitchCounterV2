@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -44,7 +45,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -54,8 +54,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.harrisonsoftware.stitchCounter.Constants
-import dev.harrisonsoftware.stitchCounter.domain.model.AppTheme
-import dev.harrisonsoftware.stitchCounter.feature.library.FireHeartIcon
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.ThemedAppIcon
 import kotlinx.coroutines.flow.takeWhile
 import dev.harrisonsoftware.stitchCounter.R
@@ -167,10 +165,14 @@ fun SupportAppScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .sizeIn(minHeight = 48.dp)
+                        .toggleable(
+                            value = hasSupported,
+                            role = Role.Switch,
+                            onValueChange = { viewModel.toggleSupported() }
+                        )
                         .padding(horizontal = 20.dp, vertical = 12.dp)
-                        .semantics(mergeDescendants = true) {
+                        .semantics {
                             contentDescription = toggleDescription
-                            role = Role.Switch
                         },
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -181,7 +183,7 @@ fun SupportAppScreen(
                     )
                     Switch(
                         checked = hasSupported,
-                        onCheckedChange = { viewModel.toggleSupported() }
+                        onCheckedChange = null
                     )
                 }
             }

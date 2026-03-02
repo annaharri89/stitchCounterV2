@@ -1,16 +1,20 @@
 package dev.harrisonsoftware.stitchCounter.domain.model
 
-enum class AdjustmentAmount(val text: String, val adjustmentAmount: Int) {
-    ONE(
-        text = "+1",
-        adjustmentAmount = 1
-    ),
-    FIVE(
-        text = "+5",
-        adjustmentAmount = 5
-    ),
-    TEN(
-        text = "+10",
-        adjustmentAmount = 10
-    )
+enum class AdjustmentAmount(val defaultAmount: Int) {
+    ONE(defaultAmount = 1),
+    FIVE(defaultAmount = 5),
+    CUSTOM(defaultAmount = 10);
+
+    companion object {
+        fun fromPersistedAmount(
+            amount: Int,
+            previousCustomAdjustmentAmount: Int = CUSTOM.defaultAmount
+        ): Pair<AdjustmentAmount, Int> {
+            return when (amount) {
+                ONE.defaultAmount -> ONE to previousCustomAdjustmentAmount
+                FIVE.defaultAmount -> FIVE to previousCustomAdjustmentAmount
+                else -> CUSTOM to amount.coerceAtLeast(1)
+            }
+        }
+    }
 }

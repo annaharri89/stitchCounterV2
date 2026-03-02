@@ -27,6 +27,7 @@ interface DoubleCounterActions {
     fun decrement(type: CounterType)
     fun reset(type: CounterType)
     fun changeAdjustment(type: CounterType, value: AdjustmentAmount)
+    fun setCustomAdjustmentAmount(type: CounterType, value: Int)
     fun resetAll()
 }
 
@@ -56,10 +57,12 @@ fun DoubleCounterPortraitLayout(
             label = stringResource(R.string.counter_type_stitches),
             count = state.stitchCounterState.count,
             selectedAdjustmentAmount = state.stitchCounterState.adjustment,
+            customAdjustmentAmount = state.stitchCounterState.customAdjustmentAmount,
             onIncrement = { actions.increment(CounterType.STITCH) },
             onDecrement = { actions.decrement(CounterType.STITCH) },
             onReset = { actions.reset(CounterType.STITCH) },
-            onAdjustmentClick = { actions.changeAdjustment(CounterType.STITCH, it) }
+            onAdjustmentClick = { actions.changeAdjustment(CounterType.STITCH, it) },
+            onCustomAdjustmentAmountChange = { actions.setCustomAdjustmentAmount(CounterType.STITCH, it) }
         )
 
         CounterView(
@@ -67,10 +70,12 @@ fun DoubleCounterPortraitLayout(
             label = stringResource(R.string.counter_type_rows_rounds),
             count = state.rowCounterState.count,
             selectedAdjustmentAmount = state.rowCounterState.adjustment,
+            customAdjustmentAmount = state.rowCounterState.customAdjustmentAmount,
             onIncrement = { actions.increment(CounterType.ROW) },
             onDecrement = { actions.decrement(CounterType.ROW) },
             onReset = { actions.reset(CounterType.ROW) },
-            onAdjustmentClick = { actions.changeAdjustment(CounterType.ROW, it) }
+            onAdjustmentClick = { actions.changeAdjustment(CounterType.ROW, it) },
+            onCustomAdjustmentAmountChange = { actions.setCustomAdjustmentAmount(CounterType.ROW, it) }
         )
         
         Spacer(modifier = Modifier.weight(1f))
@@ -92,6 +97,7 @@ private fun DoubleCounterPortraitPreview() {
                 override fun decrement(type: CounterType) {}
                 override fun reset(type: CounterType) {}
                 override fun changeAdjustment(type: CounterType, value: AdjustmentAmount) {}
+                override fun setCustomAdjustmentAmount(type: CounterType, value: Int) {}
                 override fun resetAll() {}
             }
             

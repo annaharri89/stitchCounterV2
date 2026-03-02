@@ -3,6 +3,7 @@ package dev.harrisonsoftware.stitchCounter.feature.singleCounter
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.harrisonsoftware.stitchCounter.data.repo.AppPreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount
 import dev.harrisonsoftware.stitchCounter.domain.model.CounterState
 import dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult
@@ -27,6 +28,7 @@ data class SingleCounterUiState(
     val title: String = "",
     val counterState: CounterState = CounterState(),
     val totalStitchesEver: Int = 0,
+    val shouldShowCustomAdjustmentTip: Boolean = false,
 )
 
 @HiltViewModel
@@ -34,6 +36,7 @@ open class SingleCounterViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getProject: GetProject,
     private val updateSingleCounterValues: UpdateSingleCounterValues,
+    private val appPreferencesRepository: AppPreferencesRepository,
 ) : ViewModel() {
 
     companion object {
@@ -51,11 +54,22 @@ open class SingleCounterViewModel @Inject constructor(
 
     private var persistJob: Job? = null
 
+    init {
+        viewModelScope.launch {
+            if (appPreferencesRepository.consumeShouldShowCustomAdjustmentTip()) {
+                showCustomAdjustmentTip()
+            }
+        }
+    }
+
     fun loadProject(projectId: Int?) {
         viewModelScope.launch {
             if (projectId == null || projectId == 0) {
                 resetState()
                 return@launch
+            }
+            if (_uiState.value.id != projectId) {
+                _uiState.update { SingleCounterUiState() }
             }
             val project = getProject(projectId)
             if (project != null) {
@@ -73,9 +87,30 @@ open class SingleCounterViewModel @Inject constructor(
                     preserveCounter -> currentState.counterState.adjustment
                     restoreFromSavedState -> {
                         val savedAdjustment = savedStateHandle.get<Int>(SAVED_STATE_KEY_COUNTER_ADJUSTMENT)
-                        AdjustmentAmount.entries.find { it.adjustmentAmount == savedAdjustment } ?: AdjustmentAmount.ONE
+                        AdjustmentAmount.fromPersistedAmount(
+                            amount = savedAdjustment ?: AdjustmentAmount.ONE.defaultAmount,
+                            previousCustomAdjustmentAmount = currentState.counterState.customAdjustmentAmount
+                        ).first
                     }
-                    else -> AdjustmentAmount.entries.find { it.adjustmentAmount == project.stitchAdjustment } ?: AdjustmentAmount.ONE
+                    else -> AdjustmentAmount.fromPersistedAmount(
+                        amount = project.stitchAdjustment,
+                        previousCustomAdjustmentAmount = AdjustmentAmount.CUSTOM.defaultAmount
+                    ).first
+                }
+                val restoredCustomAdjustmentAmount = when {
+                    preserveCounter -> currentState.counterState.customAdjustmentAmount
+                    restoreFromSavedState -> {
+                        val savedAdjustment = savedStateHandle.get<Int>(SAVED_STATE_KEY_COUNTER_ADJUSTMENT)
+                            ?: AdjustmentAmount.ONE.defaultAmount
+                        AdjustmentAmount.fromPersistedAmount(
+                            amount = savedAdjustment,
+                            previousCustomAdjustmentAmount = currentState.counterState.customAdjustmentAmount
+                        ).second
+                    }
+                    else -> AdjustmentAmount.fromPersistedAmount(
+                        amount = project.stitchAdjustment,
+                        previousCustomAdjustmentAmount = AdjustmentAmount.CUSTOM.defaultAmount
+                    ).second
                 }
                 val restoredTotalStitchesEver = when {
                     preserveCounter -> currentState.totalStitchesEver
@@ -89,7 +124,8 @@ open class SingleCounterViewModel @Inject constructor(
                         title = project.title,
                         counterState = CounterState(
                             count = restoredCount,
-                            adjustment = restoredAdjustment
+                            adjustment = restoredAdjustment,
+                            customAdjustmentAmount = restoredCustomAdjustmentAmount
                         ),
                         totalStitchesEver = restoredTotalStitchesEver
                     )
@@ -117,11 +153,33 @@ open class SingleCounterViewModel @Inject constructor(
         _uiState.update { currentState ->
             currentState.copy(
                 counterState = currentState.counterState.increment(),
-                totalStitchesEver = currentState.totalStitchesEver + currentState.counterState.adjustment.adjustmentAmount
+                totalStitchesEver = currentState.totalStitchesEver + currentState.counterState.resolvedAdjustmentAmount
             )
         }
         persistToSavedState()
         persistToRoom()
+    }
+
+    fun setCustomAdjustmentAmount(value: Int) {
+        val normalizedAmount = value.coerceAtLeast(1)
+        _uiState.update { currentState ->
+            currentState.copy(
+                counterState = currentState.counterState.copy(
+                    adjustment = AdjustmentAmount.CUSTOM,
+                    customAdjustmentAmount = normalizedAmount
+                )
+            )
+        }
+        persistToSavedState()
+        persistToRoom()
+    }
+
+    fun onCustomAdjustmentTipShown() {
+        _uiState.update { it.copy(shouldShowCustomAdjustmentTip = false) }
+    }
+
+    fun showCustomAdjustmentTip() {
+        _uiState.update { it.copy(shouldShowCustomAdjustmentTip = true) }
     }
 
     fun decrement() {
@@ -181,7 +239,7 @@ open class SingleCounterViewModel @Inject constructor(
             updateSingleCounterValues(
                 id = state.id,
                 stitchCount = state.counterState.count,
-                stitchAdjustment = state.counterState.adjustment.adjustmentAmount,
+                stitchAdjustment = state.counterState.resolvedAdjustmentAmount,
                 totalStitchesEver = state.totalStitchesEver,
                 updatedAt = System.currentTimeMillis()
             )
@@ -192,7 +250,7 @@ open class SingleCounterViewModel @Inject constructor(
         val state = _uiState.value
         savedStateHandle[SAVED_STATE_KEY_PROJECT_ID] = state.id
         savedStateHandle[SAVED_STATE_KEY_COUNTER_COUNT] = state.counterState.count
-        savedStateHandle[SAVED_STATE_KEY_COUNTER_ADJUSTMENT] = state.counterState.adjustment.adjustmentAmount
+        savedStateHandle[SAVED_STATE_KEY_COUNTER_ADJUSTMENT] = state.counterState.resolvedAdjustmentAmount
         savedStateHandle[SAVED_STATE_KEY_TOTAL_STITCHES_EVER] = state.totalStitchesEver
     }
 

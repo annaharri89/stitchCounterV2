@@ -2,8 +2,7 @@ package dev.harrisonsoftware.stitchCounter.feature.supportApp
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.harrisonsoftware.stitchCounter.data.repo.SupportAppPreferencesRepository
-import dev.harrisonsoftware.stitchCounter.data.repo.ThemePreferencesRepository
+import dev.harrisonsoftware.stitchCounter.data.repo.AppPreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AppTheme
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,8 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SupportAppViewModel @Inject constructor(
-    private val supportAppPreferencesRepository: SupportAppPreferencesRepository,
-    private val themePreferencesRepository: ThemePreferencesRepository
+    private val appPreferencesRepository: AppPreferencesRepository
 ) : ViewModel() {
 
     private val _hasSupported = MutableStateFlow(false)
@@ -31,7 +29,7 @@ class SupportAppViewModel @Inject constructor(
 
     private fun observeSupportState() {
         viewModelScope.launch {
-            supportAppPreferencesRepository.hasSupported.collect { supported ->
+            appPreferencesRepository.hasSupported.collect { supported ->
                 _hasSupported.value = supported
             }
         }
@@ -39,7 +37,7 @@ class SupportAppViewModel @Inject constructor(
 
     private fun observeTheme() {
         viewModelScope.launch {
-            themePreferencesRepository.selectedTheme.collect { theme ->
+            appPreferencesRepository.selectedTheme.collect { theme ->
                 _selectedTheme.value = theme
             }
         }
@@ -48,7 +46,7 @@ class SupportAppViewModel @Inject constructor(
     fun toggleSupported() {
         viewModelScope.launch {
             val newValue = !_hasSupported.value
-            supportAppPreferencesRepository.setHasSupported(newValue)
+            appPreferencesRepository.setHasSupported(newValue)
         }
     }
 }

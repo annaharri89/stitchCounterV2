@@ -5,14 +5,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -130,39 +127,16 @@ fun ResizableText(
             currentSize.coerceIn(absoluteMinFontSize, maxFontSize)
         }
         
-        val finalFontSize = remember { mutableFloatStateOf(fontSize) }
-        
-        LaunchedEffect(text, fontSize) {
-            finalFontSize.floatValue = fontSize
-        }
-        
         Text(
             text = text,
             maxLines = 1,
             softWrap = false,
             style = MaterialTheme.typography.displayLarge.copy(
-                fontSize = finalFontSize.floatValue.sp,
+                fontSize = fontSize.sp,
                 fontWeight = fontWeight
             ),
             textAlign = textAlign,
             modifier = Modifier.fillMaxWidth(),
-            onTextLayout = { layoutResult: TextLayoutResult ->
-                val measuredWidth = layoutResult.size.width.toFloat()
-                val didOverflow = layoutResult.didOverflowWidth || measuredWidth > maxTextWidth
-                val absoluteMin = minFontSize * 0.5f
-                
-                if (didOverflow && finalFontSize.floatValue > absoluteMin) {
-                    val scaleFactor = if (measuredWidth > 0) {
-                        (maxTextWidth / measuredWidth * 0.95f).coerceIn(0.5f, 0.95f)
-                    } else {
-                        0.9f
-                    }
-                    val newSize = (finalFontSize.floatValue * scaleFactor).coerceAtLeast(absoluteMin)
-                    if (newSize < finalFontSize.floatValue) {
-                        finalFontSize.floatValue = newSize
-                    }
-                }
-            }
         )
     }
 }

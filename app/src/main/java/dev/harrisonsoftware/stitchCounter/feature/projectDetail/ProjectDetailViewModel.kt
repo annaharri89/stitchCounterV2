@@ -77,6 +77,11 @@ class ProjectDetailViewModel @Inject constructor(
             _uiState.update { currentState -> currentState.copy(isLoading = true) }
 
             if (projectId == null || projectId == 0) {
+                val savedProjectId = savedStateHandle.get<Int>(SAVED_STATE_KEY_PROJECT_ID)
+                val previousProjectAlreadyCreated = savedProjectId != null && savedProjectId > 0
+                if (previousProjectAlreadyCreated) {
+                    clearSavedState()
+                }
                 val restoredTitle = savedStateHandle.get<String>(SAVED_STATE_KEY_TITLE)
                 val restoredNotes = savedStateHandle.get<String>(SAVED_STATE_KEY_NOTES)
                 val restoredTotalRows = savedStateHandle.get<String>(SAVED_STATE_KEY_TOTAL_ROWS)

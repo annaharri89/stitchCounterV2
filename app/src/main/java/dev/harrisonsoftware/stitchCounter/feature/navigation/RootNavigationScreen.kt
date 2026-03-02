@@ -20,7 +20,10 @@ import com.ramcosta.composedestinations.navigation.dependency
     ExperimentalAnimationApi::class
 )
 @Composable
-fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
+fun RootNavigationScreen(
+    viewModel: RootNavigationViewModel,
+    isWideLayout: Boolean
+) {
     val selectedTab = viewModel.selectedTab.collectAsStateWithLifecycle().value
     val configuration = LocalConfiguration.current
     val isCompact = configuration.screenWidthDp < 600
@@ -59,6 +62,7 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
                 engine = rememberAnimatedNavHostEngine(),
                 dependenciesContainerBuilder = {
                     dependency(NavGraphs.root) { viewModel }
+                    dependency(NavGraphs.root) { isWideLayout }
                 }
             )
         }
@@ -67,6 +71,7 @@ fun RootNavigationScreen(viewModel: RootNavigationViewModel) {
     BottomSheetManager(
         currentSheetScreen = currentSheetScreen,
         viewModel = viewModel,
+        isWideLayout = isWideLayout,
         onDismissalResult = { }
     )
 }

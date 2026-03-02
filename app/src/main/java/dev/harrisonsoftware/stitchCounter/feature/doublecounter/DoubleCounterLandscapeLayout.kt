@@ -52,11 +52,13 @@ fun DoubleCounterLandscapeLayout(
                 label = stringResource(R.string.counter_type_stitches),
                 count = state.stitchCounterState.count,
                 selectedAdjustmentAmount = state.stitchCounterState.adjustment,
+                customAdjustmentAmount = state.stitchCounterState.customAdjustmentAmount,
                 incrementFontSize = 40,
                 decrementFontSize = 50,
                 onIncrement = { actions.increment(CounterType.STITCH) },
                 onDecrement = { actions.decrement(CounterType.STITCH) },
                 onAdjustmentClick = { actions.changeAdjustment(CounterType.STITCH, it) },
+                onCustomAdjustmentAmountChange = { actions.setCustomAdjustmentAmount(CounterType.STITCH, it) },
                 onReset = { actions.reset(CounterType.STITCH) }
             )
 
@@ -65,11 +67,13 @@ fun DoubleCounterLandscapeLayout(
                 label = stringResource(R.string.counter_type_rows_rounds),
                 count = state.rowCounterState.count,
                 selectedAdjustmentAmount = state.rowCounterState.adjustment,
+                customAdjustmentAmount = state.rowCounterState.customAdjustmentAmount,
                 incrementFontSize = 40,
                 decrementFontSize = 50,
                 onIncrement = { actions.increment(CounterType.ROW) },
                 onDecrement = { actions.decrement(CounterType.ROW) },
                 onAdjustmentClick = { actions.changeAdjustment(CounterType.ROW, it) },
+                onCustomAdjustmentAmountChange = { actions.setCustomAdjustmentAmount(CounterType.ROW, it) },
                 onReset = { actions.reset(CounterType.ROW) }
             )
         }
@@ -81,7 +85,7 @@ fun DoubleCounterLandscapeLayout(
     }
 }
 
-@Preview
+@Preview(name = "Landscape", widthDp = 800, heightDp = 360, showBackground = true)
 @Composable
 private fun DoubleCounterLandscapePreview() {
     StitchCounterV3Theme {
@@ -91,6 +95,7 @@ private fun DoubleCounterLandscapePreview() {
                 override fun decrement(type: CounterType) {}
                 override fun reset(type: CounterType) {}
                 override fun changeAdjustment(type: CounterType, value: AdjustmentAmount) {}
+                override fun setCustomAdjustmentAmount(type: CounterType, value: Int) {}
                 override fun resetAll() {}
             }
             

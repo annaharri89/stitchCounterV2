@@ -6,12 +6,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
-import dev.harrisonsoftware.stitchCounter.data.repo.ThemePreferencesRepository
+import dev.harrisonsoftware.stitchCounter.data.repo.AppPreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AppTheme
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavigationScreen
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavigationViewModel
@@ -27,11 +30,12 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject
-    lateinit var themePreferencesRepository: ThemePreferencesRepository
+    lateinit var appPreferencesRepository: AppPreferencesRepository
 
     @Inject
     lateinit var launcherIconManager: LauncherIconManager
 
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -44,10 +48,15 @@ class MainActivity : ComponentActivity() {
             val themeViewModel: ThemeViewModel = hiltViewModel()
             val rootNavigationViewModel: RootNavigationViewModel = hiltViewModel()
             val themeUiState by themeViewModel.uiState.collectAsStateWithLifecycle()
+            val windowSizeClass = calculateWindowSizeClass(this)
+            val isWideLayout = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
             
             StitchCounterV3Theme(theme = themeUiState.selectedTheme) {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    RootNavigationScreen(viewModel = rootNavigationViewModel)
+                    RootNavigationScreen(
+                        viewModel = rootNavigationViewModel,
+                        isWideLayout = isWideLayout
+                    )
                 }
             }
         }
@@ -63,7 +72,7 @@ class MainActivity : ComponentActivity() {
     private fun initializeLauncherIcon() {
         lifecycleScope.launch {
             try {
-                val currentTheme = themePreferencesRepository.selectedTheme.first()
+                val currentTheme = appPreferencesRepository.selectedTheme.first()
                 launcherIconManager.updateLauncherIcon(currentTheme)
             } catch (e: Exception) {
                 // If there's an error reading the theme, default to Dusty Rose
