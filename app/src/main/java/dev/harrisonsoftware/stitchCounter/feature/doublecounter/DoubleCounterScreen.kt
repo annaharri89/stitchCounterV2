@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -36,7 +35,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 fun DoubleCounterScreen(
     projectId: Int? = null,
     viewModel: DoubleCounterViewModel = hiltViewModel(),
-    windowSizeClass: WindowSizeClass,
+    isWideLayout: Boolean,
     onNavigateToDetail: ((Int) -> Unit)? = null
 ) {
     LaunchedEffect(projectId) {
@@ -101,7 +100,7 @@ fun DoubleCounterScreen(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             AdaptiveLayout(
-                windowSizeClass = windowSizeClass,
+                isWideLayout = isWideLayout,
                 portraitContent = {
                     DoubleCounterPortraitLayout(
                         state = state,
