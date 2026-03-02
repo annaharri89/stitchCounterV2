@@ -10,6 +10,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
@@ -24,7 +28,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.window.Dialog
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -61,6 +67,37 @@ fun LibraryScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val hasSupported by supportAppViewModel.hasSupported.collectAsStateWithLifecycle()
     var showNewProjectDialog by remember { mutableStateOf(false) }
+
+    val currentSheet by rootNavigationViewModel.currentSheet.collectAsStateWithLifecycle()
+    val lazyListState = rememberLazyListState()
+    val projectCountWhenSheetOpened = remember { mutableIntStateOf(-1) }
+    val sheetWasOpenedDuringSession = remember { mutableStateOf(false) }
+
+    LaunchedEffect(currentSheet) {
+        if (!sheetWasOpenedDuringSession.value && currentSheet != null) {
+            sheetWasOpenedDuringSession.value = true
+            projectCountWhenSheetOpened.intValue = projects.size
+        }
+        if (sheetWasOpenedDuringSession.value && currentSheet == null) {
+            sheetWasOpenedDuringSession.value = false
+        }
+    }
+
+    LaunchedEffect(currentSheet, projects.size) {
+        if (currentSheet == null && projectCountWhenSheetOpened.intValue >= 0 && projects.size > projectCountWhenSheetOpened.intValue) {
+            val averageItemHeight = lazyListState.layoutInfo.visibleItemsInfo
+                .map { it.size }
+                .average()
+                .takeIf { !it.isNaN() } ?: 100.0
+            val itemsToScroll = projects.lastIndex - lazyListState.firstVisibleItemIndex
+            val estimatedScrollDistance = (itemsToScroll * averageItemHeight).toFloat()
+            lazyListState.animateScrollBy(
+                estimatedScrollDistance,
+                tween(durationMillis = 600, easing = FastOutSlowInEasing)
+            )
+            projectCountWhenSheetOpened.intValue = -1
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -118,6 +155,7 @@ fun LibraryScreen(
                 }
                 else -> {
                     LazyColumn(
+                        state = lazyListState,
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(
                             top = paddingValues.calculateTopPadding(),
