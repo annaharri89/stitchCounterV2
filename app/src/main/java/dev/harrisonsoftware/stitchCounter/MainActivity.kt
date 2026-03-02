@@ -14,7 +14,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
-import dev.harrisonsoftware.stitchCounter.data.repo.ThemePreferencesRepository
+import dev.harrisonsoftware.stitchCounter.data.repo.AppPreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AppTheme
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavigationScreen
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavigationViewModel
@@ -30,7 +30,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject
-    lateinit var themePreferencesRepository: ThemePreferencesRepository
+    lateinit var appPreferencesRepository: AppPreferencesRepository
 
     @Inject
     lateinit var launcherIconManager: LauncherIconManager
@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
     private fun initializeLauncherIcon() {
         lifecycleScope.launch {
             try {
-                val currentTheme = themePreferencesRepository.selectedTheme.first()
+                val currentTheme = appPreferencesRepository.selectedTheme.first()
                 launcherIconManager.updateLauncherIcon(currentTheme)
             } catch (e: Exception) {
                 // If there's an error reading the theme, default to Dusty Rose

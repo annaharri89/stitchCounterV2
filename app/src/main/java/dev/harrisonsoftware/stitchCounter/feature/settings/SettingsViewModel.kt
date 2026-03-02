@@ -3,7 +3,7 @@ package dev.harrisonsoftware.stitchCounter.feature.settings
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.harrisonsoftware.stitchCounter.data.repo.ThemePreferencesRepository
+import dev.harrisonsoftware.stitchCounter.data.repo.AppPreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AppTheme
 import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
 import dev.harrisonsoftware.stitchCounter.domain.usecase.ExportLibrary
@@ -24,7 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val themePreferencesRepository: ThemePreferencesRepository,
+    private val appPreferencesRepository: AppPreferencesRepository,
     private val themeManager: ThemeManager,
     private val launcherIconManager: LauncherIconManager,
     private val exportLibraryUseCase: ExportLibrary,
@@ -43,7 +43,7 @@ class SettingsViewModel @Inject constructor(
 
     private fun observeTheme() {
         viewModelScope.launch {
-            themePreferencesRepository.selectedTheme.collect { theme ->
+            appPreferencesRepository.selectedTheme.collect { theme ->
                 _uiState.update { currentState ->
                     currentState.copy(
                         selectedTheme = theme,
@@ -56,7 +56,7 @@ class SettingsViewModel @Inject constructor(
 
     fun onThemeSelected(theme: AppTheme) {
         viewModelScope.launch {
-            themePreferencesRepository.setTheme(theme)
+            appPreferencesRepository.setTheme(theme)
             launcherIconManager.pendingTheme = theme
         }
     }

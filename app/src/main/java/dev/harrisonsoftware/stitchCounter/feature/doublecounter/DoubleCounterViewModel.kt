@@ -3,7 +3,7 @@ package dev.harrisonsoftware.stitchCounter.feature.doublecounter
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.harrisonsoftware.stitchCounter.data.repo.CounterPreferencesRepository
+import dev.harrisonsoftware.stitchCounter.data.repo.AppPreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount
 import dev.harrisonsoftware.stitchCounter.domain.model.CounterState
 import dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult
@@ -49,7 +49,7 @@ open class DoubleCounterViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getProject: GetProject,
     private val updateDoubleCounterValues: UpdateDoubleCounterValues,
-    private val counterPreferencesRepository: CounterPreferencesRepository,
+    private val appPreferencesRepository: AppPreferencesRepository,
 ) : ViewModel() {
 
     companion object {
@@ -72,7 +72,7 @@ open class DoubleCounterViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            if (counterPreferencesRepository.consumeShouldShowCustomAdjustmentTip()) {
+            if (appPreferencesRepository.consumeShouldShowCustomAdjustmentTip()) {
                 showCustomAdjustmentTip()
             }
         }
@@ -83,6 +83,9 @@ open class DoubleCounterViewModel @Inject constructor(
             if (projectId == null || projectId == 0) {
                 resetState()
                 return@launch
+            }
+            if (_uiState.value.id != projectId) {
+                _uiState.update { DoubleCounterUiState() }
             }
             val project = getProject(projectId)
             if (project != null) {
@@ -107,7 +110,7 @@ open class DoubleCounterViewModel @Inject constructor(
                     }
                     else -> AdjustmentAmount.fromPersistedAmount(
                         amount = project.stitchAdjustment,
-                        previousCustomAdjustmentAmount = currentState.stitchCounterState.customAdjustmentAmount
+                        previousCustomAdjustmentAmount = AdjustmentAmount.CUSTOM.defaultAmount
                     ).first
                 }
                 val restoredStitchCustomAdjustment = when {
@@ -122,7 +125,7 @@ open class DoubleCounterViewModel @Inject constructor(
                     }
                     else -> AdjustmentAmount.fromPersistedAmount(
                         amount = project.stitchAdjustment,
-                        previousCustomAdjustmentAmount = currentState.stitchCounterState.customAdjustmentAmount
+                        previousCustomAdjustmentAmount = AdjustmentAmount.CUSTOM.defaultAmount
                     ).second
                 }
                 val restoredRowCount = when {
@@ -141,7 +144,7 @@ open class DoubleCounterViewModel @Inject constructor(
                     }
                     else -> AdjustmentAmount.fromPersistedAmount(
                         amount = project.rowAdjustment,
-                        previousCustomAdjustmentAmount = currentState.rowCounterState.customAdjustmentAmount
+                        previousCustomAdjustmentAmount = AdjustmentAmount.CUSTOM.defaultAmount
                     ).first
                 }
                 val restoredRowCustomAdjustment = when {
@@ -156,7 +159,7 @@ open class DoubleCounterViewModel @Inject constructor(
                     }
                     else -> AdjustmentAmount.fromPersistedAmount(
                         amount = project.rowAdjustment,
-                        previousCustomAdjustmentAmount = currentState.rowCounterState.customAdjustmentAmount
+                        previousCustomAdjustmentAmount = AdjustmentAmount.CUSTOM.defaultAmount
                     ).second
                 }
                 val restoredTotalStitchesEver = when {

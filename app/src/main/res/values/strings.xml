@@ -8,6 +8,8 @@
     <string name="action_delete">Delete</string>
     <string name="action_discard">Discard</string>
     <string name="action_ok">OK</string>
+    <string name="action_save">Save</string>
+    <string name="action_edit">Edit</string>
 
     <!-- Counter -->
     <string name="counter_type_stitches">Stitches</string>
@@ -18,6 +20,11 @@
     <string name="reset_named_counter_message">Are you sure you want to reset the %1$s counter to 0?</string>
     <string name="reset_all_counters_title">Reset All Counters?</string>
     <string name="reset_all_counters_message">Are you sure you want to reset both Stitches and Rows/Rounds counters to 0?</string>
+    <string name="tip_custom_adjustment">Tip: Tap the pencil icon next to the custom step to set your own increment amount.</string>
+    <string name="title_set_custom_adjustment">Set custom increment</string>
+    <string name="label_custom_adjustment">Custom increment amount</string>
+    <string name="placeholder_custom_adjustment">Enter a number</string>
+    <string name="error_custom_adjustment_invalid">Enter a value greater than 0</string>
 
     <!-- Library -->
     <string name="library_title">Library</string>
@@ -146,6 +153,7 @@
     <string name="cd_named_current_count">%1$s: %2$d</string>
     <string name="cd_adjustment_amount">Adjust by %1$s</string>
     <string name="cd_adjustment_amount_selected">Adjust by %1$s, selected</string>
+    <string name="cd_edit_custom_adjustment">Edit custom increment amount</string>
     <string name="cd_row_progress">Row progress: %1$d of %2$d</string>
     <string name="cd_theme_icon">%1$s theme icon</string>
     <string name="cd_color_swatch_light">%1$s light color</string>
