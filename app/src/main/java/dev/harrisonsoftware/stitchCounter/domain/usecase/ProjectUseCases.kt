@@ -59,7 +59,9 @@ class UpdateSingleCounterValues @Inject constructor(
         totalStitchesEver: Int,
         updatedAt: Long
     ) = repo.updateSingleCounterValues(id, stitchCount, stitchAdjustment, totalStitchesEver, updatedAt)
-}@Singleton
+}
+
+@Singleton
 class UpdateDoubleCounterValues @Inject constructor(
     private val repo: ProjectRepository
 ) {
@@ -72,4 +74,19 @@ class UpdateDoubleCounterValues @Inject constructor(
         totalStitchesEver: Int,
         updatedAt: Long
     ) = repo.updateDoubleCounterValues(id, stitchCount, stitchAdjustment, rowCount, rowAdjustment, totalStitchesEver, updatedAt)
+}
+
+@Singleton
+class UpdateProjectDetailValues @Inject constructor(
+    private val repo: ProjectRepository
+) {
+    suspend operator fun invoke(
+        id: Int,
+        title: String,
+        notes: String,
+        totalRows: Int,
+        imagePaths: List<String>,
+        completedAt: Long?,
+        updatedAt: Long
+    ) = repo.updateProjectDetailValues(id, title, notes, totalRows, imagePaths, completedAt, updatedAt)
 }
