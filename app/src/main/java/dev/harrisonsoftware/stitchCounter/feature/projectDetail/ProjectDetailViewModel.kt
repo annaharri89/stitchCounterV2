@@ -9,6 +9,7 @@ import dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult
 import dev.harrisonsoftware.stitchCounter.domain.model.Project
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.domain.usecase.GetProject
+import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateProjectDetailValues
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpsertProject
 import android.content.Context
 import android.net.Uri
@@ -47,6 +48,7 @@ class ProjectDetailViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getProject: GetProject,
     private val upsertProject: UpsertProject,
+    private val updateProjectDetailValues: UpdateProjectDetailValues,
 ) : ViewModel() {
 
     companion object {
@@ -347,56 +349,80 @@ class ProjectDetailViewModel @Inject constructor(
         val staleProject = state.project
         val projectId = staleProject?.id ?: 0
         val totalRowsValue = state.totalRows.toIntOrNull() ?: 0
+        val now = System.currentTimeMillis()
+        val completedAt = if (state.isCompleted) (staleProject?.completedAt ?: now) else null
 
-        val freshProject = if (projectId > 0) getProject(projectId) else null
-        val baseProject = freshProject ?: staleProject
+        if (projectId > 0) {
+            updateProjectDetailValues(
+                id = projectId,
+                title = state.title,
+                notes = state.notes,
+                totalRows = totalRowsValue,
+                projectType = state.projectType,
+                imagePaths = state.imagePaths,
+                completedAt = completedAt,
+                updatedAt = now
+            )
+            val freshProject = getProject(projectId)
+            if (freshProject != null) {
+                originalTitle = state.title
+                originalNotes = state.notes
+                originalTotalRows = state.totalRows
+                originalImagePaths = state.imagePaths
+                originalIsCompleted = state.isCompleted
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        project = freshProject,
+                        imagePaths = freshProject.imagePaths,
+                        hasUnsavedChanges = false
+                    )
+                }
+            }
+        } else {
+            val freshProject = if (projectId > 0) getProject(projectId) else null
+            val baseProject = freshProject ?: staleProject
+            val project = Project(
+                id = 0,
+                type = state.projectType,
+                title = state.title,
+                notes = state.notes,
+                stitchCounterNumber = baseProject?.stitchCounterNumber ?: 0,
+                stitchAdjustment = baseProject?.stitchAdjustment ?: 1,
+                rowCounterNumber = baseProject?.rowCounterNumber ?: 0,
+                rowAdjustment = baseProject?.rowAdjustment ?: 1,
+                totalRows = totalRowsValue,
+                imagePaths = state.imagePaths,
+                createdAt = now,
+                updatedAt = now,
+                completedAt = completedAt,
+                totalStitchesEver = 0,
+            )
+            val newId = upsertProject(project).toInt()
+            if (newId > 0) {
+                val updatedProject = project.copy(id = newId)
+                originalTitle = state.title
+                originalNotes = state.notes
+                originalTotalRows = state.totalRows
+                originalImagePaths = updatedProject.imagePaths
+                originalIsCompleted = state.isCompleted
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        project = updatedProject,
+                        imagePaths = updatedProject.imagePaths,
+                        hasUnsavedChanges = false
+                    )
+                }
+                persistToSavedState()
+            }
+        }
+    }
 
-        val project = Project(
-            id = projectId,
-            type = state.projectType,
-            title = state.title,
-            notes = state.notes,
-            stitchCounterNumber = baseProject?.stitchCounterNumber ?: 0,
-            stitchAdjustment = baseProject?.stitchAdjustment ?: 1,
-            rowCounterNumber = baseProject?.rowCounterNumber ?: 0,
-            rowAdjustment = baseProject?.rowAdjustment ?: 1,
-            totalRows = totalRowsValue,
-            imagePaths = state.imagePaths,
-            createdAt = baseProject?.createdAt ?: System.currentTimeMillis(),
-            updatedAt = System.currentTimeMillis(),
-            completedAt = if (state.isCompleted) (baseProject?.completedAt ?: System.currentTimeMillis()) else null,
-            totalStitchesEver = baseProject?.totalStitchesEver ?: 0,
-        )
-        val newId = upsertProject(project).toInt()
-        if (projectId == 0 && newId > 0) {
-            val updatedProject = project.copy(id = newId)
-            originalTitle = state.title
-            originalNotes = state.notes
-            originalTotalRows = state.totalRows
-            originalImagePaths = updatedProject.imagePaths
-            originalIsCompleted = state.isCompleted
-            _uiState.update { currentState ->
-                currentState.copy(
-                    project = updatedProject,
-                    imagePaths = updatedProject.imagePaths,
-                    hasUnsavedChanges = false
-                )
-            }
-            persistToSavedState()
-        } else if (projectId > 0) {
-            val updatedProject = project.copy(id = projectId)
-            originalTitle = state.title
-            originalNotes = state.notes
-            originalTotalRows = state.totalRows
-            originalImagePaths = updatedProject.imagePaths
-            originalIsCompleted = state.isCompleted
-            _uiState.update { currentState ->
-                currentState.copy(
-                    project = updatedProject,
-                    imagePaths = updatedProject.imagePaths,
-                    hasUnsavedChanges = false
-                )
-            }
+    suspend fun ensureSaved() {
+        autoSaveJob?.cancel()
+        val state = _uiState.value
+        val isExistingProject = state.project?.id != null && state.project.id > 0
+        if (state.hasUnsavedChanges && isExistingProject) {
+            saveToRoom()
         }
     }
 

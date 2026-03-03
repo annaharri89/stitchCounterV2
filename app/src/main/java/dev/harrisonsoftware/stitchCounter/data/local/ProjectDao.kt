@@ -72,6 +72,26 @@ interface ProjectDao {
 
     @Query("""
         UPDATE entry 
+        SET title = :title,
+            notes = :notes,
+            total_rows = :totalRows,
+            image_paths = :imagePaths,
+            completed_at = :completedAt,
+            updated_at = :updatedAt
+        WHERE _id = :id
+    """)
+    suspend fun updateProjectDetailValues(
+        id: Int,
+        title: String,
+        notes: String,
+        totalRows: Int,
+        imagePaths: List<String>,
+        completedAt: Long?,
+        updatedAt: Long
+    )
+
+    @Query("""
+        UPDATE entry 
         SET stitch_counter_number = :stitchCount,
             stitch_adjustment = :stitchAdjustment,
             total_stitches_ever = :totalStitchesEver,

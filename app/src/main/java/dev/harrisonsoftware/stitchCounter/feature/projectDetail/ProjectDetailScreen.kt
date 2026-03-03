@@ -297,9 +297,7 @@ fun ProjectDetailScreenContent(
 
     LaunchedEffect(projectId, projectType) {
         if (projectId != null && projectId > 0) {
-            if (uiState.project == null || uiState.project?.id != projectId) {
-                viewModel.loadProjectById(projectId)
-            }
+            viewModel.loadProjectById(projectId)
         } else if (projectType != null) {
             viewModel.loadProject(null, projectType)
         }
