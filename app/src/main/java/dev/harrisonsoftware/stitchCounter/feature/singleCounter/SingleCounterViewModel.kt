@@ -207,6 +207,11 @@ open class SingleCounterViewModel @Inject constructor(
         clearSavedState()
     }
 
+    suspend fun ensureSaved() {
+        persistJob?.cancel()
+        saveToRoom()
+    }
+
     fun attemptDismissal() {
         viewModelScope.launch {
             persistJob?.cancel()

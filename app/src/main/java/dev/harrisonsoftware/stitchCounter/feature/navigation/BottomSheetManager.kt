@@ -23,6 +23,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.harrisonsoftware.stitchCounter.R
+import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult
@@ -325,18 +326,22 @@ fun BottomSheetManager(
                                     is SheetScreen.SingleCounter -> {
                                         val singleCounterViewModel =
                                             hiltViewModel<SingleCounterViewModel>()
+                                        val saveBeforeNavigateScope = rememberCoroutineScope()
                                         Box(modifier = Modifier.fillMaxSize()) {
                                             SingleCounterScreen(
                                                 projectId = currentScreen.projectId,
                                                 viewModel = singleCounterViewModel,
                                                 isWideLayout = isWideLayout,
                                                 onNavigateToDetail = { projectId ->
-                                                    viewModel.showBottomSheet(
-                                                        SheetScreen.ProjectDetail(
-                                                            projectId = projectId,
-                                                            projectType = ProjectType.SINGLE
+                                                    saveBeforeNavigateScope.launch {
+                                                        singleCounterViewModel.ensureSaved()
+                                                        viewModel.showBottomSheet(
+                                                            SheetScreen.ProjectDetail(
+                                                                projectId = projectId,
+                                                                projectType = ProjectType.SINGLE
+                                                            )
                                                         )
-                                                    )
+                                                    }
                                                 }
                                             )
                                         }
@@ -345,18 +350,22 @@ fun BottomSheetManager(
                                     is SheetScreen.DoubleCounter -> {
                                         val doubleCounterViewModel =
                                             hiltViewModel<DoubleCounterViewModel>()
+                                        val saveBeforeNavigateScope = rememberCoroutineScope()
                                         Box(modifier = Modifier.fillMaxSize()) {
                                             DoubleCounterScreen(
                                                 projectId = currentScreen.projectId,
                                                 viewModel = doubleCounterViewModel,
                                                 isWideLayout = isWideLayout,
                                                 onNavigateToDetail = { projectId ->
-                                                    viewModel.showBottomSheet(
-                                                        SheetScreen.ProjectDetail(
-                                                            projectId = projectId,
-                                                            projectType = ProjectType.DOUBLE
+                                                    saveBeforeNavigateScope.launch {
+                                                        doubleCounterViewModel.ensureSaved()
+                                                        viewModel.showBottomSheet(
+                                                            SheetScreen.ProjectDetail(
+                                                                projectId = projectId,
+                                                                projectType = ProjectType.DOUBLE
+                                                            )
                                                         )
-                                                    )
+                                                    }
                                                 }
                                             )
                                         }
@@ -366,18 +375,22 @@ fun BottomSheetManager(
                                         val projectDetailViewModel =
                                             hiltViewModel<ProjectDetailViewModel>()
                                         val projectDetailUiState by projectDetailViewModel.uiState.collectAsStateWithLifecycle()
+                                        val saveBeforeNavigateScope = rememberCoroutineScope()
                                         ProjectDetailScreenContent(
                                             projectId = currentScreen.projectId,
                                             projectType = currentScreen.projectType,
                                             viewModel = projectDetailViewModel,
                                             onNavigateBack = { projectId ->
                                                 projectDetailUiState.project?.type?.let { projectType ->
-                                                    viewModel.showBottomSheet(
-                                                        createSheetScreenForProjectType(
-                                                            projectType,
-                                                            projectId
+                                                    saveBeforeNavigateScope.launch {
+                                                        projectDetailViewModel.ensureSaved()
+                                                        viewModel.showBottomSheet(
+                                                            createSheetScreenForProjectType(
+                                                                projectType,
+                                                                projectId
+                                                            )
                                                         )
-                                                    )
+                                                    }
                                                 }
                                             },
                                             onDismiss = {

@@ -246,6 +246,11 @@ open class DoubleCounterViewModel @Inject constructor(
         _uiState.update { it.copy(shouldShowCustomAdjustmentTip = true) }
     }
 
+    suspend fun ensureSaved() {
+        persistJob?.cancel()
+        saveToRoom()
+    }
+
     fun attemptDismissal() {
         viewModelScope.launch {
             persistJob?.cancel()
