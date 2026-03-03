@@ -6,9 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import android.content.res.Configuration
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
@@ -35,7 +34,6 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var launcherIconManager: LauncherIconManager
 
-    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -48,8 +46,8 @@ class MainActivity : ComponentActivity() {
             val themeViewModel: ThemeViewModel = hiltViewModel()
             val rootNavigationViewModel: RootNavigationViewModel = hiltViewModel()
             val themeUiState by themeViewModel.uiState.collectAsStateWithLifecycle()
-            val windowSizeClass = calculateWindowSizeClass(this)
-            val isWideLayout = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
+            val configuration = LocalConfiguration.current
+            val isWideLayout = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
             
             StitchCounterV3Theme(theme = themeUiState.selectedTheme) {
                 Surface(modifier = Modifier.fillMaxSize()) {

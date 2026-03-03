@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import dev.harrisonsoftware.stitchCounter.feature.NavGraphs
@@ -25,8 +24,6 @@ fun RootNavigationScreen(
     isWideLayout: Boolean
 ) {
     val selectedTab = viewModel.selectedTab.collectAsStateWithLifecycle().value
-    val configuration = LocalConfiguration.current
-    val isCompact = configuration.screenWidthDp < 600
     val navController = rememberNavController()
     val currentSheetScreen by viewModel.currentSheet.collectAsStateWithLifecycle()
 
@@ -40,7 +37,7 @@ fun RootNavigationScreen(
 
     Scaffold(
         bottomBar = {
-            if (isCompact) {
+            if (!isWideLayout) {
                 BottomNavigationLayout(
                     selectedTab = selectedTab,
                     onTabSelected = viewModel::selectTab
@@ -49,7 +46,7 @@ fun RootNavigationScreen(
         }
     ) { innerPadding ->
         Row(modifier = Modifier.padding(innerPadding)) {
-            if (!isCompact) {
+            if (isWideLayout) {
                 NavigationRailLayout(
                     selectedTab = selectedTab,
                     onTabSelected = viewModel::selectTab
