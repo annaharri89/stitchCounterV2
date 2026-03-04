@@ -8,6 +8,7 @@ import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult
 import dev.harrisonsoftware.stitchCounter.domain.model.Project
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
+import dev.harrisonsoftware.stitchCounter.domain.validation.ProjectValidator
 import dev.harrisonsoftware.stitchCounter.domain.usecase.GetProject
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateProjectDetailValues
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpsertProject
@@ -274,7 +275,7 @@ class ProjectDetailViewModel @Inject constructor(
             currentState.copy(
                 title = newTitle,
                 hasUnsavedChanges = hasChanges(title = newTitle),
-                titleError = if (newTitle.isBlank()) R.string.error_title_required else null
+                titleError = if (!ProjectValidator.isTitleValid(newTitle)) R.string.error_title_required else null
             )
         }
         persistToSavedState()
@@ -296,7 +297,7 @@ class ProjectDetailViewModel @Inject constructor(
         val state = _uiState.value
         val totalRowsValue = newTotalRows.toIntOrNull() ?: 0
         val isDoubleCounter = state.projectType == ProjectType.DOUBLE
-        val totalRowsError = if (isDoubleCounter && totalRowsValue <= 0 && newTotalRows.isNotBlank()) {
+        val totalRowsError = if (isDoubleCounter && newTotalRows.isNotBlank() && !ProjectValidator.areTotalRowsValidForType(totalRowsValue, state.projectType)) {
             R.string.error_total_rows_greater_than_zero
         } else if (isDoubleCounter && newTotalRows.isBlank()) {
             R.string.error_total_rows_required
@@ -431,7 +432,7 @@ class ProjectDetailViewModel @Inject constructor(
             autoSaveJob?.cancel()
             val state = _uiState.value
 
-            if (state.title.isBlank()) {
+            if (!ProjectValidator.isTitleValid(state.title)) {
                 _uiState.update { currentState ->
                     currentState.copy(titleError = R.string.error_title_required)
                 }
@@ -493,16 +494,15 @@ class ProjectDetailViewModel @Inject constructor(
     fun createProject() {
         viewModelScope.launch {
             val state = _uiState.value
-            if (state.title.isBlank()) {
+            if (!ProjectValidator.isTitleValid(state.title)) {
                 _uiState.update { currentState ->
                     currentState.copy(titleError = R.string.error_title_required)
                 }
                 return@launch
             }
 
-            val isDoubleCounter = state.projectType == ProjectType.DOUBLE
             val totalRowsValue = state.totalRows.toIntOrNull() ?: 0
-            if (isDoubleCounter && totalRowsValue <= 0) {
+            if (!ProjectValidator.areTotalRowsValidForType(totalRowsValue, state.projectType)) {
                 _uiState.update { currentState ->
                     currentState.copy(totalRowsError = R.string.error_total_rows_required_and_greater)
                 }
