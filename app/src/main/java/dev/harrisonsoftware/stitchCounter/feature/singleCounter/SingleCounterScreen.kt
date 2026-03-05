@@ -78,6 +78,9 @@ fun SingleCounterScreen(
             override fun changeAdjustment(value: dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount) = 
                 viewModel.changeAdjustment(value)
             override fun setCustomAdjustmentAmount(value: Int) = viewModel.setCustomAdjustmentAmount(value)
+            override fun showCustomAdjustmentDialog() = viewModel.showCustomAdjustmentDialog()
+            override fun dismissCustomAdjustmentDialog() = viewModel.dismissCustomAdjustmentDialog()
+            override fun updateCustomAdjustmentDialogInput(input: String) = viewModel.updateCustomAdjustmentDialogInput(input)
         }
     }
 

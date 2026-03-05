@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.CustomAdjustmentDialogState
 
 data class SingleCounterUiState(
     val id: Int = 0,
@@ -29,6 +30,7 @@ data class SingleCounterUiState(
     val counterState: CounterState = CounterState(),
     val totalStitchesEver: Int = 0,
     val shouldShowCustomAdjustmentTip: Boolean = false,
+    val customAdjustmentDialogState: CustomAdjustmentDialogState = CustomAdjustmentDialogState(),
 )
 
 @HiltViewModel
@@ -118,7 +120,7 @@ open class SingleCounterViewModel @Inject constructor(
                     else -> project.totalStitchesEver
                 }
 
-                _uiState.update {
+                _uiState.update { current ->
                     SingleCounterUiState(
                         id = project.id,
                         title = project.title,
@@ -127,7 +129,8 @@ open class SingleCounterViewModel @Inject constructor(
                             adjustment = restoredAdjustment,
                             customAdjustmentAmount = restoredCustomAdjustmentAmount
                         ),
-                        totalStitchesEver = restoredTotalStitchesEver
+                        totalStitchesEver = restoredTotalStitchesEver,
+                        customAdjustmentDialogState = current.customAdjustmentDialogState
                     )
                 }
                 persistToSavedState()
@@ -180,6 +183,23 @@ open class SingleCounterViewModel @Inject constructor(
 
     fun showCustomAdjustmentTip() {
         _uiState.update { it.copy(shouldShowCustomAdjustmentTip = true) }
+    }
+
+    fun showCustomAdjustmentDialog() {
+        _uiState.update {
+            it.copy(customAdjustmentDialogState = CustomAdjustmentDialogState(
+                isVisible = true,
+                input = it.counterState.customAdjustmentAmount.coerceAtLeast(1).toString()
+            ))
+        }
+    }
+
+    fun dismissCustomAdjustmentDialog() {
+        _uiState.update { it.copy(customAdjustmentDialogState = CustomAdjustmentDialogState()) }
+    }
+
+    fun updateCustomAdjustmentDialogInput(input: String) {
+        _uiState.update { it.copy(customAdjustmentDialogState = it.customAdjustmentDialogState.copy(input = input)) }
     }
 
     fun decrement() {

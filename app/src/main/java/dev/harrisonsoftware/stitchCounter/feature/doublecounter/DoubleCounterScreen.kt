@@ -83,6 +83,9 @@ fun DoubleCounterScreen(
             override fun resetAll() {
                 showResetAllDialog.value = true
             }
+            override fun showCustomAdjustmentDialog(type: CounterType) = viewModel.showCustomAdjustmentDialog(type)
+            override fun dismissCustomAdjustmentDialog() = viewModel.dismissCustomAdjustmentDialog()
+            override fun updateCustomAdjustmentDialogInput(input: String) = viewModel.updateCustomAdjustmentDialogInput(input)
         }
     }
 
