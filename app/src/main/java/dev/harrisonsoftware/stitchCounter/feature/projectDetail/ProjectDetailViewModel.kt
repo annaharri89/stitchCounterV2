@@ -59,6 +59,7 @@ class ProjectDetailViewModel @Inject constructor(
         private const val SAVED_STATE_KEY_PROJECT_TYPE = "detail_project_type"
         private const val SAVED_STATE_KEY_TOTAL_ROWS = "detail_total_rows"
         private const val SAVED_STATE_KEY_IS_COMPLETED = "detail_is_completed"
+        private const val SAVED_STATE_KEY_IMAGE_PATHS = "detail_image_paths"
         private const val AUTO_SAVE_DELAY_MS = 1000L
     }
 
@@ -89,6 +90,7 @@ class ProjectDetailViewModel @Inject constructor(
                 val restoredNotes = savedStateHandle.get<String>(SAVED_STATE_KEY_NOTES)
                 val restoredTotalRows = savedStateHandle.get<String>(SAVED_STATE_KEY_TOTAL_ROWS)
                 val restoredIsCompleted = savedStateHandle.get<Boolean>(SAVED_STATE_KEY_IS_COMPLETED)
+                val restoredImagePaths = savedStateHandle.get<ArrayList<String>>(SAVED_STATE_KEY_IMAGE_PATHS)
                 val hasSavedNewProjectState = restoredTitle != null
 
                 val newProject = Project(
@@ -108,7 +110,7 @@ class ProjectDetailViewModel @Inject constructor(
                         notes = if (hasSavedNewProjectState) restoredNotes ?: "" else "",
                         projectType = projectType,
                         totalRows = if (hasSavedNewProjectState) restoredTotalRows ?: "" else "",
-                        imagePaths = emptyList(),
+                        imagePaths = if (hasSavedNewProjectState) restoredImagePaths?.toList() ?: emptyList() else emptyList(),
                         isCompleted = if (hasSavedNewProjectState) restoredIsCompleted ?: false else false,
                         isLoading = false,
                         hasUnsavedChanges = hasSavedNewProjectState,
@@ -126,63 +128,7 @@ class ProjectDetailViewModel @Inject constructor(
 
             val project = getProject(projectId)
             if (project != null) {
-                val savedProjectId = savedStateHandle.get<Int>(SAVED_STATE_KEY_PROJECT_ID)
-                val restoreFromSavedState = savedProjectId == project.id
-
-                val restoredTitle = if (restoreFromSavedState) {
-                    savedStateHandle.get<String>(SAVED_STATE_KEY_TITLE) ?: project.title
-                } else {
-                    project.title
-                }
-                val restoredNotes = if (restoreFromSavedState) {
-                    savedStateHandle.get<String>(SAVED_STATE_KEY_NOTES) ?: project.notes
-                } else {
-                    project.notes
-                }
-                val restoredTotalRows = if (restoreFromSavedState) {
-                    savedStateHandle.get<String>(SAVED_STATE_KEY_TOTAL_ROWS)
-                        ?: if (project.totalRows > 0) project.totalRows.toString() else ""
-                } else {
-                    if (project.totalRows > 0) project.totalRows.toString() else ""
-                }
-                val restoredIsCompleted = if (restoreFromSavedState) {
-                    savedStateHandle.get<Boolean>(SAVED_STATE_KEY_IS_COMPLETED) ?: (project.completedAt != null)
-                } else {
-                    project.completedAt != null
-                }
-
-                originalTitle = project.title
-                originalNotes = project.notes
-                originalTotalRows = if (project.totalRows > 0) project.totalRows.toString() else ""
-                originalImagePaths = project.imagePaths
-                originalIsCompleted = project.completedAt != null
-
-                val hasChangesFromSavedState = restoreFromSavedState && (
-                    restoredTitle != originalTitle
-                        || restoredNotes != originalNotes
-                        || restoredTotalRows != originalTotalRows
-                        || restoredIsCompleted != originalIsCompleted
-                )
-
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        project = project,
-                        title = restoredTitle,
-                        notes = restoredNotes,
-                        projectType = project.type,
-                        totalRows = restoredTotalRows,
-                        imagePaths = project.imagePaths,
-                        isCompleted = restoredIsCompleted,
-                        isLoading = false,
-                        hasUnsavedChanges = hasChangesFromSavedState,
-                        titleError = null,
-                        totalRowsError = null
-                    )
-                }
-
-                if (hasChangesFromSavedState) {
-                    triggerAutoSave()
-                }
+                restoreExistingProjectState(project)
             } else {
                 _uiState.update { currentState -> currentState.copy(isLoading = false) }
             }
@@ -194,66 +140,77 @@ class ProjectDetailViewModel @Inject constructor(
             _uiState.update { currentState -> currentState.copy(isLoading = true) }
             val project = getProject(projectId)
             if (project != null) {
-                val savedProjectId = savedStateHandle.get<Int>(SAVED_STATE_KEY_PROJECT_ID)
-                val restoreFromSavedState = savedProjectId == project.id
-
-                val restoredTitle = if (restoreFromSavedState) {
-                    savedStateHandle.get<String>(SAVED_STATE_KEY_TITLE) ?: project.title
-                } else {
-                    project.title
-                }
-                val restoredNotes = if (restoreFromSavedState) {
-                    savedStateHandle.get<String>(SAVED_STATE_KEY_NOTES) ?: project.notes
-                } else {
-                    project.notes
-                }
-                val restoredTotalRows = if (restoreFromSavedState) {
-                    savedStateHandle.get<String>(SAVED_STATE_KEY_TOTAL_ROWS)
-                        ?: if (project.totalRows > 0) project.totalRows.toString() else ""
-                } else {
-                    if (project.totalRows > 0) project.totalRows.toString() else ""
-                }
-                val restoredIsCompleted = if (restoreFromSavedState) {
-                    savedStateHandle.get<Boolean>(SAVED_STATE_KEY_IS_COMPLETED) ?: (project.completedAt != null)
-                } else {
-                    project.completedAt != null
-                }
-
-                originalTitle = project.title
-                originalNotes = project.notes
-                originalTotalRows = if (project.totalRows > 0) project.totalRows.toString() else ""
-                originalImagePaths = project.imagePaths
-                originalIsCompleted = project.completedAt != null
-
-                val hasChangesFromSavedState = restoreFromSavedState && (
-                    restoredTitle != originalTitle
-                        || restoredNotes != originalNotes
-                        || restoredTotalRows != originalTotalRows
-                        || restoredIsCompleted != originalIsCompleted
-                )
-
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        project = project,
-                        title = restoredTitle,
-                        notes = restoredNotes,
-                        projectType = project.type,
-                        totalRows = restoredTotalRows,
-                        imagePaths = project.imagePaths,
-                        isCompleted = restoredIsCompleted,
-                        isLoading = false,
-                        hasUnsavedChanges = hasChangesFromSavedState,
-                        titleError = null,
-                        totalRowsError = null
-                    )
-                }
-
-                if (hasChangesFromSavedState) {
-                    triggerAutoSave()
-                }
+                restoreExistingProjectState(project)
             } else {
                 _uiState.update { currentState -> currentState.copy(isLoading = false) }
             }
+        }
+    }
+
+    private fun restoreExistingProjectState(project: Project) {
+        val savedProjectId = savedStateHandle.get<Int>(SAVED_STATE_KEY_PROJECT_ID)
+        val restoreFromSavedState = savedProjectId == project.id
+
+        val restoredTitle = if (restoreFromSavedState) {
+            savedStateHandle.get<String>(SAVED_STATE_KEY_TITLE) ?: project.title
+        } else {
+            project.title
+        }
+        val restoredNotes = if (restoreFromSavedState) {
+            savedStateHandle.get<String>(SAVED_STATE_KEY_NOTES) ?: project.notes
+        } else {
+            project.notes
+        }
+        val restoredTotalRows = if (restoreFromSavedState) {
+            savedStateHandle.get<String>(SAVED_STATE_KEY_TOTAL_ROWS)
+                ?: if (project.totalRows > 0) project.totalRows.toString() else ""
+        } else {
+            if (project.totalRows > 0) project.totalRows.toString() else ""
+        }
+        val restoredIsCompleted = if (restoreFromSavedState) {
+            savedStateHandle.get<Boolean>(SAVED_STATE_KEY_IS_COMPLETED) ?: (project.completedAt != null)
+        } else {
+            project.completedAt != null
+        }
+        val restoredImagePaths = if (restoreFromSavedState) {
+            savedStateHandle.get<ArrayList<String>>(SAVED_STATE_KEY_IMAGE_PATHS)?.toList()
+                ?: project.imagePaths
+        } else {
+            project.imagePaths
+        }
+
+        originalTitle = project.title
+        originalNotes = project.notes
+        originalTotalRows = if (project.totalRows > 0) project.totalRows.toString() else ""
+        originalImagePaths = project.imagePaths
+        originalIsCompleted = project.completedAt != null
+
+        val hasChangesFromSavedState = restoreFromSavedState && (
+            restoredTitle != originalTitle
+                || restoredNotes != originalNotes
+                || restoredTotalRows != originalTotalRows
+                || restoredIsCompleted != originalIsCompleted
+                || restoredImagePaths != originalImagePaths
+        )
+
+        _uiState.update { currentState ->
+            currentState.copy(
+                project = project,
+                title = restoredTitle,
+                notes = restoredNotes,
+                projectType = project.type,
+                totalRows = restoredTotalRows,
+                imagePaths = restoredImagePaths,
+                isCompleted = restoredIsCompleted,
+                isLoading = false,
+                hasUnsavedChanges = hasChangesFromSavedState,
+                titleError = null,
+                totalRowsError = null
+            )
+        }
+
+        if (hasChangesFromSavedState) {
+            triggerAutoSave()
         }
     }
 
@@ -477,6 +434,7 @@ class ProjectDetailViewModel @Inject constructor(
                 hasUnsavedChanges = hasChanges(imagePaths = newImagePaths)
             )
         }
+        persistToSavedState()
         triggerAutoSave()
     }
 
@@ -488,6 +446,7 @@ class ProjectDetailViewModel @Inject constructor(
                 hasUnsavedChanges = hasChanges(imagePaths = newImagePaths)
             )
         }
+        persistToSavedState()
         triggerAutoSave()
     }
 
@@ -567,6 +526,7 @@ class ProjectDetailViewModel @Inject constructor(
         savedStateHandle[SAVED_STATE_KEY_PROJECT_TYPE] = state.projectType.name
         savedStateHandle[SAVED_STATE_KEY_TOTAL_ROWS] = state.totalRows
         savedStateHandle[SAVED_STATE_KEY_IS_COMPLETED] = state.isCompleted
+        savedStateHandle[SAVED_STATE_KEY_IMAGE_PATHS] = ArrayList(state.imagePaths)
     }
 
     private fun clearSavedState() {
@@ -576,5 +536,6 @@ class ProjectDetailViewModel @Inject constructor(
         savedStateHandle.remove<String>(SAVED_STATE_KEY_PROJECT_TYPE)
         savedStateHandle.remove<String>(SAVED_STATE_KEY_TOTAL_ROWS)
         savedStateHandle.remove<Boolean>(SAVED_STATE_KEY_IS_COMPLETED)
+        savedStateHandle.remove<ArrayList<String>>(SAVED_STATE_KEY_IMAGE_PATHS)
     }
 }

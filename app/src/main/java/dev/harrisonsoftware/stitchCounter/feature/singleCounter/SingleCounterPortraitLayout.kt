@@ -24,6 +24,22 @@ interface SingleCounterActions {
     fun resetCount()
     fun changeAdjustment(value: AdjustmentAmount)
     fun setCustomAdjustmentAmount(value: Int)
+    fun showCustomAdjustmentDialog()
+    fun dismissCustomAdjustmentDialog()
+    fun updateCustomAdjustmentDialogInput(input: String)
+
+    companion object {
+        val NoOp = object : SingleCounterActions {
+            override fun increment() {}
+            override fun decrement() {}
+            override fun resetCount() {}
+            override fun changeAdjustment(value: AdjustmentAmount) {}
+            override fun setCustomAdjustmentAmount(value: Int) {}
+            override fun showCustomAdjustmentDialog() {}
+            override fun dismissCustomAdjustmentDialog() {}
+            override fun updateCustomAdjustmentDialogInput(input: String) {}
+        }
+    }
 }
 
 @Composable
@@ -52,6 +68,10 @@ fun SingleCounterPortraitLayout(
             onDecrement = actions::decrement,
             onAdjustmentClick = actions::changeAdjustment,
             onCustomAdjustmentAmountChange = actions::setCustomAdjustmentAmount,
+            customAdjustmentDialogState = state.customAdjustmentDialogState,
+            onShowCustomAdjustmentDialog = actions::showCustomAdjustmentDialog,
+            onDismissCustomAdjustmentDialog = actions::dismissCustomAdjustmentDialog,
+            onCustomAdjustmentDialogInputChange = actions::updateCustomAdjustmentDialogInput,
             onReset = actions::resetCount,
             showResetButton = false,
             counterNumberIsVertical = true
@@ -70,14 +90,6 @@ fun SingleCounterPortraitLayout(
 private fun SingleCounterPortraitPreview() {
     StitchCounterV3Theme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            val fakeActions = object : SingleCounterActions {
-                override fun increment() {}
-                override fun decrement() {}
-                override fun resetCount() {}
-                override fun changeAdjustment(value: AdjustmentAmount) {}
-                override fun setCustomAdjustmentAmount(value: Int) {}
-            }
-            
             SingleCounterPortraitLayout(
                 state = SingleCounterUiState(
                     counterState = CounterState(
@@ -85,7 +97,7 @@ private fun SingleCounterPortraitPreview() {
                         adjustment = AdjustmentAmount.FIVE
                     )
                 ),
-                actions = fakeActions
+                actions = SingleCounterActions.NoOp
             )
         }
     }

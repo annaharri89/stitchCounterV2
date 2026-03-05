@@ -3,6 +3,8 @@ package dev.harrisonsoftware.stitchCounter.feature.projectDetail
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import android.util.Log
 import java.io.File
@@ -38,12 +40,17 @@ fun saveImageToInternalStorage(context: Context, uri: Uri): String? {
             BitmapFactory.decodeStream(inputStream, null, decodeOptions)
         } ?: return null
 
-        val scaledBitmap = scaleDownBitmap(sampledBitmap, MAX_IMAGE_DIMENSION)
+        val exifOrientationMatrix = readExifOrientationMatrix(context, uri)
+        val orientedBitmap = applyExifOrientation(sampledBitmap, exifOrientationMatrix)
+        val scaledBitmap = scaleDownBitmap(orientedBitmap, MAX_IMAGE_DIMENSION)
         FileOutputStream(file).use { outputStream ->
             scaledBitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_COMPRESSION_QUALITY, outputStream)
         }
-        if (scaledBitmap !== sampledBitmap) {
+        if (scaledBitmap !== orientedBitmap) {
             scaledBitmap.recycle()
+        }
+        if (orientedBitmap !== sampledBitmap) {
+            orientedBitmap.recycle()
         }
         sampledBitmap.recycle()
 
@@ -101,4 +108,36 @@ private fun scaleDownBitmap(bitmap: Bitmap, maxDimension: Int): Bitmap {
     val scaledWidth = (bitmap.width * scaleFactor).roundToInt()
     val scaledHeight = (bitmap.height * scaleFactor).roundToInt()
     return Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true)
+}
+
+private fun readExifOrientationMatrix(context: Context, uri: Uri): Matrix {
+    val matrix = Matrix()
+    try {
+        context.contentResolver.openInputStream(uri)?.use { inputStream ->
+            val exif = ExifInterface(inputStream)
+            when (exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)) {
+                ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.setScale(-1f, 1f)
+                ExifInterface.ORIENTATION_ROTATE_180 -> matrix.setRotate(180f)
+                ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.setScale(1f, -1f)
+                ExifInterface.ORIENTATION_TRANSPOSE -> {
+                    matrix.setRotate(90f)
+                    matrix.postScale(-1f, 1f)
+                }
+                ExifInterface.ORIENTATION_ROTATE_90 -> matrix.setRotate(90f)
+                ExifInterface.ORIENTATION_TRANSVERSE -> {
+                    matrix.setRotate(-90f)
+                    matrix.postScale(-1f, 1f)
+                }
+                ExifInterface.ORIENTATION_ROTATE_270 -> matrix.setRotate(-90f)
+            }
+        }
+    } catch (e: Exception) {
+        Log.w(LOG_TAG, "Failed to read EXIF orientation", e)
+    }
+    return matrix
+}
+
+private fun applyExifOrientation(bitmap: Bitmap, exifMatrix: Matrix): Bitmap {
+    if (exifMatrix.isIdentity) return bitmap
+    return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, exifMatrix, true)
 }

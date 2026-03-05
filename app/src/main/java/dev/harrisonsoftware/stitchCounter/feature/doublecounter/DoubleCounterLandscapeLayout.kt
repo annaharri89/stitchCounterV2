@@ -59,6 +59,10 @@ fun DoubleCounterLandscapeLayout(
                 onDecrement = { actions.decrement(CounterType.STITCH) },
                 onAdjustmentClick = { actions.changeAdjustment(CounterType.STITCH, it) },
                 onCustomAdjustmentAmountChange = { actions.setCustomAdjustmentAmount(CounterType.STITCH, it) },
+                customAdjustmentDialogState = state.customAdjustmentDialogStateFor(CounterType.STITCH),
+                onShowCustomAdjustmentDialog = { actions.showCustomAdjustmentDialog(CounterType.STITCH) },
+                onDismissCustomAdjustmentDialog = actions::dismissCustomAdjustmentDialog,
+                onCustomAdjustmentDialogInputChange = actions::updateCustomAdjustmentDialogInput,
                 onReset = { actions.reset(CounterType.STITCH) }
             )
 
@@ -74,6 +78,10 @@ fun DoubleCounterLandscapeLayout(
                 onDecrement = { actions.decrement(CounterType.ROW) },
                 onAdjustmentClick = { actions.changeAdjustment(CounterType.ROW, it) },
                 onCustomAdjustmentAmountChange = { actions.setCustomAdjustmentAmount(CounterType.ROW, it) },
+                customAdjustmentDialogState = state.customAdjustmentDialogStateFor(CounterType.ROW),
+                onShowCustomAdjustmentDialog = { actions.showCustomAdjustmentDialog(CounterType.ROW) },
+                onDismissCustomAdjustmentDialog = actions::dismissCustomAdjustmentDialog,
+                onCustomAdjustmentDialogInputChange = actions::updateCustomAdjustmentDialogInput,
                 onReset = { actions.reset(CounterType.ROW) }
             )
         }
@@ -90,15 +98,6 @@ fun DoubleCounterLandscapeLayout(
 private fun DoubleCounterLandscapePreview() {
     StitchCounterV3Theme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            val fakeActions = object : DoubleCounterActions {
-                override fun increment(type: CounterType) {}
-                override fun decrement(type: CounterType) {}
-                override fun reset(type: CounterType) {}
-                override fun changeAdjustment(type: CounterType, value: AdjustmentAmount) {}
-                override fun setCustomAdjustmentAmount(type: CounterType, value: Int) {}
-                override fun resetAll() {}
-            }
-            
             DoubleCounterLandscapeLayout(
                 state = DoubleCounterUiState(
                     stitchCounterState = CounterState(
@@ -111,7 +110,7 @@ private fun DoubleCounterLandscapePreview() {
                     ),
                     totalRows = 20
                 ),
-                actions = fakeActions
+                actions = DoubleCounterActions.NoOp
             )
         }
     }

@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.CustomAdjustmentDialogState
 
 data class DoubleCounterUiState(
     val id: Int = 0,
@@ -31,7 +32,14 @@ data class DoubleCounterUiState(
     val totalRows: Int = 0,
     val totalStitchesEver: Int = 0,
     val shouldShowCustomAdjustmentTip: Boolean = false,
+    val activeCustomAdjustmentDialogCounterType: CounterType? = null,
+    val customAdjustmentDialogInput: String = "",
 ) {
+    fun customAdjustmentDialogStateFor(counterType: CounterType) = CustomAdjustmentDialogState(
+        isVisible = activeCustomAdjustmentDialogCounterType == counterType,
+        input = customAdjustmentDialogInput,
+    )
+
     val rowProgress: Float? = if (totalRows > 0) {
         (rowCounterState.count.toFloat() / totalRows.toFloat()).coerceIn(0f, 1f)
     } else {
@@ -168,7 +176,7 @@ open class DoubleCounterViewModel @Inject constructor(
                     else -> project.totalStitchesEver
                 }
 
-                _uiState.update {
+                _uiState.update { current ->
                     DoubleCounterUiState(
                         id = project.id,
                         title = project.title,
@@ -183,7 +191,9 @@ open class DoubleCounterViewModel @Inject constructor(
                             customAdjustmentAmount = restoredRowCustomAdjustment
                         ),
                         totalRows = project.totalRows,
-                        totalStitchesEver = restoredTotalStitchesEver
+                        totalStitchesEver = restoredTotalStitchesEver,
+                        activeCustomAdjustmentDialogCounterType = current.activeCustomAdjustmentDialogCounterType,
+                        customAdjustmentDialogInput = current.customAdjustmentDialogInput
                     )
                 }
                 persistToSavedState()
@@ -244,6 +254,24 @@ open class DoubleCounterViewModel @Inject constructor(
 
     fun showCustomAdjustmentTip() {
         _uiState.update { it.copy(shouldShowCustomAdjustmentTip = true) }
+    }
+
+    fun showCustomAdjustmentDialog(counterType: CounterType) {
+        val currentAmount = when (counterType) {
+            CounterType.STITCH -> _uiState.value.stitchCounterState
+            CounterType.ROW -> _uiState.value.rowCounterState
+        }.customAdjustmentAmount.coerceAtLeast(1)
+        _uiState.update {
+            it.copy(activeCustomAdjustmentDialogCounterType = counterType, customAdjustmentDialogInput = currentAmount.toString())
+        }
+    }
+
+    fun dismissCustomAdjustmentDialog() {
+        _uiState.update { it.copy(activeCustomAdjustmentDialogCounterType = null, customAdjustmentDialogInput = "") }
+    }
+
+    fun updateCustomAdjustmentDialogInput(input: String) {
+        _uiState.update { it.copy(customAdjustmentDialogInput = input) }
     }
 
     suspend fun ensureSaved() {

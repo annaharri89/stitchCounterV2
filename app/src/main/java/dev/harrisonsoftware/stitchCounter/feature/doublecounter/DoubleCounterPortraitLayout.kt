@@ -29,6 +29,23 @@ interface DoubleCounterActions {
     fun changeAdjustment(type: CounterType, value: AdjustmentAmount)
     fun setCustomAdjustmentAmount(type: CounterType, value: Int)
     fun resetAll()
+    fun showCustomAdjustmentDialog(type: CounterType)
+    fun dismissCustomAdjustmentDialog()
+    fun updateCustomAdjustmentDialogInput(input: String)
+
+    companion object {
+        val NoOp = object : DoubleCounterActions {
+            override fun increment(type: CounterType) {}
+            override fun decrement(type: CounterType) {}
+            override fun reset(type: CounterType) {}
+            override fun changeAdjustment(type: CounterType, value: AdjustmentAmount) {}
+            override fun setCustomAdjustmentAmount(type: CounterType, value: Int) {}
+            override fun resetAll() {}
+            override fun showCustomAdjustmentDialog(type: CounterType) {}
+            override fun dismissCustomAdjustmentDialog() {}
+            override fun updateCustomAdjustmentDialogInput(input: String) {}
+        }
+    }
 }
 
 @Composable
@@ -62,7 +79,11 @@ fun DoubleCounterPortraitLayout(
             onDecrement = { actions.decrement(CounterType.STITCH) },
             onReset = { actions.reset(CounterType.STITCH) },
             onAdjustmentClick = { actions.changeAdjustment(CounterType.STITCH, it) },
-            onCustomAdjustmentAmountChange = { actions.setCustomAdjustmentAmount(CounterType.STITCH, it) }
+            onCustomAdjustmentAmountChange = { actions.setCustomAdjustmentAmount(CounterType.STITCH, it) },
+            customAdjustmentDialogState = state.customAdjustmentDialogStateFor(CounterType.STITCH),
+            onShowCustomAdjustmentDialog = { actions.showCustomAdjustmentDialog(CounterType.STITCH) },
+            onDismissCustomAdjustmentDialog = actions::dismissCustomAdjustmentDialog,
+            onCustomAdjustmentDialogInputChange = actions::updateCustomAdjustmentDialogInput
         )
 
         CounterView(
@@ -75,7 +96,11 @@ fun DoubleCounterPortraitLayout(
             onDecrement = { actions.decrement(CounterType.ROW) },
             onReset = { actions.reset(CounterType.ROW) },
             onAdjustmentClick = { actions.changeAdjustment(CounterType.ROW, it) },
-            onCustomAdjustmentAmountChange = { actions.setCustomAdjustmentAmount(CounterType.ROW, it) }
+            onCustomAdjustmentAmountChange = { actions.setCustomAdjustmentAmount(CounterType.ROW, it) },
+            customAdjustmentDialogState = state.customAdjustmentDialogStateFor(CounterType.ROW),
+            onShowCustomAdjustmentDialog = { actions.showCustomAdjustmentDialog(CounterType.ROW) },
+            onDismissCustomAdjustmentDialog = actions::dismissCustomAdjustmentDialog,
+            onCustomAdjustmentDialogInputChange = actions::updateCustomAdjustmentDialogInput
         )
         
         Spacer(modifier = Modifier.weight(1f))
@@ -92,15 +117,6 @@ fun DoubleCounterPortraitLayout(
 private fun DoubleCounterPortraitPreview() {
     StitchCounterV3Theme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            val fakeActions = object : DoubleCounterActions {
-                override fun increment(type: CounterType) {}
-                override fun decrement(type: CounterType) {}
-                override fun reset(type: CounterType) {}
-                override fun changeAdjustment(type: CounterType, value: AdjustmentAmount) {}
-                override fun setCustomAdjustmentAmount(type: CounterType, value: Int) {}
-                override fun resetAll() {}
-            }
-            
             DoubleCounterPortraitLayout(
                 state = DoubleCounterUiState(
                     stitchCounterState = CounterState(
@@ -113,7 +129,7 @@ private fun DoubleCounterPortraitPreview() {
                     ),
                     totalRows = 20
                 ),
-                actions = fakeActions
+                actions = DoubleCounterActions.NoOp
             )
         }
     }
