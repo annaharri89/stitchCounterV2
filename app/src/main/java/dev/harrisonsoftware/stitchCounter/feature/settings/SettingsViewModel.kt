@@ -61,6 +61,10 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun onLaunchingExternalActivity() {
+        launcherIconManager.skipNextPendingIconApply()
+    }
+
     fun exportLibrary(outputUri: Uri? = null) {
         viewModelScope.launch {
             _uiState.update { it.copy(isExporting = true, exportError = null) }
