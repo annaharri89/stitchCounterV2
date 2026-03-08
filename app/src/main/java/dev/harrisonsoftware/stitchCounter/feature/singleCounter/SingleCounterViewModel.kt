@@ -219,7 +219,7 @@ open class SingleCounterViewModel @Inject constructor(
             )
         }
         persistToSavedState()
-        persistToRoom()
+        persistToRoom(clearCompletedAt = true)
     }
 
     fun resetState() {
@@ -250,15 +250,15 @@ open class SingleCounterViewModel @Inject constructor(
         }
     }
 
-    private fun persistToRoom() {
+    private fun persistToRoom(clearCompletedAt: Boolean = false) {
         persistJob?.cancel()
         val state = _uiState.value
         if (state.id > 0) {
-            persistJob = viewModelScope.launch { saveToRoom() }
+            persistJob = viewModelScope.launch { saveToRoom(clearCompletedAt = clearCompletedAt) }
         }
     }
 
-    private suspend fun saveToRoom() {
+    private suspend fun saveToRoom(clearCompletedAt: Boolean = false) {
         val state = _uiState.value
         if (state.id > 0) {
             updateSingleCounterValues(
@@ -266,6 +266,7 @@ open class SingleCounterViewModel @Inject constructor(
                 stitchCount = state.counterState.count,
                 stitchAdjustment = state.counterState.resolvedAdjustmentAmount,
                 totalStitchesEver = state.totalStitchesEver,
+                clearCompletedAt = clearCompletedAt,
                 updatedAt = System.currentTimeMillis()
             )
         }
