@@ -51,8 +51,6 @@ fun CounterView(
     textPaddingEnd: Float = 24f,
     buttonSpacing: Int = 24,
     buttonShape: RoundedCornerShape = RoundedCornerShape(12.dp),
-    incrementFontSize: Int = 50,
-    decrementFontSize: Int = 60,
     showResetButton: Boolean = true,
     counterNumberIsVertical: Boolean = false
 ) {
@@ -119,9 +117,7 @@ fun CounterView(
                 onDecrement = onDecrement,
                 counterLabel = label,
                 buttonSpacing = buttonSpacing,
-                buttonShape = buttonShape,
-                incrementFontSize = incrementFontSize,
-                decrementFontSize = decrementFontSize
+                buttonShape = buttonShape
             )
         }
 

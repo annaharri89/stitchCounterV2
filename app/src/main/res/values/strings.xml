@@ -20,7 +20,7 @@
     <string name="reset_named_counter_message">Are you sure you want to reset the %1$s counter to 0?</string>
     <string name="reset_all_counters_title">Reset All Counters?</string>
     <string name="reset_all_counters_message">Are you sure you want to reset both Stitches and Rows/Rounds counters to 0?</string>
-    <string name="tip_custom_adjustment">Tip: Tap the pencil icon next to the custom step to set your own increment amount.</string>
+    <string name="tip_custom_adjustment">Tip: Tap the custom adjustment (with the pencil) once to select it, then tap again to edit the amount.</string>
     <string name="title_set_custom_adjustment">Set custom increment</string>
     <string name="label_custom_adjustment">Custom increment amount</string>
     <string name="placeholder_custom_adjustment">Enter a number</string>

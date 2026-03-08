@@ -1,10 +1,8 @@
 package dev.harrisonsoftware.stitchCounter.feature.sharedComposables
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,9 +28,7 @@ fun IncreaseDecreaseButtons(
     onDecrement: () -> Unit,
     counterLabel: String? = null,
     buttonSpacing: Int = 24,
-    buttonShape: RoundedCornerShape = RoundedCornerShape(12.dp),
-    incrementFontSize: Int = 50,
-    decrementFontSize: Int = 60,
+    buttonShape: RoundedCornerShape = RoundedCornerShape(12.dp)
 ) {
     val decreaseDescription = if (counterLabel != null) {
         stringResource(R.string.cd_decrease_named_count, counterLabel)
@@ -45,52 +41,47 @@ fun IncreaseDecreaseButtons(
         stringResource(R.string.cd_increase_count)
     }
 
-    Column(
+    Row(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(buttonSpacing.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(buttonSpacing.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Button(
+            modifier = Modifier
+                .weight(1f)
+                .semantics { contentDescription = decreaseDescription },
+            colors = ButtonDefaults.buttonColors().copy(
+                containerColor = MaterialTheme.quaternary,
+                contentColor = MaterialTheme.onQuaternary
+            ),
+            contentPadding = PaddingValues(0.dp),
+            onClick = onDecrement,
+            shape = buttonShape
         ) {
-            Button(
-                modifier = Modifier
-                    .weight(1f)
-                    .semantics { contentDescription = decreaseDescription },
-                colors = ButtonDefaults.buttonColors().copy(
-                    containerColor = MaterialTheme.quaternary,
-                    contentColor = MaterialTheme.onQuaternary
-                ),
-                contentPadding = PaddingValues(0.dp),
-                onClick = onDecrement,
-                shape = buttonShape
-            ) {
-                androidx.compose.material3.Text(
-                    text = "-",
-                    style = MaterialTheme.typography.displayLarge.copy(
-                        fontSize = decrementFontSize.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+            androidx.compose.material3.Text(
+                text = "-",
+                style = MaterialTheme.typography.displayLarge.copy(
+                    fontSize = 50.sp,
+                    fontWeight = FontWeight.Bold
                 )
-            }
-            
-            Button(
-                modifier = Modifier
-                    .weight(1f)
-                    .semantics { contentDescription = increaseDescription },
-                contentPadding = PaddingValues(0.dp),
-                onClick = onIncrement,
-                shape = buttonShape
-            ) {
-                androidx.compose.material3.Text(
-                    text = "+",
-                    style = MaterialTheme.typography.displayLarge.copy(
-                        fontSize = incrementFontSize.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+            )
+        }
+
+        Button(
+            modifier = Modifier
+                .weight(1f)
+                .semantics { contentDescription = increaseDescription },
+            contentPadding = PaddingValues(0.dp),
+            onClick = onIncrement,
+            shape = buttonShape
+        ) {
+            androidx.compose.material3.Text(
+                text = "+",
+                style = MaterialTheme.typography.displayLarge.copy(
+                    fontSize = 50.sp,
+                    fontWeight = FontWeight.Bold
                 )
-            }
+            )
         }
     }
 }
