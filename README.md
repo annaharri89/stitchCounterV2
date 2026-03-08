@@ -12,3 +12,28 @@ A modern Android app for counting stitches with support for multiple themes and 
 - Import/Export Library creates and restores an offline backup that includes both project data and project photos, so local-only data can be transferred to a new device.
 - No account, login, or cloud service is required to use backup and transfer features.
 - Stitch Counter does not collect analytics, tracking data, or personal information. All data is stored locally on the user’s device.
+
+## Engineering Guardrails
+
+- CI runs `:app:testDebugUnitTest` and fails if Kotlin source in `app/src/main` changes without corresponding changes in `app/src/test`.
+- Install local Git hooks with:
+  - `bash scripts/install-git-hooks.sh`
+- The pre-commit hook runs `:app:testDebugUnitTest` when staged changes include Kotlin production or test files.
+
+## Release: Signed Play Store AAB
+
+This project is configured to build signed release AABs with an upload key from `keystore.properties`.
+
+1. Create `keystore.properties` in the project root:
+   - `storeFile=/absolute/path/to/upload-keystore.jks`
+   - `storePassword=YOUR_STORE_PASSWORD`
+   - `keyAlias=upload`
+   - `keyPassword=YOUR_KEY_PASSWORD`
+1. Build the signed AAB:
+   - Android Studio Gradle task: `:app:buildPlayReleaseAab`
+   - CLI equivalent: `./gradlew :app:buildPlayReleaseAab`
+
+Notes:
+- `buildPlayReleaseAab` runs release unit tests before packaging by way of the `bundleRelease` task dependency chain.
+- On success, it opens the output folder in Finder.
+- AAB output path: `app/build/outputs/bundle/release/app-release.aab`.
