@@ -1,9 +1,10 @@
 package dev.harrisonsoftware.stitchCounter.feature.sharedComposables
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
@@ -33,33 +34,37 @@ fun AdjustmentButtons(
     onEditCustomAdjustmentClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val editCustomAdjustmentDescription = stringResource(R.string.cd_edit_custom_adjustment)
-
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         AdjustmentAmount.entries.forEach { amount ->
+            val isCustom = amount == AdjustmentAmount.CUSTOM
+            val isSelected = amount == selectedAdjustmentAmount
+
             val label = when (amount) {
                 AdjustmentAmount.ONE -> "+1"
                 AdjustmentAmount.FIVE -> "+5"
                 AdjustmentAmount.CUSTOM -> "+$customAdjustmentAmount"
             }
+
             AdjustmentButton(
+                modifier = Modifier.weight(if (isCustom) 1f else .9f),
                 label = label,
-                isSelected = amount == selectedAdjustmentAmount,
-                onClick = { onAdjustmentClick(amount) },
-                trailingIcon = if (amount == AdjustmentAmount.CUSTOM) {
+                isSelected = isSelected,
+                onClick = {
+                    if (isCustom && isSelected) {
+                        onEditCustomAdjustmentClick()
+                    } else {
+                        onAdjustmentClick(amount)
+                    }
+                },
+                trailingIcon = if (isCustom) {
                     {
                         Icon(
-                            modifier = Modifier
-                                .clickable { onEditCustomAdjustmentClick() }
-                                .semantics {
-                                    contentDescription = editCustomAdjustmentDescription
-                                    role = Role.Button
-                                },
                             imageVector = Icons.Default.Edit,
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.cd_edit_custom_adjustment),
+                            modifier = Modifier.size(18.dp),
                         )
                     }
                 } else {
@@ -97,9 +102,10 @@ private fun AdjustmentButton(
     }
 
     Button(
+        contentPadding = PaddingValues(0.dp), // removes internal content padding
         modifier = modifier
             .padding(horizontal = 4.dp)
-            .sizeIn(minWidth = 40.dp, minHeight = 40.dp)
+            //.sizeIn(minWidth = 40.dp, minHeight = 40.dp)
             .semantics {
                 selected = isSelected
                 role = Role.RadioButton
