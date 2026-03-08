@@ -95,6 +95,7 @@ interface ProjectDao {
         SET stitch_counter_number = :stitchCount,
             stitch_adjustment = :stitchAdjustment,
             total_stitches_ever = :totalStitchesEver,
+            completed_at = CASE WHEN :clearCompletedAt THEN NULL ELSE completed_at END,
             updated_at = :updatedAt
         WHERE _id = :id
     """)
@@ -103,6 +104,7 @@ interface ProjectDao {
         stitchCount: Int,
         stitchAdjustment: Int,
         totalStitchesEver: Int,
+        clearCompletedAt: Boolean,
         updatedAt: Long
     )
 
@@ -113,6 +115,7 @@ interface ProjectDao {
             row_counter_number = :rowCount,
             row_adjustment = :rowAdjustment,
             total_stitches_ever = :totalStitchesEver,
+            completed_at = CASE WHEN :clearCompletedAt THEN NULL ELSE completed_at END,
             updated_at = :updatedAt
         WHERE _id = :id
     """)
@@ -123,6 +126,7 @@ interface ProjectDao {
         rowCount: Int,
         rowAdjustment: Int,
         totalStitchesEver: Int,
+        clearCompletedAt: Boolean,
         updatedAt: Long
     )
 }
