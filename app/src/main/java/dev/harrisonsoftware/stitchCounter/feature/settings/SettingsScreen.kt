@@ -70,6 +70,7 @@ fun SettingsScreen(
         viewModel.effect.collect { effect ->
             when (effect) {
                 is SettingsEffect.OpenEmailClient -> {
+                    viewModel.onLaunchingExternalActivity()
                     val encodedSubject = Uri.encode(effect.subject)
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
                         data = "mailto:${Constants.SUPPORT_EMAIL}?subject=$encodedSubject".toUri()
@@ -77,11 +78,13 @@ fun SettingsScreen(
                     context.startActivity(intent)
                 }
                 is SettingsEffect.OpenPrivacyPolicy -> {
+                    viewModel.onLaunchingExternalActivity()
                     val browserIntent = Intent(Intent.ACTION_VIEW,
                         Constants.PRIVACY_POLICY_URL.toUri())
                     context.startActivity(browserIntent)
                 }
                 is SettingsEffect.OpenEULA -> {
+                    viewModel.onLaunchingExternalActivity()
                     val browserIntent = Intent(Intent.ACTION_VIEW,
                         Constants.EULA_URL.toUri())
                     context.startActivity(browserIntent)
@@ -145,11 +148,15 @@ fun SettingsScreen(
                             exportError = uiState.exportError,
                             importError = uiState.importError,
                             onExport = {
+                                viewModel.onLaunchingExternalActivity()
                                 val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US)
                                     .format(java.util.Date())
                                 exportLauncher.launch("stitch_counter_backup_$timestamp.zip")
                             },
-                            onImport = { importLauncher.launch("application/zip") }
+                            onImport = {
+                                viewModel.onLaunchingExternalActivity()
+                                importLauncher.launch("application/zip")
+                            }
                         )
                     }
                 }

@@ -31,7 +31,18 @@ class LauncherIconManager @Inject constructor(
     @Volatile
     var pendingTheme: AppTheme? = null
 
+    @Volatile
+    private var shouldSkipNextPendingIconApply: Boolean = false
+
+    fun skipNextPendingIconApply() {
+        shouldSkipNextPendingIconApply = true
+    }
+
     fun applyPendingIconChangeIfNeeded() {
+        if (consumeShouldSkipNextPendingIconApply()) {
+            return
+        }
+
         pendingTheme?.let { theme ->
             updateLauncherIcon(theme)
             pendingTheme = null
@@ -85,5 +96,14 @@ class LauncherIconManager @Inject constructor(
         } catch (_: Exception) {
             false
         }
+    }
+
+    private fun consumeShouldSkipNextPendingIconApply(): Boolean {
+        if (!shouldSkipNextPendingIconApply) {
+            return false
+        }
+
+        shouldSkipNextPendingIconApply = false
+        return true
     }
 }
