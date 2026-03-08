@@ -1,4 +1,5 @@
 import java.util.Properties
+import org.gradle.api.GradleException
 
 plugins {
     alias(libs.plugins.android.application)
@@ -11,6 +12,22 @@ plugins {
 
 val versionProps = Properties().apply {
     load(rootProject.file("gradle/version.properties").inputStream())
+}
+
+val releaseKeystorePropertiesFile = rootProject.file("keystore.properties")
+val releaseKeystoreProperties = Properties().apply {
+    if (releaseKeystorePropertiesFile.exists()) {
+        load(releaseKeystorePropertiesFile.inputStream())
+    }
+}
+
+val hasCompleteReleaseSigningConfig = listOf(
+    "storeFile",
+    "storePassword",
+    "keyAlias",
+    "keyPassword"
+).all { requiredKey ->
+    !releaseKeystoreProperties.getProperty(requiredKey).isNullOrBlank()
 }
 
 android {
@@ -30,10 +47,22 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            if (hasCompleteReleaseSigningConfig) {
+                storeFile = file(releaseKeystoreProperties.getProperty("storeFile"))
+                storePassword = releaseKeystoreProperties.getProperty("storePassword")
+                keyAlias = releaseKeystoreProperties.getProperty("keyAlias")
+                keyPassword = releaseKeystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -109,4 +138,28 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+tasks.configureEach {
+    if (name == "assembleRelease" || name == "bundleRelease") {
+        dependsOn("testReleaseUnitTest")
+        doFirst {
+            if (!hasCompleteReleaseSigningConfig) {
+                throw GradleException(
+                    "Release signing is not configured. Create keystore.properties with storeFile, storePassword, keyAlias, and keyPassword."
+                )
+            }
+        }
+    }
+}
+
+tasks.register("buildPlayReleaseAab") {
+    group = "release"
+    description = "Runs release unit tests, builds the signed Play Store AAB, and opens the output folder in Finder."
+    dependsOn("bundleRelease")
+    doLast {
+        exec {
+            commandLine("open", "$projectDir/build/outputs/bundle/release")
+        }
+    }
 }
