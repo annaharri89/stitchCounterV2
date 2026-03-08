@@ -75,8 +75,16 @@ class UpdateSingleCounterValues @Inject constructor(
         stitchCount: Int,
         stitchAdjustment: Int,
         totalStitchesEver: Int,
+        clearCompletedAt: Boolean = false,
         updatedAt: Long
-    ) = repo.updateSingleCounterValues(id, stitchCount, stitchAdjustment, totalStitchesEver, updatedAt)
+    ) = repo.updateSingleCounterValues(
+        id = id,
+        stitchCount = stitchCount,
+        stitchAdjustment = stitchAdjustment,
+        totalStitchesEver = totalStitchesEver,
+        clearCompletedAt = clearCompletedAt,
+        updatedAt = updatedAt
+    )
 }
 
 @Singleton
@@ -90,8 +98,18 @@ class UpdateDoubleCounterValues @Inject constructor(
         rowCount: Int,
         rowAdjustment: Int,
         totalStitchesEver: Int,
+        clearCompletedAt: Boolean = false,
         updatedAt: Long
-    ) = repo.updateDoubleCounterValues(id, stitchCount, stitchAdjustment, rowCount, rowAdjustment, totalStitchesEver, updatedAt)
+    ) = repo.updateDoubleCounterValues(
+        id = id,
+        stitchCount = stitchCount,
+        stitchAdjustment = stitchAdjustment,
+        rowCount = rowCount,
+        rowAdjustment = rowAdjustment,
+        totalStitchesEver = totalStitchesEver,
+        clearCompletedAt = clearCompletedAt,
+        updatedAt = updatedAt
+    )
 }
 
 @Singleton

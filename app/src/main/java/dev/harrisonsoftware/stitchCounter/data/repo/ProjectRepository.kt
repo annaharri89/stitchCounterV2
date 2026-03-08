@@ -67,9 +67,17 @@ class ProjectRepository @Inject constructor(
         stitchCount: Int,
         stitchAdjustment: Int,
         totalStitchesEver: Int,
+        clearCompletedAt: Boolean,
         updatedAt: Long
     ) {
-        projectDao.updateSingleCounterValues(id, stitchCount, stitchAdjustment, totalStitchesEver, updatedAt)
+        projectDao.updateSingleCounterValues(
+            id = id,
+            stitchCount = stitchCount,
+            stitchAdjustment = stitchAdjustment,
+            totalStitchesEver = totalStitchesEver,
+            clearCompletedAt = clearCompletedAt,
+            updatedAt = updatedAt
+        )
     }
 
     suspend fun updateDoubleCounterValues(
@@ -79,9 +87,19 @@ class ProjectRepository @Inject constructor(
         rowCount: Int,
         rowAdjustment: Int,
         totalStitchesEver: Int,
+        clearCompletedAt: Boolean,
         updatedAt: Long
     ) {
-        projectDao.updateDoubleCounterValues(id, stitchCount, stitchAdjustment, rowCount, rowAdjustment, totalStitchesEver, updatedAt)
+        projectDao.updateDoubleCounterValues(
+            id = id,
+            stitchCount = stitchCount,
+            stitchAdjustment = stitchAdjustment,
+            rowCount = rowCount,
+            rowAdjustment = rowAdjustment,
+            totalStitchesEver = totalStitchesEver,
+            clearCompletedAt = clearCompletedAt,
+            updatedAt = updatedAt
+        )
     }
 }
 

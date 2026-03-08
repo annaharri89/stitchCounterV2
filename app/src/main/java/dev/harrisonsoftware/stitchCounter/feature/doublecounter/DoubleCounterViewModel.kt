@@ -205,7 +205,11 @@ open class DoubleCounterViewModel @Inject constructor(
         }
     }
 
-    private fun updateCounter(type: CounterType, update: (CounterState) -> CounterState) {
+    private fun updateCounter(
+        type: CounterType,
+        clearCompletedAt: Boolean = false,
+        update: (CounterState) -> CounterState
+    ) {
         _uiState.update { currentState ->
             when (type) {
                 CounterType.STITCH -> currentState.copy(
@@ -225,7 +229,7 @@ open class DoubleCounterViewModel @Inject constructor(
             }
         }
         persistToSavedState()
-        persistToRoom()
+        persistToRoom(clearCompletedAt = clearCompletedAt)
     }
 
     fun increment(type: CounterType) {
@@ -237,7 +241,7 @@ open class DoubleCounterViewModel @Inject constructor(
     }
 
     fun decrement(type: CounterType) = updateCounter(type) { it.decrement() }
-    fun reset(type: CounterType) = updateCounter(type) { it.reset() }
+    fun reset(type: CounterType) = updateCounter(type, clearCompletedAt = true) { it.reset() }
     fun changeAdjustment(type: CounterType, value: AdjustmentAmount) =
         updateCounter(type) { it.copy(adjustment = value) }
     fun setCustomAdjustmentAmount(type: CounterType, value: Int) =
@@ -307,15 +311,15 @@ open class DoubleCounterViewModel @Inject constructor(
         }
     }
 
-    private fun persistToRoom() {
+    private fun persistToRoom(clearCompletedAt: Boolean = false) {
         persistJob?.cancel()
         val state = _uiState.value
         if (state.id > 0) {
-            persistJob = viewModelScope.launch { saveToRoom() }
+            persistJob = viewModelScope.launch { saveToRoom(clearCompletedAt = clearCompletedAt) }
         }
     }
 
-    private suspend fun saveToRoom() {
+    private suspend fun saveToRoom(clearCompletedAt: Boolean = false) {
         val state = _uiState.value
         if (state.id > 0) {
             updateDoubleCounterValues(
@@ -325,6 +329,7 @@ open class DoubleCounterViewModel @Inject constructor(
                 rowCount = state.rowCounterState.count,
                 rowAdjustment = state.rowCounterState.resolvedAdjustmentAmount,
                 totalStitchesEver = state.totalStitchesEver,
+                clearCompletedAt = clearCompletedAt,
                 updatedAt = System.currentTimeMillis()
             )
         }
