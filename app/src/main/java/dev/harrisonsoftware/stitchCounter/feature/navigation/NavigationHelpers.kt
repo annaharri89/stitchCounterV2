@@ -14,6 +14,14 @@ fun getDestinationForTab(tab: BottomNavTab): Direction = when(tab) {
     BottomNavTab.SETTINGS -> SettingsScreenDestination
 }
 
+fun getTabForRoute(route: String?): BottomNavTab = when {
+    route == null -> BottomNavTab.LIBRARY
+    route.startsWith(LibraryScreenDestination.route) -> BottomNavTab.LIBRARY
+    route.startsWith(StatsScreenDestination.route) -> BottomNavTab.STATS
+    route.startsWith(SettingsScreenDestination.route) -> BottomNavTab.SETTINGS
+    else -> BottomNavTab.LIBRARY
+}
+
 inline fun <reified T : Direction> navigateToDestination(
     navController: NavHostController,
     destination: T

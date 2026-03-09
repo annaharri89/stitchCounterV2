@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dev.harrisonsoftware.stitchCounter.feature.NavGraphs
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
@@ -23,24 +24,21 @@ fun RootNavigationScreen(
     viewModel: RootNavigationViewModel,
     isWideLayout: Boolean
 ) {
-    val selectedTab = viewModel.selectedTab.collectAsStateWithLifecycle().value
     val navController = rememberNavController()
     val currentSheetScreen by viewModel.currentSheet.collectAsStateWithLifecycle()
-
-    val previousTab = remember { mutableStateOf<BottomNavTab?>(null) }
-    LaunchedEffect(selectedTab) {
-        if (previousTab.value != null && selectedTab != previousTab.value) {
-            navigateToDestination(navController, getDestinationForTab(selectedTab))
-        }
-        previousTab.value = selectedTab
-    }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val selectedTab = getTabForRoute(navBackStackEntry?.destination?.route)
 
     Scaffold(
         bottomBar = {
             if (!isWideLayout) {
                 BottomNavigationLayout(
                     selectedTab = selectedTab,
-                    onTabSelected = viewModel::selectTab
+                    onTabSelected = { tab ->
+                        if (tab != selectedTab) {
+                            navigateToDestination(navController, getDestinationForTab(tab))
+                        }
+                    }
                 )
             }
         }
@@ -49,7 +47,11 @@ fun RootNavigationScreen(
             if (isWideLayout) {
                 NavigationRailLayout(
                     selectedTab = selectedTab,
-                    onTabSelected = viewModel::selectTab
+                    onTabSelected = { tab ->
+                        if (tab != selectedTab) {
+                            navigateToDestination(navController, getDestinationForTab(tab))
+                        }
+                    }
                 )
             }
 
