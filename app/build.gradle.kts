@@ -140,6 +140,10 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 tasks.configureEach {
     if (name == "assembleRelease" || name == "bundleRelease") {
         dependsOn("testReleaseUnitTest")
