@@ -11,12 +11,12 @@ import androidx.compose.ui.graphics.Color
 import dev.harrisonsoftware.stitchCounter.domain.model.AppTheme
 import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeManager
 
-val LocalQuaternaryColor = compositionLocalOf<Color> { 
-    error("No quaternary color provided") 
+val LocalQuaternaryColor = compositionLocalOf<Color> {
+    Color.Unspecified
 }
 
-val LocalOnQuaternaryColor = compositionLocalOf<Color> { 
-    error("No onQuaternary color provided") 
+val LocalOnQuaternaryColor = compositionLocalOf<Color> {
+    Color.Unspecified
 }
 
 fun seaCottageLightColors() = lightColorScheme(
