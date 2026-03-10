@@ -24,7 +24,7 @@
     <color name="icon_golden_hearth_depth_lightest">#FFF5E0D8</color>
     <color name="icon_golden_hearth_depth_very_dark">#FF5E548E</color>
     <color name="icon_golden_hearth_depth_very_light">#FFFFF0E0</color>
-    <color name="icon_golden_hearth_accent">#FFF5E0D8</color>
+    <color name="icon_golden_hearth_accent">#FFD4DDF0</color>
     <color name="icon_golden_hearth_base">#FFB85C38</color>
     
     <!-- Forest Fiber Theme - Light -->
@@ -35,7 +35,7 @@
     <color name="icon_forest_fiber_depth_lightest">#FFE4F0E6</color>
     <color name="icon_forest_fiber_depth_very_dark">#FF7C5E3C</color>
     <color name="icon_forest_fiber_depth_very_light">#FFF0F8F0</color>
-    <color name="icon_forest_fiber_accent">#FFE4F0E6</color>
+    <color name="icon_forest_fiber_accent">#FFE7D89F</color>
     <color name="icon_forest_fiber_base">#FF4C6A4D</color>
     
     <!-- Cloud Soft Theme - Light -->
@@ -46,7 +46,7 @@
     <color name="icon_cloud_soft_depth_lightest">#FFE3F2F7</color>
     <color name="icon_cloud_soft_depth_very_dark">#FF9A8C98</color>
     <color name="icon_cloud_soft_depth_very_light">#FFF0F8FC</color>
-    <color name="icon_cloud_soft_accent">#FFE3F2F7</color>
+    <color name="icon_cloud_soft_accent">#FFEDE2D2</color>
     <color name="icon_cloud_soft_base">#FF6B8E9F</color>
     
     <!-- Yarn Candy Theme - Light -->
@@ -57,7 +57,7 @@
     <color name="icon_yarn_candy_depth_lightest">#FFE8ECFF</color>
     <color name="icon_yarn_candy_depth_very_dark">#FFFFAFCC</color>
     <color name="icon_yarn_candy_depth_very_light">#FFF8E8FF</color>
-    <color name="icon_yarn_candy_accent">#FFE8ECFF</color>
+    <color name="icon_yarn_candy_accent">#FFF6D3C8</color>
     <color name="icon_yarn_candy_base">#FF7B9ACC</color>
     
     <!-- Dusty Rose Theme - Light -->
@@ -68,9 +68,9 @@
     <color name="icon_dusty_rose_depth_lightest">#FFF2DCE0</color>
     <color name="icon_dusty_rose_depth_very_dark">#FF6D597A</color>
     <color name="icon_dusty_rose_depth_very_light">#FFF8E8EC</color>
-    <color name="icon_dusty_rose_accent">#FFF2DCE0</color>
+    <color name="icon_dusty_rose_accent">#FFCBE4DA</color>
     <color name="icon_dusty_rose_base">#FFB76E79</color>
-    
+
     <!-- Text colors -->
     <color name="icon_text_color">#333333</color>
     <color name="icon_text_bg">#FFFFFF</color>

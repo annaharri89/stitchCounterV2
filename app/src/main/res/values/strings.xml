@@ -106,7 +106,7 @@
 
     <!-- Support -->
     <string name="support_title">Support the App</string>
-    <string name="support_description">This app works entirely offline and doesn\'t use accounts or tracking. It is completely free and ad-free. No analytics are gathered. If you\'d like to support its development, you can do so with a coffee ☕</string>
+    <string name="support_description">This app works entirely offline and doesn\'t use accounts or tracking. It is completely free and ad-free. No analytics are gathered. If you\'d like to support its development, you can do so with a coffee.</string>
     <string name="support_buy_coffee">Buy Me a Coffee ☕</string>
     <string name="support_i_supported">I Supported</string>
     <string name="support_thank_you_title">Thank you for supporting the app!</string>

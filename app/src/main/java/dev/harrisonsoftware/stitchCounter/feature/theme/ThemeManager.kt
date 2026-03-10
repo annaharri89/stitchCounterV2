@@ -52,7 +52,7 @@ class ThemeManager @Inject constructor() {
             AppTheme.SEA_COTTAGE -> Color.White
             AppTheme.GOLDEN_HEARTH -> if (isDark) Color.Black else Color.White
             AppTheme.FOREST_FIBER -> Color.White
-            AppTheme.CLOUD_SOFT -> Color.Black
+            AppTheme.CLOUD_SOFT -> Color.White
             AppTheme.YARN_CANDY -> Color.Black
             AppTheme.DUSTY_ROSE -> if (isDark) Color.Black else Color.White
         }

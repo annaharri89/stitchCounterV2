@@ -47,7 +47,7 @@ class SettingsViewModelTest {
         launcherIconManager = mockk(relaxed = true)
         exportLibrary = mockk()
         importLibrary = mockk()
-        every { appPreferencesRepository.selectedTheme } returns flowOf(AppTheme.DUSTY_ROSE)
+        every { appPreferencesRepository.selectedTheme } returns flowOf(AppTheme.FOREST_FIBER)
         every { themeManager.getThemeColors(any()) } returns emptyList()
     }
 
@@ -63,6 +63,11 @@ class SettingsViewModelTest {
         exportLibraryUseCase = exportLibrary,
         importLibraryUseCase = importLibrary,
     )
+
+    @Test
+    fun `settings ui state defaults to forest fiber theme`() {
+        assertEquals(AppTheme.FOREST_FIBER, SettingsUiState().selectedTheme)
+    }
 
     @Test
     fun `init observes theme and updates state`() {
