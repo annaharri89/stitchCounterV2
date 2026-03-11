@@ -1,12 +1,18 @@
 package dev.harrisonsoftware.stitchCounter.feature.settings
 
 import app.cash.turbine.test
+import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.Constants
+import dev.harrisonsoftware.stitchCounter.data.backup.BackupManagerError
 import dev.harrisonsoftware.stitchCounter.data.repo.AppPreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AppTheme
 import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
 import dev.harrisonsoftware.stitchCounter.domain.usecase.ExportLibrary
+import dev.harrisonsoftware.stitchCounter.domain.usecase.ExportLibraryError
+import dev.harrisonsoftware.stitchCounter.domain.usecase.ExportLibraryResult
 import dev.harrisonsoftware.stitchCounter.domain.usecase.ImportLibrary
+import dev.harrisonsoftware.stitchCounter.domain.usecase.ImportLibraryError
+import dev.harrisonsoftware.stitchCounter.domain.usecase.ImportLibraryResult
 import dev.harrisonsoftware.stitchCounter.domain.usecase.ImportResult
 import dev.harrisonsoftware.stitchCounter.feature.theme.LauncherIconManager
 import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeManager
@@ -79,7 +85,7 @@ class SettingsViewModelTest {
 
     @Test
     fun `exportLibrary sets isExporting then exportSuccess on success`() = runTest {
-        coEvery { exportLibrary(any()) } returns Result.success(ContentUri("content://test"))
+        coEvery { exportLibrary(any()) } returns ExportLibraryResult.Success(ContentUri("content://test"))
 
         val viewModel = createViewModel()
         viewModel.exportLibrary()
@@ -92,7 +98,7 @@ class SettingsViewModelTest {
 
     @Test
     fun `exportLibrary sets exportError on failure`() = runTest {
-        coEvery { exportLibrary(any()) } returns Result.failure(Exception("Disk full"))
+        coEvery { exportLibrary(any()) } returns ExportLibraryResult.Failure(ExportLibraryError.Unexpected(Exception()))
 
         val viewModel = createViewModel()
         viewModel.exportLibrary()
@@ -100,13 +106,26 @@ class SettingsViewModelTest {
         val state = viewModel.uiState.value
         assertFalse(state.isExporting)
         assertFalse(state.exportSuccess)
-        assertEquals("Disk full", state.exportError)
+        assertEquals(R.string.settings_error_unexpected, state.exportError?.resId)
+    }
+
+    @Test
+    fun `exportLibrary maps backup json missing to invalid backup message`() = runTest {
+        coEvery { exportLibrary(any()) } returns ExportLibraryResult.Failure(
+            ExportLibraryError.BackupCreationFailed(BackupManagerError.BackupJsonMissing)
+        )
+
+        val viewModel = createViewModel()
+        viewModel.exportLibrary()
+
+        val state = viewModel.uiState.value
+        assertEquals(R.string.settings_error_backup_invalid, state.exportError?.resId)
     }
 
     @Test
     fun `importLibrary sets importSuccess and importResult on success`() = runTest {
         val importResult = ImportResult(importedCount = 5, failedCount = 0, failedProjectNames = emptyList())
-        coEvery { importLibrary(any(), any()) } returns Result.success(importResult)
+        coEvery { importLibrary(any(), any()) } returns ImportLibraryResult.Success(importResult)
 
         val viewModel = createViewModel()
         viewModel.importLibrary(mockk(relaxed = true))
@@ -120,7 +139,9 @@ class SettingsViewModelTest {
 
     @Test
     fun `importLibrary sets importError on failure`() = runTest {
-        coEvery { importLibrary(any(), any()) } returns Result.failure(Exception("Corrupt file"))
+        coEvery { importLibrary(any(), any()) } returns ImportLibraryResult.Failure(
+            ImportLibraryError.UnsupportedBackupVersion(99)
+        )
 
         val viewModel = createViewModel()
         viewModel.importLibrary(mockk(relaxed = true))
@@ -128,12 +149,25 @@ class SettingsViewModelTest {
         val state = viewModel.uiState.value
         assertFalse(state.isImporting)
         assertFalse(state.importSuccess)
-        assertEquals("Corrupt file", state.importError)
+        assertEquals(R.string.settings_error_backup_unsupported_version, state.importError?.resId)
+    }
+
+    @Test
+    fun `importLibrary maps unsafe zip entry to unsafe backup message`() = runTest {
+        coEvery { importLibrary(any(), any()) } returns ImportLibraryResult.Failure(
+            ImportLibraryError.BackupExtractionFailed(BackupManagerError.UnsafeZipEntry("../bad"))
+        )
+
+        val viewModel = createViewModel()
+        viewModel.importLibrary(mockk(relaxed = true))
+
+        val state = viewModel.uiState.value
+        assertEquals(R.string.settings_error_backup_unsafe, state.importError?.resId)
     }
 
     @Test
     fun `clearExportStatus resets export flags`() = runTest {
-        coEvery { exportLibrary(any()) } returns Result.success(ContentUri("content://test"))
+        coEvery { exportLibrary(any()) } returns ExportLibraryResult.Success(ContentUri("content://test"))
 
         val viewModel = createViewModel()
         viewModel.exportLibrary()
@@ -147,7 +181,7 @@ class SettingsViewModelTest {
     @Test
     fun `clearImportStatus resets import flags`() = runTest {
         val importResult = ImportResult(importedCount = 3, failedCount = 0, failedProjectNames = emptyList())
-        coEvery { importLibrary(any(), any()) } returns Result.success(importResult)
+        coEvery { importLibrary(any(), any()) } returns ImportLibraryResult.Success(importResult)
 
         val viewModel = createViewModel()
         viewModel.importLibrary(mockk(relaxed = true))

@@ -1,12 +1,19 @@
 package dev.harrisonsoftware.stitchCounter.feature.settings
 
 import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.harrisonsoftware.stitchCounter.R
+import dev.harrisonsoftware.stitchCounter.data.backup.BackupManagerError
 import dev.harrisonsoftware.stitchCounter.data.repo.AppPreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AppTheme
 import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
+import dev.harrisonsoftware.stitchCounter.domain.usecase.ExportLibraryError
+import dev.harrisonsoftware.stitchCounter.domain.usecase.ExportLibraryResult
 import dev.harrisonsoftware.stitchCounter.domain.usecase.ExportLibrary
+import dev.harrisonsoftware.stitchCounter.domain.usecase.ImportLibraryError
+import dev.harrisonsoftware.stitchCounter.domain.usecase.ImportLibraryResult
 import dev.harrisonsoftware.stitchCounter.domain.usecase.ImportLibrary
 import dev.harrisonsoftware.stitchCounter.feature.theme.LauncherIconManager
 import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeColor
@@ -69,44 +76,44 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isExporting = true, exportError = null) }
             val outputContentUri = outputUri?.let { ContentUri(it.toString()) }
-            exportLibraryUseCase(outputContentUri).fold(
-                onSuccess = {
+            when (val exportResult = exportLibraryUseCase(outputContentUri)) {
+                is ExportLibraryResult.Success -> {
                     _uiState.update { it.copy(isExporting = false, exportSuccess = true) }
-                },
-                onFailure = { error ->
-                    _uiState.update { 
+                }
+                is ExportLibraryResult.Failure -> {
+                    _uiState.update {
                         it.copy(
-                            isExporting = false, 
-                            exportError = error.message ?: "Export failed"
-                        ) 
+                            isExporting = false,
+                            exportError = exportResult.error.toUserMessage()
+                        )
                     }
                 }
-            )
+            }
         }
     }
     
     fun importLibrary(inputUri: Uri, replaceExisting: Boolean = false) {
         viewModelScope.launch {
             _uiState.update { it.copy(isImporting = true, importError = null) }
-            importLibraryUseCase(ContentUri(inputUri.toString()), replaceExisting).fold(
-                onSuccess = { importResult ->
-                    _uiState.update { 
+            when (val importResult = importLibraryUseCase(ContentUri(inputUri.toString()), replaceExisting)) {
+                is ImportLibraryResult.Success -> {
+                    _uiState.update {
                         it.copy(
-                            isImporting = false, 
+                            isImporting = false,
                             importSuccess = true,
-                            importResult = importResult
-                        ) 
-                    }
-                },
-                onFailure = { error ->
-                    _uiState.update { 
-                        it.copy(
-                            isImporting = false, 
-                            importError = error.message ?: "Import failed"
-                        ) 
+                            importResult = importResult.result
+                        )
                     }
                 }
-            )
+                is ImportLibraryResult.Failure -> {
+                    _uiState.update {
+                        it.copy(
+                            isImporting = false,
+                            importError = importResult.error.toUserMessage()
+                        )
+                    }
+                }
+            }
         }
     }
     
@@ -149,15 +156,45 @@ class SettingsViewModel @Inject constructor(
     }
 }
 
+data class SettingsUiText(
+    @StringRes val resId: Int,
+    val formatArgs: List<Any> = emptyList()
+)
+
+private fun ExportLibraryError.toUserMessage(): SettingsUiText = when (this) {
+    is ExportLibraryError.BackupCreationFailed -> when (error) {
+        BackupManagerError.InputStreamUnavailable,
+        BackupManagerError.OutputStreamUnavailable -> SettingsUiText(R.string.settings_error_file_access_unavailable)
+        BackupManagerError.ExternalFilesDirectoryUnavailable -> SettingsUiText(R.string.settings_error_storage_unavailable)
+        BackupManagerError.BackupJsonMissing -> SettingsUiText(R.string.settings_error_backup_invalid)
+        is BackupManagerError.UnsafeZipEntry -> SettingsUiText(R.string.settings_error_backup_unsafe)
+        is BackupManagerError.Unexpected -> SettingsUiText(R.string.settings_error_unexpected)
+    }
+    is ExportLibraryError.Unexpected -> SettingsUiText(R.string.settings_error_unexpected)
+}
+
+private fun ImportLibraryError.toUserMessage(): SettingsUiText = when (this) {
+    is ImportLibraryError.BackupExtractionFailed -> when (error) {
+        BackupManagerError.InputStreamUnavailable,
+        BackupManagerError.OutputStreamUnavailable -> SettingsUiText(R.string.settings_error_file_access_unavailable)
+        BackupManagerError.ExternalFilesDirectoryUnavailable -> SettingsUiText(R.string.settings_error_storage_unavailable)
+        BackupManagerError.BackupJsonMissing -> SettingsUiText(R.string.settings_error_backup_invalid)
+        is BackupManagerError.UnsafeZipEntry -> SettingsUiText(R.string.settings_error_backup_unsafe)
+        is BackupManagerError.Unexpected -> SettingsUiText(R.string.settings_error_unexpected)
+    }
+    is ImportLibraryError.UnsupportedBackupVersion -> SettingsUiText(R.string.settings_error_backup_unsupported_version)
+    is ImportLibraryError.Unexpected -> SettingsUiText(R.string.settings_error_unexpected)
+}
+
 data class SettingsUiState(
-    val selectedTheme: AppTheme = AppTheme.DUSTY_ROSE,
+    val selectedTheme: AppTheme = AppTheme.FOREST_FIBER,
     val themeColors: List<ThemeColor> = emptyList(),
     val isExporting: Boolean = false,
     val exportSuccess: Boolean = false,
-    val exportError: String? = null,
+    val exportError: SettingsUiText? = null,
     val isImporting: Boolean = false,
     val importSuccess: Boolean = false,
-    val importError: String? = null,
+    val importError: SettingsUiText? = null,
     val importResult: dev.harrisonsoftware.stitchCounter.domain.usecase.ImportResult? = null
 )
 
