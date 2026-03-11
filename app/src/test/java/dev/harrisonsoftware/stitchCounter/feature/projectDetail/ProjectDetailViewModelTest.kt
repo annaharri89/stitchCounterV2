@@ -7,7 +7,9 @@ import dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult
 import dev.harrisonsoftware.stitchCounter.domain.model.Project
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.domain.usecase.GetProject
+import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateProjectDetailResult
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateProjectDetailValues
+import dev.harrisonsoftware.stitchCounter.domain.usecase.UpsertProjectResult
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpsertProject
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -41,8 +43,21 @@ class ProjectDetailViewModelTest {
         Dispatchers.setMain(testDispatcher)
         savedStateHandle = SavedStateHandle()
         getProject = mockk()
-        upsertProject = mockk(relaxed = true)
-        updateProjectDetailValues = mockk(relaxed = true)
+        upsertProject = mockk()
+        updateProjectDetailValues = mockk()
+        coEvery { upsertProject(any()) } returns UpsertProjectResult.Success(1L)
+        coEvery {
+            updateProjectDetailValues(
+                id = any(),
+                title = any(),
+                notes = any(),
+                totalRows = any(),
+                projectType = any(),
+                imagePaths = any(),
+                completedAt = any(),
+                updatedAt = any()
+            )
+        } returns UpdateProjectDetailResult.Success
     }
 
     @After
@@ -250,6 +265,34 @@ class ProjectDetailViewModelTest {
     }
 
     @Test
+    fun `attemptDismissal with invalid totalRows sends ShowDiscardDialog`() = runTest {
+        val project = sampleProject().copy(type = ProjectType.DOUBLE, totalRows = 10)
+        coEvery { getProject(1) } returns project
+        coEvery {
+            updateProjectDetailValues(
+                id = any(),
+                title = any(),
+                notes = any(),
+                totalRows = any(),
+                projectType = any(),
+                imagePaths = any(),
+                completedAt = any(),
+                updatedAt = any()
+            )
+        } returns UpdateProjectDetailResult.InvalidTotalRows
+
+        val viewModel = createViewModel()
+        viewModel.loadProject(1, ProjectType.DOUBLE)
+        viewModel.updateTitle("Valid title")
+        viewModel.updateTotalRows("0")
+
+        viewModel.dismissalResult.test {
+            viewModel.attemptDismissal()
+            assertEquals(DismissalResult.ShowDiscardDialog, awaitItem())
+        }
+    }
+
+    @Test
     fun `discardChanges reverts to original values`() = runTest {
         val project = sampleProject()
         coEvery { getProject(1) } returns project
@@ -290,7 +333,7 @@ class ProjectDetailViewModelTest {
 
     @Test
     fun `createProject with valid data calls upsert and updates state`() = runTest {
-        coEvery { upsertProject(any()) } returns 42L
+        coEvery { upsertProject(any()) } returns UpsertProjectResult.Success(42L)
 
         val viewModel = createViewModel()
         viewModel.loadProject(null, ProjectType.SINGLE)
@@ -301,6 +344,44 @@ class ProjectDetailViewModelTest {
         assertEquals(42, state.project!!.id)
         assertFalse(state.hasUnsavedChanges)
         assertNull(state.titleError)
+    }
+
+    @Test
+    fun `save for existing project maps invalid total rows result to ui error`() = runTest {
+        val project = sampleProject().copy(type = ProjectType.DOUBLE)
+        coEvery { getProject(1) } returns project
+        coEvery {
+            updateProjectDetailValues(
+                id = any(),
+                title = any(),
+                notes = any(),
+                totalRows = any(),
+                projectType = any(),
+                imagePaths = any(),
+                completedAt = any(),
+                updatedAt = any()
+            )
+        } returns UpdateProjectDetailResult.InvalidTotalRows
+
+        val viewModel = createViewModel()
+        viewModel.loadProject(1, ProjectType.DOUBLE)
+        viewModel.updateTitle("Valid title")
+        viewModel.updateTotalRows("0")
+        viewModel.save()
+
+        assertEquals(R.string.error_total_rows_required_and_greater, viewModel.uiState.value.totalRowsError)
+    }
+
+    @Test
+    fun `createProject maps invalid title result to ui error`() = runTest {
+        coEvery { upsertProject(any()) } returns UpsertProjectResult.InvalidTitle
+
+        val viewModel = createViewModel()
+        viewModel.loadProject(null, ProjectType.SINGLE)
+        viewModel.updateTitle("   ")
+        viewModel.createProject()
+
+        assertEquals(R.string.error_title_required, viewModel.uiState.value.titleError)
     }
 
     @Test

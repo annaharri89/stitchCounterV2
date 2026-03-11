@@ -10,7 +10,9 @@ import dev.harrisonsoftware.stitchCounter.domain.model.Project
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.domain.validation.ProjectValidator
 import dev.harrisonsoftware.stitchCounter.domain.usecase.GetProject
+import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateProjectDetailResult
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateProjectDetailValues
+import dev.harrisonsoftware.stitchCounter.domain.usecase.UpsertProjectResult
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpsertProject
 import android.content.Context
 import android.net.Uri
@@ -51,6 +53,12 @@ class ProjectDetailViewModel @Inject constructor(
     private val upsertProject: UpsertProject,
     private val updateProjectDetailValues: UpdateProjectDetailValues,
 ) : ViewModel() {
+
+    private sealed interface SaveToRoomResult {
+        data object Saved : SaveToRoomResult
+        data object NotSavedValidation : SaveToRoomResult
+        data object NotSavedPersistence : SaveToRoomResult
+    }
 
     companion object {
         private const val SAVED_STATE_KEY_PROJECT_ID = "detail_project_id"
@@ -287,7 +295,7 @@ class ProjectDetailViewModel @Inject constructor(
         autoSaveJob?.cancel()
         val state = _uiState.value
         val isExistingProject = state.project?.id != null && state.project.id > 0
-        if (state.hasUnsavedChanges && isExistingProject) {
+        if (state.hasUnsavedChanges && isExistingProject && canPersistState(state)) {
             autoSaveJob = viewModelScope.launch {
                 delay(AUTO_SAVE_DELAY_MS)
                 saveToRoom()
@@ -302,7 +310,7 @@ class ProjectDetailViewModel @Inject constructor(
         }
     }
 
-    private suspend fun saveToRoom() {
+    private suspend fun saveToRoom(): SaveToRoomResult {
         val state = _uiState.value
         val staleProject = state.project
         val projectId = staleProject?.id ?: 0
@@ -311,7 +319,7 @@ class ProjectDetailViewModel @Inject constructor(
         val completedAt = if (state.isCompleted) (staleProject?.completedAt ?: now) else null
 
         if (projectId > 0) {
-            updateProjectDetailValues(
+            val updateResult = updateProjectDetailValues(
                 id = projectId,
                 title = state.title,
                 notes = state.notes,
@@ -321,6 +329,9 @@ class ProjectDetailViewModel @Inject constructor(
                 completedAt = completedAt,
                 updatedAt = now
             )
+            if (!applyUpdateProjectDetailResult(updateResult)) {
+                return SaveToRoomResult.NotSavedValidation
+            }
             val freshProject = getProject(projectId)
             if (freshProject != null) {
                 originalTitle = state.title
@@ -332,10 +343,13 @@ class ProjectDetailViewModel @Inject constructor(
                     currentState.copy(
                         project = freshProject,
                         imagePaths = freshProject.imagePaths,
-                        hasUnsavedChanges = false
+                        hasUnsavedChanges = false,
+                        titleError = null,
+                        totalRowsError = null
                     )
                 }
             }
+            return SaveToRoomResult.Saved
         } else {
             val freshProject = if (projectId > 0) getProject(projectId) else null
             val baseProject = freshProject ?: staleProject
@@ -355,7 +369,16 @@ class ProjectDetailViewModel @Inject constructor(
                 completedAt = completedAt,
                 totalStitchesEver = 0,
             )
-            val newId = upsertProject(project).toInt()
+            val upsertResult = upsertProject(project)
+            val newId = when (upsertResult) {
+                is UpsertProjectResult.Success -> upsertResult.projectId.toInt()
+                UpsertProjectResult.InvalidTitle -> {
+                    _uiState.update { currentState ->
+                        currentState.copy(titleError = R.string.error_title_required)
+                    }
+                    return SaveToRoomResult.NotSavedValidation
+                }
+            }
             if (newId > 0) {
                 val updatedProject = project.copy(id = newId)
                 originalTitle = state.title
@@ -367,11 +390,15 @@ class ProjectDetailViewModel @Inject constructor(
                     currentState.copy(
                         project = updatedProject,
                         imagePaths = updatedProject.imagePaths,
-                        hasUnsavedChanges = false
+                        hasUnsavedChanges = false,
+                        titleError = null,
+                        totalRowsError = null
                     )
                 }
                 persistToSavedState()
+                return SaveToRoomResult.Saved
             }
+            return SaveToRoomResult.NotSavedPersistence
         }
     }
 
@@ -379,7 +406,7 @@ class ProjectDetailViewModel @Inject constructor(
         autoSaveJob?.cancel()
         val state = _uiState.value
         val isExistingProject = state.project?.id != null && state.project.id > 0
-        if (state.hasUnsavedChanges && isExistingProject) {
+        if (state.hasUnsavedChanges && isExistingProject && canPersistState(state)) {
             saveToRoom()
         }
     }
@@ -395,8 +422,11 @@ class ProjectDetailViewModel @Inject constructor(
                 }
                 _dismissalResult.send(DismissalResult.ShowDiscardDialog)
             } else {
-                saveToRoom()
-                _dismissalResult.send(DismissalResult.Allowed)
+                when (saveToRoom()) {
+                    SaveToRoomResult.Saved -> _dismissalResult.send(DismissalResult.Allowed)
+                    SaveToRoomResult.NotSavedValidation,
+                    SaveToRoomResult.NotSavedPersistence -> _dismissalResult.send(DismissalResult.ShowDiscardDialog)
+                }
             }
         }
     }
@@ -486,7 +516,16 @@ class ProjectDetailViewModel @Inject constructor(
                 completedAt = null,
                 totalStitchesEver = 0,
             )
-            val newId = upsertProject(project).toInt()
+            val upsertResult = upsertProject(project)
+            val newId = when (upsertResult) {
+                is UpsertProjectResult.Success -> upsertResult.projectId.toInt()
+                UpsertProjectResult.InvalidTitle -> {
+                    _uiState.update { currentState ->
+                        currentState.copy(titleError = R.string.error_title_required)
+                    }
+                    return@launch
+                }
+            }
             if (newId > 0) {
                 val updatedProject = project.copy(id = newId)
                 originalTitle = state.title
@@ -511,9 +550,33 @@ class ProjectDetailViewModel @Inject constructor(
         super.onCleared()
         val state = _uiState.value
         val projectId = state.project?.id ?: 0
-        if (projectId > 0 && state.hasUnsavedChanges) {
+        if (projectId > 0 && state.hasUnsavedChanges && canPersistState(state)) {
             CoroutineScope(Dispatchers.IO + NonCancellable).launch {
                 saveToRoom()
+            }
+        }
+    }
+
+    private fun canPersistState(state: ProjectDetailUiState): Boolean {
+        val totalRowsValue = state.totalRows.toIntOrNull() ?: 0
+        return ProjectValidator.isTitleValid(state.title)
+                && ProjectValidator.areTotalRowsValidForType(totalRowsValue, state.projectType)
+    }
+
+    private fun applyUpdateProjectDetailResult(result: UpdateProjectDetailResult): Boolean {
+        return when (result) {
+            UpdateProjectDetailResult.Success -> true
+            UpdateProjectDetailResult.InvalidTitle -> {
+                _uiState.update { currentState ->
+                    currentState.copy(titleError = R.string.error_title_required)
+                }
+                false
+            }
+            UpdateProjectDetailResult.InvalidTotalRows -> {
+                _uiState.update { currentState ->
+                    currentState.copy(totalRowsError = R.string.error_total_rows_required_and_greater)
+                }
+                false
             }
         }
     }
