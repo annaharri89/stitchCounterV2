@@ -11,8 +11,9 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import dev.harrisonsoftware.stitchCounter.ui.theme.onQuaternary
+import dev.harrisonsoftware.stitchCounter.ui.theme.quaternary
 
 
 @Composable
@@ -61,13 +62,13 @@ private fun BottomNavigationBar(
                     Text(tabTitle)
                 },
                 colors = NavigationBarItemColors(
-                    selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    unselectedIconColor = Color.Gray,
-                    unselectedTextColor = Color.Gray,
-                    selectedIndicatorColor = MaterialTheme.colorScheme.secondaryContainer,
-                    disabledIconColor = Color.Gray,
-                    disabledTextColor = Color.Gray
+                    selectedIconColor = MaterialTheme.onQuaternary,
+                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    selectedIndicatorColor = MaterialTheme.quaternary,
+                    disabledIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                 )
             )
         }

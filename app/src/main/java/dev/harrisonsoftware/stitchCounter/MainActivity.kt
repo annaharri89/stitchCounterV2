@@ -73,8 +73,7 @@ class MainActivity : ComponentActivity() {
                 val currentTheme = appPreferencesRepository.selectedTheme.first()
                 launcherIconManager.updateLauncherIcon(currentTheme)
             } catch (e: Exception) {
-                // If there's an error reading the theme, default to Dusty Rose
-                launcherIconManager.updateLauncherIcon(AppTheme.DUSTY_ROSE)
+                launcherIconManager.updateLauncherIcon(AppTheme.FOREST_FIBER)
             }
         }
     }

@@ -13,7 +13,7 @@
     
     <!-- Subtle gradient overlay for depth -->
     <path
-        android:fillColor="@color/icon_dusty_rose_depth_very_light"
-        android:alpha="0.2"
+        android:fillColor="@color/icon_dusty_rose_accent"
+        android:alpha="0.32"
         android:pathData="M0,0h108v54h-108z" />
 </vector>
