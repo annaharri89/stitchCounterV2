@@ -27,7 +27,10 @@ class BackupManager(
     private val json = Json { ignoreUnknownKeys = true }
     private val tag = "BackupManager"
     
-    fun createBackupZip(backupData: BackupData, outputContentUri: ContentUri? = null): Result<ContentUri> {
+    fun createBackupZip(
+        backupData: BackupData,
+        outputContentUri: ContentUri? = null
+    ): BackupZipCreationResult {
         return try {
             val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
             val zipFileName = "stitch_counter_backup_$timestamp.zip"
@@ -59,10 +62,10 @@ class BackupManager(
                 uriStreamProvider.openOutputStream(outputUri)?.use { outputStream ->
                     createZipFromDirectory(tempDir, outputStream)
                     outputUri
-                } ?: throw Exception("Failed to open output stream")
+                } ?: return BackupZipCreationResult.Failure(BackupManagerError.OutputStreamUnavailable)
             } else {
                 val externalFilesDir = fileSystemProvider.getExternalFilesDirectory()
-                    ?: throw Exception("External files directory not available")
+                    ?: return BackupZipCreationResult.Failure(BackupManagerError.ExternalFilesDirectoryUnavailable)
                 val externalZipFile = File(externalFilesDir, zipFileName)
                 FileOutputStream(externalZipFile).use { outputStream ->
                     createZipFromDirectory(tempDir, outputStream)
@@ -72,35 +75,38 @@ class BackupManager(
             
             tempDir.deleteRecursively()
             
-            Result.success(ContentUri(resultUri.toString()))
+            BackupZipCreationResult.Success(ContentUri(resultUri.toString()))
         } catch (e: Exception) {
             Log.e(tag, "Error creating backup", e)
-            Result.failure(e)
+            BackupZipCreationResult.Failure(BackupManagerError.Unexpected(e))
         }
     }
     
-    fun extractBackupZip(inputContentUri: ContentUri): Result<BackupExtraction> {
+    fun extractBackupZip(inputContentUri: ContentUri): BackupZipExtractionResult {
         return try {
             val inputUri = Uri.parse(inputContentUri.value)
             val tempDir = File(fileSystemProvider.getCacheDirectory(), "backup_extract_${System.currentTimeMillis()}")
             tempDir.mkdirs()
             
             uriStreamProvider.openInputStream(inputUri)?.use { inputStream ->
-                extractZipToDirectory(inputStream, tempDir)
-            } ?: throw Exception("Failed to open input stream")
+                val extractionError = extractZipToDirectory(inputStream, tempDir)
+                if (extractionError != null) {
+                    return BackupZipExtractionResult.Failure(extractionError)
+                }
+            } ?: return BackupZipExtractionResult.Failure(BackupManagerError.InputStreamUnavailable)
             
             val jsonFile = File(tempDir, BACKUP_JSON_FILE_NAME)
             if (!jsonFile.exists()) {
-                throw Exception("$BACKUP_JSON_FILE_NAME not found in archive")
+                return BackupZipExtractionResult.Failure(BackupManagerError.BackupJsonMissing)
             }
             
             val backupData = json.decodeFromString(BackupData.serializer(), jsonFile.readText())
             val imagesDir = File(tempDir, BACKUP_IMAGES_DIRECTORY_NAME)
             
-            Result.success(BackupExtraction(backupData, imagesDir, tempDir))
+            BackupZipExtractionResult.Success(BackupExtraction(backupData, imagesDir, tempDir))
         } catch (e: Exception) {
             Log.e(tag, "Error extracting backup", e)
-            Result.failure(e)
+            BackupZipExtractionResult.Failure(BackupManagerError.Unexpected(e))
         }
     }
     
@@ -144,11 +150,15 @@ class BackupManager(
         }
     }
     
-    private fun extractZipToDirectory(inputStream: InputStream, destDir: File) {
+    private fun extractZipToDirectory(inputStream: InputStream, destDir: File): BackupManagerError? {
         ZipInputStream(inputStream).use { zipIn ->
             var entry: ZipEntry? = zipIn.nextEntry
             while (entry != null) {
-                val file = resolveSecureZipEntryDestination(destDir, entry.name)
+                val destination = resolveSecureZipEntryDestination(destDir, entry.name)
+                if (destination is SecureZipDestination.Invalid) {
+                    return destination.error
+                }
+                val file = (destination as SecureZipDestination.Valid).file
                 if (entry.isDirectory) {
                     file.mkdirs()
                 } else {
@@ -159,16 +169,20 @@ class BackupManager(
                 entry = zipIn.nextEntry
             }
         }
+        return null
     }
 
-    private fun resolveSecureZipEntryDestination(destinationDirectory: File, zipEntryName: String): File {
+    private fun resolveSecureZipEntryDestination(
+        destinationDirectory: File,
+        zipEntryName: String
+    ): SecureZipDestination {
         val destinationFile = File(destinationDirectory, zipEntryName)
         val canonicalDestinationDirectoryPath = destinationDirectory.canonicalPath + File.separator
         val canonicalDestinationFilePath = destinationFile.canonicalPath
         if (!canonicalDestinationFilePath.startsWith(canonicalDestinationDirectoryPath)) {
-            throw IllegalArgumentException("Zip entry is outside destination directory: $zipEntryName")
+            return SecureZipDestination.Invalid(BackupManagerError.UnsafeZipEntry(zipEntryName))
         }
-        return destinationFile
+        return SecureZipDestination.Valid(destinationFile)
     }
 
     private fun resolveSafeInternalFile(relativePath: String): File? {
@@ -188,6 +202,30 @@ class BackupManager(
             null
         }
     }
+}
+
+sealed interface BackupZipCreationResult {
+    data class Success(val contentUri: ContentUri) : BackupZipCreationResult
+    data class Failure(val error: BackupManagerError) : BackupZipCreationResult
+}
+
+sealed interface BackupZipExtractionResult {
+    data class Success(val extraction: BackupExtraction) : BackupZipExtractionResult
+    data class Failure(val error: BackupManagerError) : BackupZipExtractionResult
+}
+
+sealed interface BackupManagerError {
+    data object OutputStreamUnavailable : BackupManagerError
+    data object ExternalFilesDirectoryUnavailable : BackupManagerError
+    data object InputStreamUnavailable : BackupManagerError
+    data object BackupJsonMissing : BackupManagerError
+    data class UnsafeZipEntry(val zipEntryName: String) : BackupManagerError
+    data class Unexpected(val cause: Throwable) : BackupManagerError
+}
+
+private sealed interface SecureZipDestination {
+    data class Valid(val file: File) : SecureZipDestination
+    data class Invalid(val error: BackupManagerError) : SecureZipDestination
 }
 
 data class BackupExtraction(

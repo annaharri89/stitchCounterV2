@@ -1,12 +1,16 @@
 package dev.harrisonsoftware.stitchCounter.domain.usecase
 
-import android.util.Log
+import dev.harrisonsoftware.stitchCounter.data.backup.BackupManagerError
+import dev.harrisonsoftware.stitchCounter.data.backup.BackupZipExtractionResult
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupManager
 import dev.harrisonsoftware.stitchCounter.data.repo.ProjectRepository
 import dev.harrisonsoftware.stitchCounter.domain.mapper.toEntity
 import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
 import dev.harrisonsoftware.stitchCounter.domain.model.Project
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
+import dev.harrisonsoftware.stitchCounter.logging.projectDataError
+import dev.harrisonsoftware.stitchCounter.logging.projectDataInfo
+import dev.harrisonsoftware.stitchCounter.logging.projectDataWarn
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -14,25 +18,35 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val SUPPORTED_BACKUP_VERSION = 1
-private const val IMPORT_LIBRARY_LOG_TAG = "ImportLibrary"
 
 @Singleton
 class ImportLibrary @Inject constructor(
     private val projectRepository: ProjectRepository,
     private val backupManager: BackupManager
 ) {
-    suspend operator fun invoke(inputContentUri: ContentUri, replaceExisting: Boolean = false): Result<ImportResult> {
+    suspend operator fun invoke(
+        inputContentUri: ContentUri,
+        replaceExisting: Boolean = false
+    ): ImportLibraryResult {
         return withContext(Dispatchers.IO) {
+            projectDataInfo("import_start replaceExisting=$replaceExisting inputUri=${inputContentUri.value}")
             try {
                 val extractionResult = backupManager.extractBackupZip(inputContentUri)
-                val extraction = extractionResult.getOrElse {
-                    return@withContext Result.failure(it)
+                val extraction = when (extractionResult) {
+                    is BackupZipExtractionResult.Success -> extractionResult.extraction
+                    is BackupZipExtractionResult.Failure -> {
+                        projectDataError("import_extract_failed replaceExisting=$replaceExisting error=${extractionResult.error}")
+                        return@withContext ImportLibraryResult.Failure(
+                            ImportLibraryError.BackupExtractionFailed(extractionResult.error)
+                        )
+                    }
                 }
 
                 if (extraction.backupData.metadata.version != SUPPORTED_BACKUP_VERSION) {
                     backupManager.cleanupTempDirectory(extraction.tempDir)
-                    return@withContext Result.failure(
-                        IllegalArgumentException("Unsupported backup version: ${extraction.backupData.metadata.version}")
+                    projectDataError("import_version_unsupported version=${extraction.backupData.metadata.version}")
+                    return@withContext ImportLibraryResult.Failure(
+                        ImportLibraryError.UnsupportedBackupVersion(extraction.backupData.metadata.version)
                     )
                 }
                 
@@ -52,10 +66,7 @@ class ImportLibrary @Inject constructor(
                                         imagePaths.add(newImagePath)
                                     }
                                 } else {
-                                    Log.w(
-                                        IMPORT_LIBRARY_LOG_TAG,
-                                        "Skipping missing image for project ${backupProject.id}: $relativePath"
-                                    )
+                                    projectDataWarn("import_missing_image projectId=${backupProject.id} path=$relativePath")
                                 }
                             }
                             
@@ -89,16 +100,29 @@ class ImportLibrary @Inject constructor(
                         failedCount = failedProjects.size,
                         failedProjectNames = failedProjects
                     )
+                    projectDataInfo("import_done replaceExisting=$replaceExisting imported=${result.importedCount} failed=${result.failedCount}")
                     
-                    Result.success(result)
+                    ImportLibraryResult.Success(result)
                 } finally {
                     backupManager.cleanupTempDirectory(extraction.tempDir)
                 }
             } catch (e: Exception) {
-                Result.failure(e)
+                projectDataError("import_unexpected_error", e)
+                ImportLibraryResult.Failure(ImportLibraryError.Unexpected(e))
             }
         }
     }
+}
+
+sealed interface ImportLibraryResult {
+    data class Success(val result: ImportResult) : ImportLibraryResult
+    data class Failure(val error: ImportLibraryError) : ImportLibraryResult
+}
+
+sealed interface ImportLibraryError {
+    data class BackupExtractionFailed(val error: BackupManagerError) : ImportLibraryError
+    data class UnsupportedBackupVersion(val version: Int) : ImportLibraryError
+    data class Unexpected(val cause: Throwable) : ImportLibraryError
 }
 
 data class ImportResult(
