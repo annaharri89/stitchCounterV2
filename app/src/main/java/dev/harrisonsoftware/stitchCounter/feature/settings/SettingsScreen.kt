@@ -2,6 +2,7 @@ package dev.harrisonsoftware.stitchCounter.feature.settings
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -25,6 +26,8 @@ import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import androidx.core.net.toUri
 import dev.harrisonsoftware.stitchCounter.Constants
+
+private const val SETTINGS_SCREEN_LOG_TAG = "SettingsScreen"
 
 @RootNavGraph
 @Destination
@@ -75,19 +78,19 @@ fun SettingsScreen(
                     val intent = Intent(Intent.ACTION_SENDTO).apply {
                         data = "mailto:${Constants.SUPPORT_EMAIL}?subject=$encodedSubject".toUri()
                     }
-                    context.startActivity(intent)
+                    launchExternalActivitySafely(context, intent)
                 }
                 is SettingsEffect.OpenPrivacyPolicy -> {
                     viewModel.onLaunchingExternalActivity()
                     val browserIntent = Intent(Intent.ACTION_VIEW,
                         Constants.PRIVACY_POLICY_URL.toUri())
-                    context.startActivity(browserIntent)
+                    launchExternalActivitySafely(context, browserIntent)
                 }
                 is SettingsEffect.OpenEULA -> {
                     viewModel.onLaunchingExternalActivity()
                     val browserIntent = Intent(Intent.ACTION_VIEW,
                         Constants.EULA_URL.toUri())
-                    context.startActivity(browserIntent)
+                    launchExternalActivitySafely(context, browserIntent)
                 }
             }
         }
@@ -213,4 +216,17 @@ fun SettingsScreen(
             }
         }
     }
+}
+
+internal fun launchExternalActivitySafely(context: android.content.Context, intent: Intent): Boolean {
+    return runCatching { context.startActivity(intent) }
+        .fold(
+            onSuccess = { true },
+            onFailure = { throwable ->
+                runCatching {
+                    Log.w(SETTINGS_SCREEN_LOG_TAG, "Failed to launch external activity", throwable)
+                }
+                false
+            }
+        )
 }
