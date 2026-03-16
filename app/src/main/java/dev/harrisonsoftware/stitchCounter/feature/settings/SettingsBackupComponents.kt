@@ -30,8 +30,8 @@ import dev.harrisonsoftware.stitchCounter.domain.usecase.ImportResult
 internal fun BackupRestoreCard(
     isExporting: Boolean,
     isImporting: Boolean,
-    exportError: String?,
-    importError: String?,
+    exportError: SettingsUiText?,
+    importError: SettingsUiText?,
     onExport: () -> Unit,
     onImport: () -> Unit
 ) {
@@ -63,7 +63,10 @@ internal fun BackupRestoreCard(
             
             if (exportError != null) {
                 Text(
-                    text = stringResource(R.string.settings_error_format, exportError),
+                    text = stringResource(
+                        exportError.resId,
+                        *exportError.formatArgs.toTypedArray()
+                    ),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -91,7 +94,10 @@ internal fun BackupRestoreCard(
             
             if (importError != null) {
                 Text(
-                    text = stringResource(R.string.settings_error_format, importError),
+                    text = stringResource(
+                        importError.resId,
+                        *importError.formatArgs.toTypedArray()
+                    ),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
                 )

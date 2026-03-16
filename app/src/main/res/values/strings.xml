@@ -33,6 +33,9 @@
     <string name="library_empty_title">No Projects Yet</string>
     <string name="library_empty_message">Create your first project to start tracking your stitches</string>
     <string name="library_untitled_project">Untitled Project</string>
+    <string name="install_diagnostic_banner_title">Fresh install or data reset detected</string>
+    <string name="install_diagnostic_banner_message">This message appears only on first launch after install or app data reset. If you did not expect this, app data was likely replaced.</string>
+    <string name="install_diagnostic_banner_action">Dismiss</string>
     <string name="label_count">Count</string>
     <string name="label_stitches">Stitches</string>
     <string name="label_rows">Rows</string>
@@ -87,7 +90,12 @@
     <string name="settings_export_library">Export Library</string>
     <string name="settings_importing">Importing…</string>
     <string name="settings_import_library">Import Library</string>
-    <string name="settings_error_format">Error: %1$s</string>
+    <string name="settings_error_file_access_unavailable">Can\'t access the selected file or location. Try choosing another file or location.</string>
+    <string name="settings_error_storage_unavailable">Storage is unavailable. Check available storage and try again.</string>
+    <string name="settings_error_backup_invalid">Backup file is incomplete or invalid.</string>
+    <string name="settings_error_backup_unsupported_version">This backup was created by a newer app version.</string>
+    <string name="settings_error_backup_unsafe">Backup file appears invalid or unsafe.</string>
+    <string name="settings_error_unexpected">Something went wrong. Try again.</string>
     <string name="settings_report_bug">Report a Bug</string>
     <string name="settings_give_feedback">Give Feedback</string>
     <string name="settings_request_feature">Request a Feature</string>

@@ -2,16 +2,18 @@ package dev.harrisonsoftware.stitchCounter.domain.usecase
 
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupData
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupExtraction
+import dev.harrisonsoftware.stitchCounter.data.backup.BackupManagerError
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupManager
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupMetadata
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupProject
+import dev.harrisonsoftware.stitchCounter.data.backup.BackupZipExtractionResult
 import dev.harrisonsoftware.stitchCounter.data.repo.ProjectRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -96,64 +98,67 @@ class ImportLibraryTest {
         val extraction = sampleExtraction(
             projects = listOf(sampleBackupProject(1, "Scarf"), sampleBackupProject(2, "Hat"))
         )
-        coEvery { backupManager.extractBackupZip(inputUri) } returns Result.success(extraction)
+        every { backupManager.extractBackupZip(inputUri) } returns BackupZipExtractionResult.Success(extraction)
         coEvery { projectRepository.upsert(any()) } returns 100L
 
         val result = importLibrary(inputUri)
 
-        assertTrue(result.isSuccess)
-        assertEquals(2, result.getOrNull()?.importedCount)
-        assertEquals(0, result.getOrNull()?.failedCount)
+        assertTrue(result is ImportLibraryResult.Success)
+        val successResult = result as ImportLibraryResult.Success
+        assertEquals(2, successResult.result.importedCount)
+        assertEquals(0, successResult.result.failedCount)
     }
 
     @Test
     fun `import fails for unsupported backup version`() = runTest {
         val extraction = sampleExtraction(version = 999)
-        coEvery { backupManager.extractBackupZip(inputUri) } returns Result.success(extraction)
+        every { backupManager.extractBackupZip(inputUri) } returns BackupZipExtractionResult.Success(extraction)
 
         val result = importLibrary(inputUri)
 
-        assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull()?.message?.contains("Unsupported backup version") == true)
+        assertTrue(result is ImportLibraryResult.Failure)
+        val errorResult = result as ImportLibraryResult.Failure
+        assertTrue(errorResult.error is ImportLibraryError.UnsupportedBackupVersion)
     }
 
     @Test
     fun `import cleans up temp directory on unsupported version`() = runTest {
         val extraction = sampleExtraction(version = 999)
-        coEvery { backupManager.extractBackupZip(inputUri) } returns Result.success(extraction)
+        every { backupManager.extractBackupZip(inputUri) } returns BackupZipExtractionResult.Success(extraction)
 
         importLibrary(inputUri)
 
-        coVerify { backupManager.cleanupTempDirectory(extraction.tempDir) }
+        verify { backupManager.cleanupTempDirectory(extraction.tempDir) }
     }
 
     @Test
     fun `import cleans up temp directory on success`() = runTest {
         val extraction = sampleExtraction()
-        coEvery { backupManager.extractBackupZip(inputUri) } returns Result.success(extraction)
+        every { backupManager.extractBackupZip(inputUri) } returns BackupZipExtractionResult.Success(extraction)
         coEvery { projectRepository.upsert(any()) } returns 1L
 
         importLibrary(inputUri)
 
-        coVerify { backupManager.cleanupTempDirectory(extraction.tempDir) }
+        verify { backupManager.cleanupTempDirectory(extraction.tempDir) }
     }
 
     @Test
     fun `import fails when extraction fails`() = runTest {
-        coEvery { backupManager.extractBackupZip(inputUri) } returns
-                Result.failure(Exception("Corrupt zip"))
+        every { backupManager.extractBackupZip(inputUri) } returns
+                BackupZipExtractionResult.Failure(BackupManagerError.BackupJsonMissing)
 
         val result = importLibrary(inputUri)
 
-        assertTrue(result.isFailure)
-        assertEquals("Corrupt zip", result.exceptionOrNull()?.message)
+        assertTrue(result is ImportLibraryResult.Failure)
+        val errorResult = result as ImportLibraryResult.Failure
+        assertTrue(errorResult.error is ImportLibraryError.BackupExtractionFailed)
     }
 
     @Test
     fun `import with replaceExisting preserves original project id`() = runTest {
         val project = sampleBackupProject(id = 42, title = "Blanket")
         val extraction = sampleExtraction(projects = listOf(project))
-        coEvery { backupManager.extractBackupZip(inputUri) } returns Result.success(extraction)
+        every { backupManager.extractBackupZip(inputUri) } returns BackupZipExtractionResult.Success(extraction)
 
         val entitySlot = slot<dev.harrisonsoftware.stitchCounter.data.local.ProjectEntity>()
         coEvery { projectRepository.upsert(capture(entitySlot)) } returns 42L
@@ -167,7 +172,7 @@ class ImportLibraryTest {
     fun `import without replaceExisting sets id to zero`() = runTest {
         val project = sampleBackupProject(id = 42, title = "Blanket")
         val extraction = sampleExtraction(projects = listOf(project))
-        coEvery { backupManager.extractBackupZip(inputUri) } returns Result.success(extraction)
+        every { backupManager.extractBackupZip(inputUri) } returns BackupZipExtractionResult.Success(extraction)
 
         val entitySlot = slot<dev.harrisonsoftware.stitchCounter.data.local.ProjectEntity>()
         coEvery { projectRepository.upsert(capture(entitySlot)) } returns 99L
@@ -181,7 +186,7 @@ class ImportLibraryTest {
     fun `import maps double type correctly`() = runTest {
         val project = sampleBackupProject(type = "double")
         val extraction = sampleExtraction(projects = listOf(project))
-        coEvery { backupManager.extractBackupZip(inputUri) } returns Result.success(extraction)
+        every { backupManager.extractBackupZip(inputUri) } returns BackupZipExtractionResult.Success(extraction)
 
         val entitySlot = slot<dev.harrisonsoftware.stitchCounter.data.local.ProjectEntity>()
         coEvery { projectRepository.upsert(capture(entitySlot)) } returns 1L
@@ -198,7 +203,7 @@ class ImportLibraryTest {
             sampleBackupProject(2, "Bad"),
         )
         val extraction = sampleExtraction(projects = projects)
-        coEvery { backupManager.extractBackupZip(inputUri) } returns Result.success(extraction)
+        every { backupManager.extractBackupZip(inputUri) } returns BackupZipExtractionResult.Success(extraction)
 
         var callCount = 0
         coEvery { projectRepository.upsert(any()) } answers {
@@ -209,21 +214,23 @@ class ImportLibraryTest {
 
         val result = importLibrary(inputUri)
 
-        assertTrue(result.isSuccess)
-        assertEquals(1, result.getOrNull()?.importedCount)
-        assertEquals(1, result.getOrNull()?.failedCount)
-        assertTrue(result.getOrNull()?.failedProjectNames?.any { it.contains("Bad") } == true)
+        assertTrue(result is ImportLibraryResult.Success)
+        val successResult = result as ImportLibraryResult.Success
+        assertEquals(1, successResult.result.importedCount)
+        assertEquals(1, successResult.result.failedCount)
+        assertTrue(successResult.result.failedProjectNames.any { it.contains("Bad") })
     }
 
     @Test
     fun `import with empty project list succeeds with zero counts`() = runTest {
         val extraction = sampleExtraction(projects = emptyList())
-        coEvery { backupManager.extractBackupZip(inputUri) } returns Result.success(extraction)
+        every { backupManager.extractBackupZip(inputUri) } returns BackupZipExtractionResult.Success(extraction)
 
         val result = importLibrary(inputUri)
 
-        assertTrue(result.isSuccess)
-        assertEquals(0, result.getOrNull()?.importedCount)
-        assertEquals(0, result.getOrNull()?.failedCount)
+        assertTrue(result is ImportLibraryResult.Success)
+        val successResult = result as ImportLibraryResult.Success
+        assertEquals(0, successResult.result.importedCount)
+        assertEquals(0, successResult.result.failedCount)
     }
 }

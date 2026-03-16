@@ -1,6 +1,5 @@
 package dev.harrisonsoftware.stitchCounter.domain.usecase
 
-import android.util.Log
 import dev.harrisonsoftware.stitchCounter.data.backup.FileSystemProvider
 import dev.harrisonsoftware.stitchCounter.data.repo.ProjectRepository
 import dev.harrisonsoftware.stitchCounter.domain.mapper.toDomain
@@ -8,13 +7,13 @@ import dev.harrisonsoftware.stitchCounter.domain.mapper.toEntity
 import dev.harrisonsoftware.stitchCounter.domain.model.Project
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.domain.validation.ProjectValidator
+import dev.harrisonsoftware.stitchCounter.logging.projectDataInfo
+import dev.harrisonsoftware.stitchCounter.logging.projectDataWarn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
-
-private const val LOG_TAG = "ProjectUseCases"
 
 @Singleton
 class ObserveProjects @Inject constructor(
@@ -34,11 +33,19 @@ class GetProject @Inject constructor(
 class UpsertProject @Inject constructor(
     private val repo: ProjectRepository
 ) {
-    suspend operator fun invoke(project: Project): Long {
-        require(ProjectValidator.isTitleValid(project.title)) { "Project title must not be blank" }
+    suspend operator fun invoke(project: Project): UpsertProjectResult {
+        if (!ProjectValidator.isTitleValid(project.title)) {
+            return UpsertProjectResult.InvalidTitle
+        }
         val trimmedTitle = project.title.trim()
-        return repo.upsert(project.copy(title = trimmedTitle).toEntity())
+        val projectId = repo.upsert(project.copy(title = trimmedTitle).toEntity())
+        return UpsertProjectResult.Success(projectId)
     }
+}
+
+sealed interface UpsertProjectResult {
+    data class Success(val projectId: Long) : UpsertProjectResult
+    data object InvalidTitle : UpsertProjectResult
 }
 
 @Singleton
@@ -47,8 +54,10 @@ class DeleteProject @Inject constructor(
     private val fileSystemProvider: FileSystemProvider
 ) {
     suspend operator fun invoke(project: Project) {
+        projectDataInfo("delete_single_start projectId=${project.id} title=${project.title}")
         deleteProjectImageFiles(project.imagePaths, fileSystemProvider)
         repo.delete(project.toEntity())
+        projectDataInfo("delete_single_done projectId=${project.id}")
     }
 }
 
@@ -59,9 +68,12 @@ class DeleteProjects @Inject constructor(
 ) {
     suspend operator fun invoke(projects: List<Project>) {
         if (projects.isNotEmpty()) {
+            val projectIds = projects.joinToString(separator = ",") { it.id.toString() }
+            projectDataInfo("delete_bulk_start count=${projects.size} projectIds=[$projectIds]")
             val allImagePaths = projects.flatMap { it.imagePaths }
             deleteProjectImageFiles(allImagePaths, fileSystemProvider)
             repo.deleteByIds(projects.map { it.id })
+            projectDataInfo("delete_bulk_done count=${projects.size}")
         }
     }
 }
@@ -125,12 +137,22 @@ class UpdateProjectDetailValues @Inject constructor(
         imagePaths: List<String>,
         completedAt: Long?,
         updatedAt: Long
-    ) {
-        require(ProjectValidator.areTotalRowsValidForType(totalRows, projectType)) {
-            "Double-counter projects require totalRows > 0"
+    ): UpdateProjectDetailResult {
+        if (!ProjectValidator.isTitleValid(title)) {
+            return UpdateProjectDetailResult.InvalidTitle
+        }
+        if (!ProjectValidator.areTotalRowsValidForType(totalRows, projectType)) {
+            return UpdateProjectDetailResult.InvalidTotalRows
         }
         repo.updateProjectDetailValues(id, title, notes, totalRows, imagePaths, completedAt, updatedAt)
+        return UpdateProjectDetailResult.Success
     }
+}
+
+sealed interface UpdateProjectDetailResult {
+    data object Success : UpdateProjectDetailResult
+    data object InvalidTitle : UpdateProjectDetailResult
+    data object InvalidTotalRows : UpdateProjectDetailResult
 }
 
 private fun deleteProjectImageFiles(
@@ -145,7 +167,7 @@ private fun deleteProjectImageFiles(
                 imageFile.delete()
             }
         } catch (e: Exception) {
-            Log.w(LOG_TAG, "Failed to delete image file: $relativePath", e)
+            projectDataWarn("delete_image_failed path=$relativePath", e)
         }
     }
 }

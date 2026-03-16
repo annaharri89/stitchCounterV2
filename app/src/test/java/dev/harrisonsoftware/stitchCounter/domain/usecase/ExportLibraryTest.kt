@@ -1,15 +1,16 @@
 package dev.harrisonsoftware.stitchCounter.domain.usecase
 
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupData
+import dev.harrisonsoftware.stitchCounter.data.backup.BackupManagerError
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupManager
+import dev.harrisonsoftware.stitchCounter.data.backup.BackupZipCreationResult
 import dev.harrisonsoftware.stitchCounter.data.local.ProjectEntity
 import dev.harrisonsoftware.stitchCounter.data.repo.ProjectRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
-import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -56,12 +57,13 @@ class ExportLibraryTest {
 
         val backupDataSlot = slot<BackupData>()
         every { backupManager.createBackupZip(capture(backupDataSlot), any()) } returns
-                Result.success(ContentUri("content://exported.zip"))
+                BackupZipCreationResult.Success(ContentUri("content://exported.zip"))
 
         val result = exportLibrary()
 
-        assertTrue(result.isSuccess)
-        assertEquals("content://exported.zip", result.getOrNull()?.value)
+        assertTrue(result is ExportLibraryResult.Success)
+        val successResult = result as ExportLibraryResult.Success
+        assertEquals("content://exported.zip", successResult.contentUri.value)
 
         val captured = backupDataSlot.captured
         assertEquals(2, captured.projects.size)
@@ -78,11 +80,11 @@ class ExportLibraryTest {
 
         val backupDataSlot = slot<BackupData>()
         every { backupManager.createBackupZip(capture(backupDataSlot), any()) } returns
-                Result.success(ContentUri("content://empty.zip"))
+                BackupZipCreationResult.Success(ContentUri("content://empty.zip"))
 
         val result = exportLibrary()
 
-        assertTrue(result.isSuccess)
+        assertTrue(result is ExportLibraryResult.Success)
         assertEquals(0, backupDataSlot.captured.projects.size)
         assertEquals(0, backupDataSlot.captured.metadata.projectCount)
     }
@@ -91,24 +93,25 @@ class ExportLibraryTest {
     fun `export forwards outputContentUri to backupManager`() = runTest {
         every { projectRepository.observeProjects() } returns flowOf(emptyList())
         every { backupManager.createBackupZip(any(), any()) } returns
-                Result.success(ContentUri("content://custom.zip"))
+                BackupZipCreationResult.Success(ContentUri("content://custom.zip"))
 
         val outputUri = ContentUri("content://user-chosen-location")
         exportLibrary(outputUri)
 
-        coVerify { backupManager.createBackupZip(any(), outputUri) }
+        verify { backupManager.createBackupZip(any(), outputUri) }
     }
 
     @Test
     fun `export returns failure when backupManager fails`() = runTest {
         every { projectRepository.observeProjects() } returns flowOf(emptyList())
         every { backupManager.createBackupZip(any(), any()) } returns
-                Result.failure(Exception("Disk full"))
+                BackupZipCreationResult.Failure(BackupManagerError.ExternalFilesDirectoryUnavailable)
 
         val result = exportLibrary()
 
-        assertTrue(result.isFailure)
-        assertEquals("Disk full", result.exceptionOrNull()?.message)
+        assertTrue(result is ExportLibraryResult.Failure)
+        val errorResult = result as ExportLibraryResult.Failure
+        assertTrue(errorResult.error is ExportLibraryError.BackupCreationFailed)
     }
 
     @Test
@@ -117,8 +120,9 @@ class ExportLibraryTest {
 
         val result = exportLibrary()
 
-        assertTrue(result.isFailure)
-        assertEquals("DB error", result.exceptionOrNull()?.message)
+        assertTrue(result is ExportLibraryResult.Failure)
+        val errorResult = result as ExportLibraryResult.Failure
+        assertTrue(errorResult.error is ExportLibraryError.Unexpected)
     }
 
     @Test
@@ -128,7 +132,7 @@ class ExportLibraryTest {
 
         val backupDataSlot = slot<BackupData>()
         every { backupManager.createBackupZip(capture(backupDataSlot), any()) } returns
-                Result.success(ContentUri("content://out.zip"))
+                BackupZipCreationResult.Success(ContentUri("content://out.zip"))
 
         exportLibrary()
 
