@@ -7,6 +7,7 @@ import dev.harrisonsoftware.stitchCounter.domain.mapper.toEntity
 import dev.harrisonsoftware.stitchCounter.domain.model.Project
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.domain.validation.ProjectValidator
+import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import dev.harrisonsoftware.stitchCounter.logging.projectDataInfo
 import dev.harrisonsoftware.stitchCounter.logging.projectDataWarn
 import kotlinx.coroutines.flow.Flow
@@ -51,29 +52,31 @@ sealed interface UpsertProjectResult {
 @Singleton
 class DeleteProject @Inject constructor(
     private val repo: ProjectRepository,
-    private val fileSystemProvider: FileSystemProvider
+    private val fileSystemProvider: FileSystemProvider,
+    private val appLogger: AppLogger,
 ) {
     suspend operator fun invoke(project: Project) {
-        projectDataInfo("delete_single_start projectId=${project.id} title=${project.title}")
-        deleteProjectImageFiles(project.imagePaths, fileSystemProvider)
+        appLogger.projectDataInfo("delete_single_start projectId=${project.id} title=${project.title}")
+        deleteProjectImageFiles(project.imagePaths, fileSystemProvider, appLogger)
         repo.delete(project.toEntity())
-        projectDataInfo("delete_single_done projectId=${project.id}")
+        appLogger.projectDataInfo("delete_single_done projectId=${project.id}")
     }
 }
 
 @Singleton
 class DeleteProjects @Inject constructor(
     private val repo: ProjectRepository,
-    private val fileSystemProvider: FileSystemProvider
+    private val fileSystemProvider: FileSystemProvider,
+    private val appLogger: AppLogger,
 ) {
     suspend operator fun invoke(projects: List<Project>) {
         if (projects.isNotEmpty()) {
             val projectIds = projects.joinToString(separator = ",") { it.id.toString() }
-            projectDataInfo("delete_bulk_start count=${projects.size} projectIds=[$projectIds]")
+            appLogger.projectDataInfo("delete_bulk_start count=${projects.size} projectIds=[$projectIds]")
             val allImagePaths = projects.flatMap { it.imagePaths }
-            deleteProjectImageFiles(allImagePaths, fileSystemProvider)
+            deleteProjectImageFiles(allImagePaths, fileSystemProvider, appLogger)
             repo.deleteByIds(projects.map { it.id })
-            projectDataInfo("delete_bulk_done count=${projects.size}")
+            appLogger.projectDataInfo("delete_bulk_done count=${projects.size}")
         }
     }
 }
@@ -157,7 +160,8 @@ sealed interface UpdateProjectDetailResult {
 
 private fun deleteProjectImageFiles(
     imagePaths: List<String>,
-    fileSystemProvider: FileSystemProvider
+    fileSystemProvider: FileSystemProvider,
+    appLogger: AppLogger,
 ) {
     val filesDirectory = fileSystemProvider.getFilesDirectory()
     for (relativePath in imagePaths) {
@@ -167,7 +171,7 @@ private fun deleteProjectImageFiles(
                 imageFile.delete()
             }
         } catch (e: Exception) {
-            projectDataWarn("delete_image_failed path=$relativePath", e)
+            appLogger.projectDataWarn("delete_image_failed path=$relativePath", e)
         }
     }
 }
