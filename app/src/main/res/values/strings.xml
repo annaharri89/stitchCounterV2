@@ -97,6 +97,7 @@
     <string name="settings_error_backup_unsafe">Backup file appears invalid or unsafe.</string>
     <string name="settings_error_unexpected">Something went wrong. Try again.</string>
     <string name="settings_report_bug">Report a Bug</string>
+    <string name="settings_attach_diagnostics_checkbox">Attach diagnostics logs</string>
     <string name="settings_give_feedback">Give Feedback</string>
     <string name="settings_request_feature">Request a Feature</string>
     <string name="settings_privacy_policy">Privacy Policy</string>

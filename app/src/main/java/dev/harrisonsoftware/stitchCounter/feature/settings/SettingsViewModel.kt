@@ -18,6 +18,9 @@ import dev.harrisonsoftware.stitchCounter.domain.usecase.ImportLibrary
 import dev.harrisonsoftware.stitchCounter.feature.theme.LauncherIconManager
 import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeColor
 import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeManager
+import dev.harrisonsoftware.stitchCounter.logging.BugReportLogPackager
+import dev.harrisonsoftware.stitchCounter.logging.BugReportLogPackagerResult
+import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,13 +32,17 @@ import kotlinx.coroutines.launch
 import dev.harrisonsoftware.stitchCounter.Constants
 import javax.inject.Inject
 
+private const val SETTINGS_VIEW_MODEL_LOG_TAG = "SettingsViewModel"
+
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val appPreferencesRepository: AppPreferencesRepository,
     private val themeManager: ThemeManager,
     private val launcherIconManager: LauncherIconManager,
     private val exportLibraryUseCase: ExportLibrary,
-    private val importLibraryUseCase: ImportLibrary
+    private val importLibraryUseCase: ImportLibrary,
+    private val bugReportLogPackager: BugReportLogPackager,
+    private val appLogger: AppLogger,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -126,9 +133,42 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun onReportBug() {
+        onReportBug(includeDiagnostics = _uiState.value.attachDiagnosticsToBugReport)
+    }
+
+    fun onReportBug(includeDiagnostics: Boolean) {
         viewModelScope.launch {
-            _effect.send(SettingsEffect.OpenEmailClient(Constants.BUG_REPORT_SUBJECT))
+            if (!includeDiagnostics) {
+                _effect.send(SettingsEffect.OpenBugReportShare(Constants.BUG_REPORT_SUBJECT, null))
+                return@launch
+            }
+
+            when (val packageResult = bugReportLogPackager.packageLogsAsHtmlZip()) {
+                is BugReportLogPackagerResult.Success -> {
+                    _effect.send(
+                        SettingsEffect.OpenBugReportShare(
+                            subject = Constants.BUG_REPORT_SUBJECT,
+                            attachmentFilePath = packageResult.zipFile.absolutePath
+                        )
+                    )
+                }
+                is BugReportLogPackagerResult.NoLogsAvailable -> {
+                    _effect.send(SettingsEffect.OpenBugReportShare(Constants.BUG_REPORT_SUBJECT, null))
+                }
+                is BugReportLogPackagerResult.Failure -> {
+                    appLogger.warn(
+                        tag = SETTINGS_VIEW_MODEL_LOG_TAG,
+                        message = "Failed to package diagnostics for bug report",
+                        throwable = packageResult.throwable
+                    )
+                    _effect.send(SettingsEffect.OpenBugReportShare(Constants.BUG_REPORT_SUBJECT, null))
+                }
+            }
         }
+    }
+
+    fun onAttachDiagnosticsToBugReportChanged(isEnabled: Boolean) {
+        _uiState.update { it.copy(attachDiagnosticsToBugReport = isEnabled) }
     }
 
     fun onGiveFeedback() {
@@ -195,11 +235,13 @@ data class SettingsUiState(
     val isImporting: Boolean = false,
     val importSuccess: Boolean = false,
     val importError: SettingsUiText? = null,
-    val importResult: dev.harrisonsoftware.stitchCounter.domain.usecase.ImportResult? = null
+    val importResult: dev.harrisonsoftware.stitchCounter.domain.usecase.ImportResult? = null,
+    val attachDiagnosticsToBugReport: Boolean = true,
 )
 
 sealed interface SettingsEffect {
     data class OpenEmailClient(val subject: String) : SettingsEffect
+    data class OpenBugReportShare(val subject: String, val attachmentFilePath: String?) : SettingsEffect
     object OpenPrivacyPolicy : SettingsEffect
     object OpenEULA : SettingsEffect
 }

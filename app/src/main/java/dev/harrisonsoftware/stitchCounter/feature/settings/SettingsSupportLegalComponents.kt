@@ -2,11 +2,13 @@ package dev.harrisonsoftware.stitchCounter.feature.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Feedback
@@ -17,6 +19,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,6 +31,8 @@ import dev.harrisonsoftware.stitchCounter.R
 
 @Composable
 internal fun SupportCard(
+    attachDiagnosticsToBugReport: Boolean,
+    onAttachDiagnosticsToBugReportChanged: (Boolean) -> Unit,
     onReportBug: () -> Unit,
     onGiveFeedback: () -> Unit,
     onRequestFeature: () -> Unit
@@ -52,6 +57,25 @@ internal fun SupportCard(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(stringResource(R.string.settings_report_bug))
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .toggleable(
+                        value = attachDiagnosticsToBugReport,
+                        onValueChange = onAttachDiagnosticsToBugReportChanged
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Checkbox(
+                    checked = attachDiagnosticsToBugReport,
+                    onCheckedChange = onAttachDiagnosticsToBugReportChanged
+                )
+                Text(
+                    text = stringResource(R.string.settings_attach_diagnostics_checkbox),
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
 
             Button(

@@ -1,6 +1,7 @@
 package dev.harrisonsoftware.stitchCounter.feature.settings
 
 import android.content.Intent
+import android.content.ClipData
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -25,7 +26,9 @@ import dev.harrisonsoftware.stitchCounter.domain.model.AppTheme
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavGraph
 import com.ramcosta.composedestinations.annotation.Destination
 import androidx.core.net.toUri
+import androidx.core.content.FileProvider
 import dev.harrisonsoftware.stitchCounter.Constants
+import java.io.File
 
 private const val SETTINGS_SCREEN_LOG_TAG = "SettingsScreen"
 
@@ -79,6 +82,19 @@ fun SettingsScreen(
                         data = "mailto:${Constants.SUPPORT_EMAIL}?subject=$encodedSubject".toUri()
                     }
                     launchExternalActivitySafely(context, intent)
+                }
+                is SettingsEffect.OpenBugReportShare -> {
+                    viewModel.onLaunchingExternalActivity()
+                    val attachmentPath = effect.attachmentFilePath
+                    val launched = if (attachmentPath.isNullOrBlank()) {
+                        launchMailtoIntent(context, effect.subject)
+                    } else {
+                        launchBugReportWithAttachment(context, effect.subject, attachmentPath)
+                    }
+
+                    if (!launched && !attachmentPath.isNullOrBlank()) {
+                        launchMailtoIntent(context, effect.subject)
+                    }
                 }
                 is SettingsEffect.OpenPrivacyPolicy -> {
                     viewModel.onLaunchingExternalActivity()
@@ -172,6 +188,10 @@ fun SettingsScreen(
                     onToggleExpanded = { isSupportSectionExpanded.value = !isSupportSectionExpanded.value }
                 ) {
                     SupportCard(
+                        attachDiagnosticsToBugReport = uiState.attachDiagnosticsToBugReport,
+                        onAttachDiagnosticsToBugReportChanged = { isEnabled ->
+                            viewModel.onAttachDiagnosticsToBugReportChanged(isEnabled)
+                        },
                         onReportBug = {
                             viewModel.onReportBug()
                         },
@@ -229,4 +249,42 @@ internal fun launchExternalActivitySafely(context: android.content.Context, inte
                 false
             }
         )
+}
+
+private fun launchMailtoIntent(context: android.content.Context, subject: String): Boolean {
+    val encodedSubject = Uri.encode(subject)
+    val mailtoIntent = Intent(Intent.ACTION_SENDTO).apply {
+        data = "mailto:${Constants.SUPPORT_EMAIL}?subject=$encodedSubject".toUri()
+    }
+    return launchExternalActivitySafely(context, mailtoIntent)
+}
+
+private fun launchBugReportWithAttachment(
+    context: android.content.Context,
+    subject: String,
+    attachmentFilePath: String
+): Boolean {
+    return runCatching {
+        val attachmentFile = File(attachmentFilePath)
+        val attachmentUri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            attachmentFile
+        )
+        val sendIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "application/zip"
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(Constants.SUPPORT_EMAIL))
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_STREAM, attachmentUri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            clipData = ClipData.newUri(context.contentResolver, "stitch_diagnostics_zip", attachmentUri)
+        }
+        val chooserIntent = Intent.createChooser(sendIntent, null)
+        launchExternalActivitySafely(context, chooserIntent)
+    }.getOrElse { throwable ->
+        runCatching {
+            Log.w(SETTINGS_SCREEN_LOG_TAG, "Failed to launch bug report with attachment", throwable)
+        }
+        false
+    }
 }
