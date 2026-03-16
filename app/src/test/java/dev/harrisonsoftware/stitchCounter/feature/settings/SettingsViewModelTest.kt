@@ -16,6 +16,9 @@ import dev.harrisonsoftware.stitchCounter.domain.usecase.ImportLibraryResult
 import dev.harrisonsoftware.stitchCounter.domain.usecase.ImportResult
 import dev.harrisonsoftware.stitchCounter.feature.theme.LauncherIconManager
 import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeManager
+import dev.harrisonsoftware.stitchCounter.logging.AppLogger
+import dev.harrisonsoftware.stitchCounter.logging.BugReportLogPackager
+import dev.harrisonsoftware.stitchCounter.logging.BugReportLogPackagerResult
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -44,6 +47,8 @@ class SettingsViewModelTest {
     private lateinit var launcherIconManager: LauncherIconManager
     private lateinit var exportLibrary: ExportLibrary
     private lateinit var importLibrary: ImportLibrary
+    private lateinit var bugReportLogPackager: BugReportLogPackager
+    private lateinit var appLogger: AppLogger
 
     @Before
     fun setUp() {
@@ -53,6 +58,8 @@ class SettingsViewModelTest {
         launcherIconManager = mockk(relaxed = true)
         exportLibrary = mockk()
         importLibrary = mockk()
+        bugReportLogPackager = mockk()
+        appLogger = mockk(relaxed = true)
         every { appPreferencesRepository.selectedTheme } returns flowOf(AppTheme.FOREST_FIBER)
         every { themeManager.getThemeColors(any()) } returns emptyList()
     }
@@ -68,6 +75,8 @@ class SettingsViewModelTest {
         launcherIconManager = launcherIconManager,
         exportLibraryUseCase = exportLibrary,
         importLibraryUseCase = importLibrary,
+        bugReportLogPackager = bugReportLogPackager,
+        appLogger = appLogger,
     )
 
     @Test
@@ -194,13 +203,31 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `onReportBug sends OpenEmailClient effect with bug report subject`() = runTest {
+    fun `onReportBug sends OpenBugReportShare with attachment when packaging succeeds`() = runTest {
+        coEvery { bugReportLogPackager.packageLogsAsHtmlZip() } returns
+            BugReportLogPackagerResult.Success(java.io.File("/tmp/stitch_diagnostics.zip"))
+
         val viewModel = createViewModel()
         viewModel.effect.test {
             viewModel.onReportBug()
             val effect = awaitItem()
-            assertTrue(effect is SettingsEffect.OpenEmailClient)
-            assertEquals(Constants.BUG_REPORT_SUBJECT, (effect as SettingsEffect.OpenEmailClient).subject)
+            assertTrue(effect is SettingsEffect.OpenBugReportShare)
+            effect as SettingsEffect.OpenBugReportShare
+            assertEquals(Constants.BUG_REPORT_SUBJECT, effect.subject)
+            assertEquals("/tmp/stitch_diagnostics.zip", effect.attachmentFilePath)
+        }
+    }
+
+    @Test
+    fun `onReportBug sends OpenBugReportShare without attachment when diagnostics disabled`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.effect.test {
+            viewModel.onReportBug(includeDiagnostics = false)
+            val effect = awaitItem()
+            assertTrue(effect is SettingsEffect.OpenBugReportShare)
+            effect as SettingsEffect.OpenBugReportShare
+            assertEquals(Constants.BUG_REPORT_SUBJECT, effect.subject)
+            assertNull(effect.attachmentFilePath)
         }
     }
 
@@ -224,6 +251,20 @@ class SettingsViewModelTest {
             assertTrue(effect is SettingsEffect.OpenEmailClient)
             assertEquals(Constants.FEATURE_REQUEST_SUBJECT, (effect as SettingsEffect.OpenEmailClient).subject)
         }
+    }
+
+    @Test
+    fun `attach diagnostics defaults to enabled`() {
+        assertTrue(SettingsUiState().attachDiagnosticsToBugReport)
+    }
+
+    @Test
+    fun `onAttachDiagnosticsToBugReportChanged updates ui state`() {
+        val viewModel = createViewModel()
+
+        viewModel.onAttachDiagnosticsToBugReportChanged(false)
+
+        assertFalse(viewModel.uiState.value.attachDiagnosticsToBugReport)
     }
 
     @Test

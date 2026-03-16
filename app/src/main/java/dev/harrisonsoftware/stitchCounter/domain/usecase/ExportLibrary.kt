@@ -9,6 +9,7 @@ import dev.harrisonsoftware.stitchCounter.data.backup.BackupProject
 import dev.harrisonsoftware.stitchCounter.data.repo.ProjectRepository
 import dev.harrisonsoftware.stitchCounter.domain.mapper.toDomain
 import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
+import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import dev.harrisonsoftware.stitchCounter.logging.projectDataError
 import dev.harrisonsoftware.stitchCounter.logging.projectDataInfo
 import kotlinx.coroutines.flow.first
@@ -19,11 +20,12 @@ import javax.inject.Singleton
 class ExportLibrary @Inject constructor(
     private val projectRepository: ProjectRepository,
     private val backupManager: BackupManager,
-    private val appVersion: String
+    private val appVersion: String,
+    private val appLogger: AppLogger,
 ) {
     suspend operator fun invoke(outputContentUri: ContentUri? = null): ExportLibraryResult {
         return try {
-            projectDataInfo("export_start outputUri=${outputContentUri?.value ?: "app_storage"}")
+            appLogger.projectDataInfo("export_start outputUri=${outputContentUri?.value ?: "app_storage"}")
             val projects = projectRepository.observeProjects().first().map { it.toDomain() }
             
             val backupProjects = projects.map { project ->
@@ -59,7 +61,7 @@ class ExportLibrary @Inject constructor(
             
             when (val backupResult = backupManager.createBackupZip(backupData, outputContentUri)) {
                 is BackupZipCreationResult.Success -> {
-                    projectDataInfo("export_done projectCount=${projects.size} outputUri=${backupResult.contentUri.value}")
+                    appLogger.projectDataInfo("export_done projectCount=${projects.size} outputUri=${backupResult.contentUri.value}")
                     ExportLibraryResult.Success(backupResult.contentUri)
                 }
                 is BackupZipCreationResult.Failure -> ExportLibraryResult.Failure(
@@ -67,7 +69,7 @@ class ExportLibrary @Inject constructor(
                 )
             }
         } catch (e: Exception) {
-            projectDataError("export_unexpected_error", e)
+            appLogger.projectDataError("export_unexpected_error", e)
             ExportLibraryResult.Failure(ExportLibraryError.Unexpected(e))
         }
     }

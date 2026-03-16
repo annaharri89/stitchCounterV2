@@ -9,6 +9,7 @@ import dev.harrisonsoftware.stitchCounter.data.backup.BackupProject
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupZipExtractionResult
 import dev.harrisonsoftware.stitchCounter.data.repo.ProjectRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
+import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -33,6 +34,7 @@ class ImportLibraryTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var projectRepository: ProjectRepository
     private lateinit var backupManager: BackupManager
+    private lateinit var appLogger: AppLogger
     private lateinit var importLibrary: ImportLibrary
 
     private val inputUri = ContentUri("content://backup.zip")
@@ -42,7 +44,8 @@ class ImportLibraryTest {
         Dispatchers.setMain(testDispatcher)
         projectRepository = mockk(relaxed = true)
         backupManager = mockk(relaxed = true)
-        importLibrary = ImportLibrary(projectRepository, backupManager)
+        appLogger = mockk(relaxed = true)
+        importLibrary = ImportLibrary(projectRepository, backupManager, appLogger)
     }
 
     @After
