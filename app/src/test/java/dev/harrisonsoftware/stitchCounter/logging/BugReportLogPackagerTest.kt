@@ -47,6 +47,32 @@ class BugReportLogPackagerTest {
     }
 
     @Test
+    fun `packageLogsAsHtmlZip includes latest enqueued log entry`() = runTest {
+        val filesDirectory = Files.createTempDirectory("bug_report_latest_log_files").toFile()
+        val cacheDirectory = Files.createTempDirectory("bug_report_latest_log_cache").toFile()
+        val fileSystemProvider = FakeFileSystemProvider(filesDirectory, cacheDirectory)
+        val fileLogSink = FileLogSink(fileSystemProvider, LogRetentionPolicy())
+        val appLogger = AppLoggerImpl(setOf(fileLogSink))
+        val packager = BugReportLogPackager(
+            fileLogSink = fileLogSink,
+            fileSystemProvider = fileSystemProvider,
+            deviceMetadataProvider = FakeDeviceMetadataProvider()
+        )
+
+        appLogger.info("SCProjectData", "latest_log_before_packaging")
+
+        val result = packager.packageLogsAsHtmlZip()
+
+        assertTrue(result is BugReportLogPackagerResult.Success)
+        val zipFile = (result as BugReportLogPackagerResult.Success).zipFile
+        ZipFile(zipFile).use { diagnosticsZip ->
+            val entry = diagnosticsZip.entries().asSequence().first()
+            val htmlContent = diagnosticsZip.getInputStream(entry).bufferedReader().readText()
+            assertTrue(htmlContent.contains("latest_log_before_packaging"))
+        }
+    }
+
+    @Test
     fun `packageLogsAsHtmlZip returns no logs when none exist`() = runTest {
         val filesDirectory = Files.createTempDirectory("bug_report_no_logs_files").toFile()
         val cacheDirectory = Files.createTempDirectory("bug_report_no_logs_cache").toFile()

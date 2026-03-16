@@ -5,6 +5,7 @@ import dev.harrisonsoftware.stitchCounter.data.backup.FileSystemProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import java.io.File
@@ -29,24 +30,40 @@ class FileLogSink @Inject constructor(
     private val logRetentionPolicy: LogRetentionPolicy,
 ) : AppLogSink {
     private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val entryChannel = Channel<AppLogEntry>(Channel.BUFFERED)
+    private val commandChannel = Channel<FileLogCommand>(Channel.UNLIMITED)
     private val dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 
     init {
         runRetention()
         ioScope.launch {
-            for (entry in entryChannel) {
-                runCatching { appendInfoLogEntry(entry) }
-                    .onFailure { throwable ->
-                        Log.w(FILE_LOG_SINK_LOG_TAG, "Failed writing info log entry to file", throwable)
+            for (command in commandChannel) {
+                when (command) {
+                    is FileLogCommand.WriteEntry -> {
+                        runCatching { appendInfoLogEntry(command.entry) }
+                            .onFailure { throwable ->
+                                Log.w(FILE_LOG_SINK_LOG_TAG, "Failed writing info log entry to file", throwable)
+                            }
                     }
+                    is FileLogCommand.Flush -> {
+                        command.completion.complete(Unit)
+                    }
+                }
             }
         }
     }
 
     override fun log(entry: AppLogEntry) {
         if (entry.level != AppLogLevel.INFO) return
-        entryChannel.trySend(entry)
+        val sendResult = commandChannel.trySend(FileLogCommand.WriteEntry(entry))
+        if (sendResult.isFailure) {
+            Log.w(FILE_LOG_SINK_LOG_TAG, "Failed enqueuing info log entry for file persistence")
+        }
+    }
+
+    suspend fun flushAndWait() {
+        val completion = CompletableDeferred<Unit>()
+        commandChannel.send(FileLogCommand.Flush(completion))
+        completion.await()
     }
 
     /** Applies retention cleanup to the resolved log directory. */
@@ -93,4 +110,9 @@ class FileLogSink @Inject constructor(
             .toLocalDate()
         return "app-log-${dateFormatter.format(date)}.log"
     }
+}
+
+private sealed interface FileLogCommand {
+    data class WriteEntry(val entry: AppLogEntry) : FileLogCommand
+    data class Flush(val completion: CompletableDeferred<Unit>) : FileLogCommand
 }

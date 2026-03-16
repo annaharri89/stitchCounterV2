@@ -56,6 +56,7 @@ class BugReportLogPackager @Inject constructor(
 ) {
     suspend fun packageLogsAsHtmlZip(): BugReportLogPackagerResult = withContext(Dispatchers.IO) {
         runCatching {
+            fileLogSink.flushAndWait()
             fileLogSink.runRetention()
             val logDirectory = fileLogSink.resolveLogDirectory()
             val logFiles = logDirectory.listFiles()
