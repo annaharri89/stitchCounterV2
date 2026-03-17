@@ -132,11 +132,7 @@ class SettingsViewModel @Inject constructor(
         _uiState.update { it.copy(importSuccess = false, importError = null, importResult = null) }
     }
 
-    fun onReportBug() {
-        onReportBug(includeDiagnostics = _uiState.value.attachDiagnosticsToBugReport)
-    }
-
-    fun onReportBug(includeDiagnostics: Boolean) {
+    fun onReportBug(includeDiagnostics: Boolean = true) {
         viewModelScope.launch {
             if (!includeDiagnostics) {
                 _effect.send(SettingsEffect.OpenBugReportShare(Constants.BUG_REPORT_SUBJECT, null))
@@ -165,10 +161,6 @@ class SettingsViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    fun onAttachDiagnosticsToBugReportChanged(isEnabled: Boolean) {
-        _uiState.update { it.copy(attachDiagnosticsToBugReport = isEnabled) }
     }
 
     fun onGiveFeedback() {
@@ -235,8 +227,7 @@ data class SettingsUiState(
     val isImporting: Boolean = false,
     val importSuccess: Boolean = false,
     val importError: SettingsUiText? = null,
-    val importResult: dev.harrisonsoftware.stitchCounter.domain.usecase.ImportResult? = null,
-    val attachDiagnosticsToBugReport: Boolean = true,
+    val importResult: dev.harrisonsoftware.stitchCounter.domain.usecase.ImportResult? = null
 )
 
 sealed interface SettingsEffect {
