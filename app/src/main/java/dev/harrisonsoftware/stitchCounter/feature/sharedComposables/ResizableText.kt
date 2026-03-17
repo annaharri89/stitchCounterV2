@@ -25,7 +25,7 @@ fun ResizableText(
     heightRatio: Float = 0.8f,
     widthRatio: Float = 0.4f,
     minFontSize: Float = 48f,
-    maxFontSize: Float = 300f,
+    maxFontSize: Float = 1000f,
     fontWeight: FontWeight = FontWeight.Bold,
     textAlign: TextAlign = TextAlign.Center
 ) {

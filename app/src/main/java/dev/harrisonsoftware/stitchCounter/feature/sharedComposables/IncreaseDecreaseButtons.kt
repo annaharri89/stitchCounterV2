@@ -1,8 +1,12 @@
 package dev.harrisonsoftware.stitchCounter.feature.sharedComposables
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -28,7 +32,8 @@ fun IncreaseDecreaseButtons(
     onDecrement: () -> Unit,
     counterLabel: String? = null,
     buttonSpacing: Int = 24,
-    buttonShape: RoundedCornerShape = RoundedCornerShape(12.dp)
+    buttonShape: RoundedCornerShape = RoundedCornerShape(12.dp),
+    maxHeightFillFraction: Float = 1f
 ) {
     val decreaseDescription = if (counterLabel != null) {
         stringResource(R.string.cd_decrease_named_count, counterLabel)
@@ -41,47 +46,47 @@ fun IncreaseDecreaseButtons(
         stringResource(R.string.cd_increase_count)
     }
 
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(buttonSpacing.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Button(
-            modifier = Modifier
-                .weight(1f)
-                .semantics { contentDescription = decreaseDescription },
-            colors = ButtonDefaults.buttonColors().copy(
-                containerColor = MaterialTheme.quaternary,
-                contentColor = MaterialTheme.onQuaternary
-            ),
-            contentPadding = PaddingValues(0.dp),
-            onClick = onDecrement,
-            shape = buttonShape
-        ) {
-            androidx.compose.material3.Text(
-                text = "-",
-                style = MaterialTheme.typography.displayLarge.copy(
-                    fontSize = 50.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-        }
+    BoxWithConstraints(modifier = modifier.fillMaxHeight()) {
+        val buttonSpacingDp = buttonSpacing.dp
+        val availableButtonWidth = ((maxWidth - buttonSpacingDp).coerceAtLeast(0.dp)) / 2
+        val maximumAllowedHeight = maxHeight * maxHeightFillFraction.coerceIn(0f, 1f)
+        val rowHeight = maximumAllowedHeight.coerceAtMost(availableButtonWidth)
 
-        Button(
+        Row(
             modifier = Modifier
-                .weight(1f)
-                .semantics { contentDescription = increaseDescription },
-            contentPadding = PaddingValues(0.dp),
-            onClick = onIncrement,
-            shape = buttonShape
+                .align(Alignment.Center)
+                .fillMaxWidth()
+                .height(rowHeight),
+            horizontalArrangement = Arrangement.spacedBy(buttonSpacingDp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            androidx.compose.material3.Text(
-                text = "+",
-                style = MaterialTheme.typography.displayLarge.copy(
-                    fontSize = 50.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
+            Button(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .semantics { contentDescription = decreaseDescription },
+                colors = ButtonDefaults.buttonColors().copy(
+                    containerColor = MaterialTheme.quaternary,
+                    contentColor = MaterialTheme.onQuaternary
+                ),
+                contentPadding = PaddingValues(0.dp),
+                onClick = onDecrement,
+                shape = buttonShape
+            ) {
+                ResizableText("-")
+            }
+
+            Button(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .semantics { contentDescription = increaseDescription },
+                contentPadding = PaddingValues(0.dp),
+                onClick = onIncrement,
+                shape = buttonShape
+            ) {
+                ResizableText("+")
+            }
         }
     }
 }

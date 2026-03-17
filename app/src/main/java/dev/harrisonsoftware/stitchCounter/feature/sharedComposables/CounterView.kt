@@ -3,6 +3,7 @@ package dev.harrisonsoftware.stitchCounter.feature.sharedComposables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
@@ -52,7 +53,8 @@ fun CounterView(
     buttonSpacing: Int = 24,
     buttonShape: RoundedCornerShape = RoundedCornerShape(12.dp),
     showResetButton: Boolean = true,
-    counterNumberIsVertical: Boolean = false
+    counterNumberIsVertical: Boolean = false,
+    increaseDecreaseButtonsHeightFillFraction: Float = 1f
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val countDescription = if (label != null) {
@@ -64,6 +66,7 @@ fun CounterView(
 
     Column(
         modifier = modifier,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
         label?.let {
             Text(
@@ -85,7 +88,6 @@ fun CounterView(
                 heightRatio = 0.6f,
                 widthRatio = 0.3f,
                 minFontSize = 48f,
-                maxFontSize = 200f
             )
         }
 
@@ -106,8 +108,7 @@ fun CounterView(
                     text = "$count",
                     heightRatio = 0.6f,
                     widthRatio = 0.3f,
-                    minFontSize = 48f,
-                    maxFontSize = 200f
+                    minFontSize = 48f
                 )
             }
 
@@ -117,12 +118,15 @@ fun CounterView(
                 onDecrement = onDecrement,
                 counterLabel = label,
                 buttonSpacing = buttonSpacing,
-                buttonShape = buttonShape
+                buttonShape = buttonShape,
+                maxHeightFillFraction = increaseDecreaseButtonsHeightFillFraction
             )
         }
 
+        Spacer(Modifier.weight(.2f))
+
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().weight(.5f),
             horizontalArrangement = if (!showResetButton) Arrangement.SpaceAround else Arrangement.Start
         ) {
             if (showResetButton) {
