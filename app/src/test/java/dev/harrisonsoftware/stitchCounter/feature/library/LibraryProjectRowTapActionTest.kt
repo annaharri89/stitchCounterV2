@@ -16,6 +16,16 @@ class LibraryProjectRowTapActionTest {
     }
 
     @Test
+    fun resolveProjectRowTapAction_prioritizesToggleSelection_whenMultiSelectAndSwipeRevealed() {
+        val action = resolveProjectRowTapAction(
+            isMultiSelectMode = true,
+            isSwipeRevealed = true
+        )
+
+        assertEquals(ProjectRowTapAction.ToggleSelection, action)
+    }
+
+    @Test
     fun resolveProjectRowTapAction_returnsResetSwipeState_whenSwipeIsRevealed() {
         val action = resolveProjectRowTapAction(
             isMultiSelectMode = false,
