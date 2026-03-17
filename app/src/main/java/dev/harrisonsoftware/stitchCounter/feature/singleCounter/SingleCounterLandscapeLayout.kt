@@ -48,7 +48,8 @@ fun SingleCounterLandscapeLayout(
             onDismissCustomAdjustmentDialog = actions::dismissCustomAdjustmentDialog,
             onCustomAdjustmentDialogInputChange = actions::updateCustomAdjustmentDialogInput,
             onReset = actions::resetCount,
-            showResetButton = false
+            showResetButton = false,
+            increaseDecreaseButtonsHeightFillFraction = 0.85f
         )
 
         BottomActionButtons(
