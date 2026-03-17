@@ -52,7 +52,7 @@ fun SingleCounterPortraitLayout(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         CounterTopBar(
@@ -77,7 +77,6 @@ fun SingleCounterPortraitLayout(
             counterNumberIsVertical = true
         )
         
-        Spacer(modifier = Modifier.weight(.5f))
 
         BottomActionButtons(
             onResetAll = actions::resetCount

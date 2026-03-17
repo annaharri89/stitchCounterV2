@@ -103,7 +103,6 @@ fun DoubleCounterPortraitLayout(
             onCustomAdjustmentDialogInputChange = actions::updateCustomAdjustmentDialogInput
         )
         
-        Spacer(modifier = Modifier.weight(1f))
 
         BottomActionButtons(
             onResetAll = actions::resetAll,
