@@ -90,6 +90,7 @@
     <string name="settings_export_library">Export Library</string>
     <string name="settings_importing">Importing…</string>
     <string name="settings_import_library">Import Library</string>
+    <string name="settings_backup_local_note">Data is stored locally; use Export to back up.</string>
     <string name="settings_error_file_access_unavailable">Can\'t access the selected file or location. Try choosing another file or location.</string>
     <string name="settings_error_storage_unavailable">Storage is unavailable. Check available storage and try again.</string>
     <string name="settings_error_backup_invalid">Backup file is incomplete or invalid.</string>
@@ -184,6 +185,7 @@
     <string name="cd_support_the_app">Support the app</string>
     <string name="cd_support_the_app_hint">Opens the support page</string>
     <string name="cd_open_kofi">Opens Ko-Fi donation page in browser</string>
+    <string name="cd_thank_you_for_support">Thank you for your support!</string>
     <string name="cd_i_supported_on">I supported toggle, currently on</string>
     <string name="cd_i_supported_off">I supported toggle, currently off</string>
 </resources>

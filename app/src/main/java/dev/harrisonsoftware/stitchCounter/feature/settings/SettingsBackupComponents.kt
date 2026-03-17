@@ -102,6 +102,12 @@ internal fun BackupRestoreCard(
                     style = MaterialTheme.typography.bodySmall
                 )
             }
+
+            Text(
+                text = stringResource(R.string.settings_backup_local_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         }
     }
 }

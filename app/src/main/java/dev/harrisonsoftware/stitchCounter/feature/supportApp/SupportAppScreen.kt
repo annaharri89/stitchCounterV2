@@ -193,6 +193,7 @@ fun SupportAppScreen(
                 enter = expandVertically() + fadeIn(),
                 exit = shrinkVertically() + fadeOut()
             ) {
+                val thankYouDescription = stringResource(R.string.cd_thank_you_for_support)
                 Card(
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
@@ -210,7 +211,7 @@ fun SupportAppScreen(
                             modifier = Modifier
                                 .size(100.dp)
                                 .semantics {
-                                    contentDescription = "Heart decoration"
+                                    contentDescription = thankYouDescription
                                 }
                         )
                         Text(
