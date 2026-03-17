@@ -15,6 +15,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -54,6 +56,8 @@ fun SettingsScreen(
     
     val context = LocalContext.current
     val showImportDialog = remember { mutableStateOf(false) }
+    val showBugReportDialog = remember { mutableStateOf(false) }
+    val includeDiagnosticsForCurrentBugReport = rememberSaveable { mutableStateOf(true) }
     val isThemeSectionExpanded = remember { mutableStateOf(false) }
     val isBackupSectionExpanded = remember { mutableStateOf(false) }
     val isSupportSectionExpanded = remember { mutableStateOf(false) }
@@ -188,12 +192,9 @@ fun SettingsScreen(
                     onToggleExpanded = { isSupportSectionExpanded.value = !isSupportSectionExpanded.value }
                 ) {
                     SupportCard(
-                        attachDiagnosticsToBugReport = uiState.attachDiagnosticsToBugReport,
-                        onAttachDiagnosticsToBugReportChanged = { isEnabled ->
-                            viewModel.onAttachDiagnosticsToBugReportChanged(isEnabled)
-                        },
                         onReportBug = {
-                            viewModel.onReportBug()
+                            includeDiagnosticsForCurrentBugReport.value = true
+                            showBugReportDialog.value = true
                         },
                         onGiveFeedback = {
                             viewModel.onGiveFeedback()
@@ -234,6 +235,53 @@ fun SettingsScreen(
                     }
                 )
             }
+        }
+
+        if (showBugReportDialog.value) {
+            AlertDialog(
+                onDismissRequest = {
+                    showBugReportDialog.value = false
+                },
+                title = {
+                    Text(stringResource(R.string.settings_bug_report_dialog_title))
+                },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(stringResource(R.string.settings_bug_report_dialog_message))
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = includeDiagnosticsForCurrentBugReport.value,
+                                onCheckedChange = { isChecked ->
+                                    includeDiagnosticsForCurrentBugReport.value = isChecked
+                                }
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_bug_report_dialog_include_diagnostics),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showBugReportDialog.value = false
+                            viewModel.onReportBug(includeDiagnosticsForCurrentBugReport.value)
+                        }
+                    ) {
+                        Text(stringResource(R.string.settings_bug_report_dialog_send))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showBugReportDialog.value = false }) {
+                        Text(stringResource(R.string.action_cancel))
+                    }
+                }
+            )
         }
     }
 }

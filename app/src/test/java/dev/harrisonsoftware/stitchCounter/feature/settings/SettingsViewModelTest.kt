@@ -254,20 +254,6 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `attach diagnostics defaults to enabled`() {
-        assertTrue(SettingsUiState().attachDiagnosticsToBugReport)
-    }
-
-    @Test
-    fun `onAttachDiagnosticsToBugReportChanged updates ui state`() {
-        val viewModel = createViewModel()
-
-        viewModel.onAttachDiagnosticsToBugReportChanged(false)
-
-        assertFalse(viewModel.uiState.value.attachDiagnosticsToBugReport)
-    }
-
-    @Test
     fun `onOpenPrivacyPolicy sends OpenPrivacyPolicy effect`() = runTest {
         val viewModel = createViewModel()
         viewModel.effect.test {

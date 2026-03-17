@@ -20,7 +20,7 @@ private const val LOG_DIRECTORY_NAME = "logs"
 
 @Singleton
 /**
- * Persists INFO-level [AppLogEntry] records to daily files under app-private storage.
+ * Persists non-debug [AppLogEntry] records to daily files under app-private storage.
  *
  * Entries are queued and written on a background IO coroutine so callers do not block.
  * The sink also applies [LogRetentionPolicy] at startup and when explicitly requested.
@@ -39,9 +39,9 @@ class FileLogSink @Inject constructor(
             for (command in commandChannel) {
                 when (command) {
                     is FileLogCommand.WriteEntry -> {
-                        runCatching { appendInfoLogEntry(command.entry) }
+                        runCatching { appendLogEntry(command.entry) }
                             .onFailure { throwable ->
-                                Log.w(FILE_LOG_SINK_LOG_TAG, "Failed writing info log entry to file", throwable)
+                                Log.w(FILE_LOG_SINK_LOG_TAG, "Failed writing log entry to file", throwable)
                             }
                     }
                     is FileLogCommand.Flush -> {
@@ -53,10 +53,10 @@ class FileLogSink @Inject constructor(
     }
 
     override fun log(entry: AppLogEntry) {
-        if (entry.level != AppLogLevel.INFO) return
+        if (entry.level == AppLogLevel.DEBUG) return
         val sendResult = commandChannel.trySend(FileLogCommand.WriteEntry(entry))
         if (sendResult.isFailure) {
-            Log.w(FILE_LOG_SINK_LOG_TAG, "Failed enqueuing info log entry for file persistence")
+            Log.w(FILE_LOG_SINK_LOG_TAG, "Failed enqueuing log entry for file persistence")
         }
     }
 
@@ -83,7 +83,7 @@ class FileLogSink @Inject constructor(
         return logDirectory
     }
 
-    private fun appendInfoLogEntry(entry: AppLogEntry) {
+    private fun appendLogEntry(entry: AppLogEntry) {
         val logFile = File(resolveLogDirectory(), buildFileName(entry.timestampEpochMillis))
         val sanitizedMessage = entry.message.replace("\n", "\\n")
         val logLine = buildString {
