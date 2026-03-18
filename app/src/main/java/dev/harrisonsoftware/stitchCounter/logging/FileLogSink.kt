@@ -10,6 +10,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import java.io.File
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -67,8 +68,8 @@ class FileLogSink @Inject constructor(
     }
 
     /** Applies retention cleanup to the resolved log directory. */
-    fun runRetention() {
-        runCatching { logRetentionPolicy.apply(resolveLogDirectory()) }
+    fun runRetention(currentDate: LocalDate = LocalDate.now(ZoneOffset.UTC)) {
+        runCatching { logRetentionPolicy.apply(resolveLogDirectory(), currentDate) }
             .onFailure { throwable ->
                 Log.w(FILE_LOG_SINK_LOG_TAG, "Failed applying log retention policy", throwable)
             }

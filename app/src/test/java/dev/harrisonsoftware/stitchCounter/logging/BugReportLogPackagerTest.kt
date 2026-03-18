@@ -7,6 +7,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 import java.nio.file.Files
+import java.time.LocalDate
 import java.util.zip.ZipFile
 
 class BugReportLogPackagerTest {
@@ -15,20 +16,23 @@ class BugReportLogPackagerTest {
     fun `packageLogsAsHtmlZip creates html zip with metadata`() = runTest {
         val filesDirectory = Files.createTempDirectory("bug_report_files").toFile()
         val cacheDirectory = Files.createTempDirectory("bug_report_cache").toFile()
-        val logDirectory = File(filesDirectory, "logs").apply { mkdirs() }
-        File(logDirectory, "app-log-2026-03-13.log").writeText(
-            "2026-03-13T10:00:00.000Z | INFO | SCProjectData | delete_bulk_start count=2"
-        )
+        val retentionCurrentDate = LocalDate.of(2026, 3, 13)
+        val logFileName = "app-log-$retentionCurrentDate.log"
+        val expectedHtmlFileName = "app-log-$retentionCurrentDate.html"
 
         val fileSystemProvider = FakeFileSystemProvider(filesDirectory, cacheDirectory)
         val fileLogSink = FileLogSink(fileSystemProvider, LogRetentionPolicy())
+        val logDirectory = fileLogSink.resolveLogDirectory()
+        File(logDirectory, logFileName).writeText(
+            "2026-03-13T10:00:00.000Z | INFO | SCProjectData | delete_bulk_start count=2"
+        )
         val packager = BugReportLogPackager(
             fileLogSink = fileLogSink,
             fileSystemProvider = fileSystemProvider,
             deviceMetadataProvider = FakeDeviceMetadataProvider()
         )
 
-        val result = packager.packageLogsAsHtmlZip()
+        val result = packager.packageLogsAsHtmlZip(retentionCurrentDate = retentionCurrentDate)
 
         assertTrue(result is BugReportLogPackagerResult.Success)
         val zipFile = (result as BugReportLogPackagerResult.Success).zipFile
@@ -37,7 +41,7 @@ class BugReportLogPackagerTest {
         ZipFile(zipFile).use { diagnosticsZip ->
             val entries = diagnosticsZip.entries().asSequence().toList()
             assertEquals(1, entries.size)
-            assertEquals("app-log-2026-03-13.html", entries.first().name)
+            assertEquals(expectedHtmlFileName, entries.first().name)
             val htmlContent = diagnosticsZip.getInputStream(entries.first()).bufferedReader().readText()
             assertTrue(htmlContent.contains("App version:</strong> 3.2.1"))
             assertTrue(htmlContent.contains("Android version:</strong> 14"))
@@ -87,6 +91,39 @@ class BugReportLogPackagerTest {
         val result = packager.packageLogsAsHtmlZip()
 
         assertTrue(result is BugReportLogPackagerResult.NoLogsAvailable)
+    }
+
+    @Test
+    fun `resolveAndroidVersion uses release before api 30`() {
+        val androidVersion = resolveAndroidVersion(
+            sdkInt = 29,
+            release = "10",
+            releaseOrCodename = "11"
+        )
+
+        assertEquals("10", androidVersion)
+    }
+
+    @Test
+    fun `resolveAndroidVersion uses releaseOrCodename on api 30 plus`() {
+        val androidVersion = resolveAndroidVersion(
+            sdkInt = 30,
+            release = "11",
+            releaseOrCodename = "11"
+        )
+
+        assertEquals("11", androidVersion)
+    }
+
+    @Test
+    fun `resolveAndroidVersion falls back to unknown when all values missing`() {
+        val androidVersion = resolveAndroidVersion(
+            sdkInt = 29,
+            release = null,
+            releaseOrCodename = null
+        )
+
+        assertEquals("unknown", androidVersion)
     }
 }
 
