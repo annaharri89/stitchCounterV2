@@ -1,5 +1,5 @@
 [versions]
-agp = "8.5.1"
+agp = "8.9.1"
 kotlin = "2.0.21"#can't be on the latest version and work with the room dependency as of 9.10.2025. Works with room version 2.6.1
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -24,6 +24,7 @@ windowSizeClass = "1.2.1"
 mockk = "1.13.12"
 turbine = "1.1.0"
 coroutinesTest = "1.8.1"
+desugarJdkLibs = "2.1.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -61,6 +62,7 @@ androidx-material3-window-size = { group = "androidx.compose.material3", name = 
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
