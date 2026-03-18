@@ -83,8 +83,13 @@ fun LibraryScreen(
         }
     }
 
-    LaunchedEffect(currentSheet, projects.size) {
-        if (currentSheet == null && projectCountWhenSheetOpened.intValue >= 0 && projects.size > projectCountWhenSheetOpened.intValue) {
+    LaunchedEffect(currentSheet, projects.size, lazyListState.isScrollInProgress) {
+        if (
+            currentSheet == null &&
+            !lazyListState.isScrollInProgress &&
+            projectCountWhenSheetOpened.intValue >= 0 &&
+            projects.size > projectCountWhenSheetOpened.intValue
+        ) {
             val averageItemHeight = lazyListState.layoutInfo.visibleItemsInfo
                 .map { it.size }
                 .average()
