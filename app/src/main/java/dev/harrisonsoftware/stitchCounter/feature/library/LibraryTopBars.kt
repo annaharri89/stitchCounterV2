@@ -46,6 +46,7 @@ fun LibraryTopBar(
                 }
             }
 
+            /*todo uncomment after beta
             IconButton(
                 onClick = onSupportClick,
                 modifier = Modifier.semantics {
@@ -61,7 +62,7 @@ fun LibraryTopBar(
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
-            }
+            }*/
         }
     )
 }

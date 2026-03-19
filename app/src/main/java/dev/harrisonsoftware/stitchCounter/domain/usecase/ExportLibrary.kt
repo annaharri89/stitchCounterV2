@@ -64,9 +64,12 @@ class ExportLibrary @Inject constructor(
                     appLogger.projectDataInfo("export_done projectCount=${projects.size} outputUri=${backupResult.contentUri.value}")
                     ExportLibraryResult.Success(backupResult.contentUri)
                 }
-                is BackupZipCreationResult.Failure -> ExportLibraryResult.Failure(
-                    ExportLibraryError.BackupCreationFailed(backupResult.error)
-                )
+                is BackupZipCreationResult.Failure -> {
+                    appLogger.projectDataError("export_failed error=${backupResult.error}")
+                    ExportLibraryResult.Failure(
+                        ExportLibraryError.BackupCreationFailed(backupResult.error)
+                    )
+                }
             }
         } catch (e: Exception) {
             appLogger.projectDataError("export_unexpected_error", e)

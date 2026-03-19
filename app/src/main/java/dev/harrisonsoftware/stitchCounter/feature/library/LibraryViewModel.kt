@@ -2,10 +2,12 @@ package dev.harrisonsoftware.stitchCounter.feature.library
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.harrisonsoftware.stitchCounter.Constants
 import dev.harrisonsoftware.stitchCounter.domain.model.Project
 import dev.harrisonsoftware.stitchCounter.domain.usecase.DeleteProject
 import dev.harrisonsoftware.stitchCounter.domain.usecase.DeleteProjects
 import dev.harrisonsoftware.stitchCounter.domain.usecase.ObserveProjects
+import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +31,7 @@ class LibraryViewModel @Inject constructor(
     observeProjects: ObserveProjects,
     private val deleteProject: DeleteProject,
     private val deleteProjects: DeleteProjects,
+    private val appLogger: AppLogger,
 ) : ViewModel() {
     val projects: StateFlow<List<Project>> = observeProjects()
         .onEach {
@@ -70,6 +73,10 @@ class LibraryViewModel @Inject constructor(
     }
 
     fun requestDelete(project: Project) {
+        appLogger.info(
+            tag = Constants.LOG_TAG_LIBRARY_VIEW_MODEL,
+            message = "event=delete_requested mode=single projectId=${project.id} title=${project.title}"
+        )
         _uiState.value = _uiState.value.copy(
             showDeleteConfirmation = true,
             projectsToDelete = listOf(project)
@@ -80,6 +87,10 @@ class LibraryViewModel @Inject constructor(
         val selectedIds = _uiState.value.selectedProjectIds
         val projectsToDelete = projects.value.filter { it.id in selectedIds }
         if (projectsToDelete.isNotEmpty()) {
+            appLogger.info(
+                tag = Constants.LOG_TAG_LIBRARY_VIEW_MODEL,
+                message = "event=delete_requested mode=bulk selectedCount=${projectsToDelete.size} selectedIds=[${projectsToDelete.joinToString(",") { it.id.toString() }}]"
+            )
             _uiState.value = _uiState.value.copy(
                 showDeleteConfirmation = true,
                 projectsToDelete = projectsToDelete
@@ -89,6 +100,10 @@ class LibraryViewModel @Inject constructor(
 
     fun confirmDelete() {
         val projectsToDelete = _uiState.value.projectsToDelete
+        appLogger.info(
+            tag = Constants.LOG_TAG_LIBRARY_VIEW_MODEL,
+            message = "event=delete_confirmed mode=${if (projectsToDelete.size == 1) "single" else "bulk"} count=${projectsToDelete.size}"
+        )
         if (projectsToDelete.size == 1) {
             viewModelScope.launch { 
                 deleteProject(projectsToDelete.first())
@@ -107,6 +122,11 @@ class LibraryViewModel @Inject constructor(
     }
 
     fun cancelDelete() {
+        val projectsToDelete = _uiState.value.projectsToDelete
+        appLogger.info(
+            tag = Constants.LOG_TAG_LIBRARY_VIEW_MODEL,
+            message = "event=delete_cancelled pendingCount=${projectsToDelete.size}"
+        )
         _uiState.value = _uiState.value.copy(
             showDeleteConfirmation = false,
             projectsToDelete = emptyList()

@@ -7,6 +7,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.zip.ZipEntry
@@ -31,7 +32,15 @@ class AndroidDeviceMetadataProvider @Inject constructor(
     private val appVersion: String,
 ) : DeviceMetadataProvider {
     override fun getCurrentMetadata(): DeviceMetadata {
-        val androidVersion = Build.VERSION.RELEASE_OR_CODENAME ?: "unknown"
+        val androidVersion = resolveAndroidVersion(
+            sdkInt = Build.VERSION.SDK_INT,
+            release = Build.VERSION.RELEASE,
+            releaseOrCodename = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                Build.VERSION.RELEASE_OR_CODENAME
+            } else {
+                null
+            }
+        )
         val manufacturer = Build.MANUFACTURER ?: "unknown"
         val model = Build.MODEL ?: "unknown"
         return DeviceMetadata(
@@ -39,6 +48,18 @@ class AndroidDeviceMetadataProvider @Inject constructor(
             androidVersion = androidVersion,
             deviceModel = "$manufacturer $model"
         )
+    }
+}
+
+internal fun resolveAndroidVersion(
+    sdkInt: Int,
+    release: String?,
+    releaseOrCodename: String?
+): String {
+    return if (sdkInt >= Build.VERSION_CODES.R) {
+        releaseOrCodename ?: release ?: "unknown"
+    } else {
+        release ?: "unknown"
     }
 }
 
@@ -54,10 +75,12 @@ class BugReportLogPackager @Inject constructor(
     private val fileSystemProvider: FileSystemProvider,
     private val deviceMetadataProvider: DeviceMetadataProvider,
 ) {
-    suspend fun packageLogsAsHtmlZip(): BugReportLogPackagerResult = withContext(Dispatchers.IO) {
+    suspend fun packageLogsAsHtmlZip(
+        retentionCurrentDate: LocalDate = LocalDate.now(ZoneOffset.UTC)
+    ): BugReportLogPackagerResult = withContext(Dispatchers.IO) {
         runCatching {
             fileLogSink.flushAndWait()
-            fileLogSink.runRetention()
+            fileLogSink.runRetention(currentDate = retentionCurrentDate)
             val logDirectory = fileLogSink.resolveLogDirectory()
             val logFiles = logDirectory.listFiles()
                 ?.filter { it.isFile && it.extension == "log" }

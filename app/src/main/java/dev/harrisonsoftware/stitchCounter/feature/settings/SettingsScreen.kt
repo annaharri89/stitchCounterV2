@@ -32,8 +32,6 @@ import androidx.core.content.FileProvider
 import dev.harrisonsoftware.stitchCounter.Constants
 import java.io.File
 
-private const val SETTINGS_SCREEN_LOG_TAG = "SettingsScreen"
-
 @RootNavGraph
 @Destination
 @Composable
@@ -292,7 +290,7 @@ internal fun launchExternalActivitySafely(context: android.content.Context, inte
             onSuccess = { true },
             onFailure = { throwable ->
                 runCatching {
-                    Log.w(SETTINGS_SCREEN_LOG_TAG, "Failed to launch external activity", throwable)
+                    Log.w(Constants.LOG_TAG_SETTINGS_SCREEN, "Failed to launch external activity", throwable)
                 }
                 false
             }
@@ -331,7 +329,7 @@ private fun launchBugReportWithAttachment(
         launchExternalActivitySafely(context, chooserIntent)
     }.getOrElse { throwable ->
         runCatching {
-            Log.w(SETTINGS_SCREEN_LOG_TAG, "Failed to launch bug report with attachment", throwable)
+            Log.w(Constants.LOG_TAG_SETTINGS_SCREEN, "Failed to launch bug report with attachment", throwable)
         }
         false
     }

@@ -32,12 +32,12 @@ val hasCompleteReleaseSigningConfig = listOf(
 
 android {
     namespace = "dev.harrisonsoftware.stitchCounter"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "dev.harrisonsoftware.stitchCounter"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 36
         versionCode = versionProps["VERSION_CODE"].toString().toInt()
         versionName = versionProps["VERSION_NAME"].toString()
 
@@ -72,6 +72,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -127,6 +128,7 @@ dependencies {
     
     // Kotlinx Serialization for JSON
     implementation(libs.kotlinx.serialization.json)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
     
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
@@ -161,6 +163,11 @@ tasks.register("buildPlayReleaseAab") {
     group = "release"
     description = "Runs release unit tests, builds the signed Play Store AAB, and opens the output folder in Finder."
     dependsOn("bundleRelease")
+    doFirst {
+        logger.lifecycle(
+            "[SCBuildReleaseAab] Starting buildPlayReleaseAab for versionName=${versionProps["VERSION_NAME"]}, versionCode=${versionProps["VERSION_CODE"]}"
+        )
+    }
     doLast {
         exec {
             commandLine("open", "$projectDir/build/outputs/bundle/release")

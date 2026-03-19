@@ -3,12 +3,14 @@ package dev.harrisonsoftware.stitchCounter.feature.singleCounter
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.harrisonsoftware.stitchCounter.Constants
 import dev.harrisonsoftware.stitchCounter.data.repo.AppPreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount
 import dev.harrisonsoftware.stitchCounter.domain.model.CounterState
 import dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult
 import dev.harrisonsoftware.stitchCounter.domain.usecase.GetProject
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateSingleCounterValues
+import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +41,7 @@ open class SingleCounterViewModel @Inject constructor(
     private val getProject: GetProject,
     private val updateSingleCounterValues: UpdateSingleCounterValues,
     private val appPreferencesRepository: AppPreferencesRepository,
+    private val appLogger: AppLogger,
 ) : ViewModel() {
 
     companion object {
@@ -67,6 +70,10 @@ open class SingleCounterViewModel @Inject constructor(
     fun loadProject(projectId: Int?) {
         viewModelScope.launch {
             if (projectId == null || projectId == 0) {
+                appLogger.info(
+                    tag = Constants.LOG_TAG_SINGLE_COUNTER_VIEW_MODEL,
+                    message = "event=project_load_reset projectId=${projectId ?: 0}"
+                )
                 resetState()
                 return@launch
             }
@@ -136,8 +143,17 @@ open class SingleCounterViewModel @Inject constructor(
                 persistToSavedState()
 
                 if (restoreFromSavedState) {
+                    appLogger.info(
+                        tag = Constants.LOG_TAG_SINGLE_COUNTER_VIEW_MODEL,
+                        message = "event=project_restore_saved_state projectId=${project.id}"
+                    )
                     persistToRoom()
                 }
+            } else {
+                appLogger.warn(
+                    tag = Constants.LOG_TAG_SINGLE_COUNTER_VIEW_MODEL,
+                    message = "event=project_load_missing projectId=$projectId"
+                )
             }
         }
     }
@@ -149,7 +165,7 @@ open class SingleCounterViewModel @Inject constructor(
             )
         }
         persistToSavedState()
-        persistToRoom()
+        persistToRoom(operationName = "change_adjustment")
     }
 
     fun increment() {
@@ -160,7 +176,7 @@ open class SingleCounterViewModel @Inject constructor(
             )
         }
         persistToSavedState()
-        persistToRoom()
+        persistToRoom(operationName = "increment")
     }
 
     fun setCustomAdjustmentAmount(value: Int) {
@@ -174,7 +190,7 @@ open class SingleCounterViewModel @Inject constructor(
             )
         }
         persistToSavedState()
-        persistToRoom()
+        persistToRoom(operationName = "set_custom_adjustment")
     }
 
     fun onCustomAdjustmentTipShown() {
@@ -209,7 +225,7 @@ open class SingleCounterViewModel @Inject constructor(
             )
         }
         persistToSavedState()
-        persistToRoom()
+        persistToRoom(operationName = "decrement")
     }
 
     fun resetCount() {
@@ -219,7 +235,7 @@ open class SingleCounterViewModel @Inject constructor(
             )
         }
         persistToSavedState()
-        persistToRoom(clearCompletedAt = true)
+        persistToRoom(clearCompletedAt = true, operationName = "reset_count")
     }
 
     fun resetState() {
@@ -229,13 +245,13 @@ open class SingleCounterViewModel @Inject constructor(
 
     suspend fun ensureSaved() {
         persistJob?.cancel()
-        saveToRoom()
+        saveToRoom(operationName = "ensure_saved")
     }
 
     fun attemptDismissal() {
         viewModelScope.launch {
             persistJob?.cancel()
-            saveToRoom()
+            saveToRoom(operationName = "attempt_dismissal")
             _dismissalResult.send(DismissalResult.Allowed)
         }
     }
@@ -245,30 +261,38 @@ open class SingleCounterViewModel @Inject constructor(
         val state = _uiState.value
         if (state.id > 0) {
             CoroutineScope(Dispatchers.IO + NonCancellable).launch {
-                saveToRoom()
+                saveToRoom(operationName = "on_cleared")
             }
         }
     }
 
-    private fun persistToRoom(clearCompletedAt: Boolean = false) {
+    private fun persistToRoom(clearCompletedAt: Boolean = false, operationName: String = "state_change") {
         persistJob?.cancel()
         val state = _uiState.value
         if (state.id > 0) {
-            persistJob = viewModelScope.launch { saveToRoom(clearCompletedAt = clearCompletedAt) }
+            persistJob = viewModelScope.launch { saveToRoom(clearCompletedAt = clearCompletedAt, operationName = operationName) }
         }
     }
 
-    private suspend fun saveToRoom(clearCompletedAt: Boolean = false) {
+    private suspend fun saveToRoom(clearCompletedAt: Boolean = false, operationName: String = "state_change") {
         val state = _uiState.value
         if (state.id > 0) {
-            updateSingleCounterValues(
-                id = state.id,
-                stitchCount = state.counterState.count,
-                stitchAdjustment = state.counterState.resolvedAdjustmentAmount,
-                totalStitchesEver = state.totalStitchesEver,
-                clearCompletedAt = clearCompletedAt,
-                updatedAt = System.currentTimeMillis()
-            )
+            runCatching {
+                updateSingleCounterValues(
+                    id = state.id,
+                    stitchCount = state.counterState.count,
+                    stitchAdjustment = state.counterState.resolvedAdjustmentAmount,
+                    totalStitchesEver = state.totalStitchesEver,
+                    clearCompletedAt = clearCompletedAt,
+                    updatedAt = System.currentTimeMillis()
+                )
+            }.onFailure { throwable ->
+                appLogger.error(
+                    tag = Constants.LOG_TAG_SINGLE_COUNTER_VIEW_MODEL,
+                    message = "event=counter_persist_failed operation=$operationName projectId=${state.id}",
+                    throwable = throwable
+                )
+            }
         }
     }
 

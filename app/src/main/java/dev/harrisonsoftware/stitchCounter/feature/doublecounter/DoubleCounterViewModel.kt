@@ -3,12 +3,14 @@ package dev.harrisonsoftware.stitchCounter.feature.doublecounter
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.harrisonsoftware.stitchCounter.Constants
 import dev.harrisonsoftware.stitchCounter.data.repo.AppPreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount
 import dev.harrisonsoftware.stitchCounter.domain.model.CounterState
 import dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult
 import dev.harrisonsoftware.stitchCounter.domain.usecase.GetProject
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateDoubleCounterValues
+import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -58,6 +60,7 @@ open class DoubleCounterViewModel @Inject constructor(
     private val getProject: GetProject,
     private val updateDoubleCounterValues: UpdateDoubleCounterValues,
     private val appPreferencesRepository: AppPreferencesRepository,
+    private val appLogger: AppLogger,
 ) : ViewModel() {
 
     companion object {
@@ -89,6 +92,10 @@ open class DoubleCounterViewModel @Inject constructor(
     fun loadProject(projectId: Int?) {
         viewModelScope.launch {
             if (projectId == null || projectId == 0) {
+                appLogger.info(
+                    tag = Constants.LOG_TAG_DOUBLE_COUNTER_VIEW_MODEL,
+                    message = "event=project_load_reset projectId=${projectId ?: 0}"
+                )
                 resetState()
                 return@launch
             }
@@ -199,14 +206,24 @@ open class DoubleCounterViewModel @Inject constructor(
                 persistToSavedState()
 
                 if (restoreFromSavedState) {
+                    appLogger.info(
+                        tag = Constants.LOG_TAG_DOUBLE_COUNTER_VIEW_MODEL,
+                        message = "event=project_restore_saved_state projectId=${project.id}"
+                    )
                     persistToRoom()
                 }
+            } else {
+                appLogger.warn(
+                    tag = Constants.LOG_TAG_DOUBLE_COUNTER_VIEW_MODEL,
+                    message = "event=project_load_missing projectId=$projectId"
+                )
             }
         }
     }
 
     private fun updateCounter(
         type: CounterType,
+        operationName: String,
         clearCompletedAt: Boolean = false,
         update: (CounterState) -> CounterState
     ) {
@@ -229,7 +246,7 @@ open class DoubleCounterViewModel @Inject constructor(
             }
         }
         persistToSavedState()
-        persistToRoom(clearCompletedAt = clearCompletedAt)
+        persistToRoom(clearCompletedAt = clearCompletedAt, operationName = operationName)
     }
 
     fun increment(type: CounterType) {
@@ -237,15 +254,19 @@ open class DoubleCounterViewModel @Inject constructor(
             val adjustmentAmount = _uiState.value.stitchCounterState.resolvedAdjustmentAmount
             _uiState.update { it.copy(totalStitchesEver = it.totalStitchesEver + adjustmentAmount) }
         }
-        updateCounter(type) { it.increment() }
+        updateCounter(type = type, operationName = "increment_${type.name.lowercase()}") { it.increment() }
     }
 
-    fun decrement(type: CounterType) = updateCounter(type) { it.decrement() }
-    fun reset(type: CounterType) = updateCounter(type, clearCompletedAt = true) { it.reset() }
+    fun decrement(type: CounterType) = updateCounter(type = type, operationName = "decrement_${type.name.lowercase()}") { it.decrement() }
+    fun reset(type: CounterType) = updateCounter(
+        type = type,
+        operationName = "reset_${type.name.lowercase()}",
+        clearCompletedAt = true
+    ) { it.reset() }
     fun changeAdjustment(type: CounterType, value: AdjustmentAmount) =
-        updateCounter(type) { it.copy(adjustment = value) }
+        updateCounter(type = type, operationName = "change_adjustment_${type.name.lowercase()}") { it.copy(adjustment = value) }
     fun setCustomAdjustmentAmount(type: CounterType, value: Int) =
-        updateCounter(type) {
+        updateCounter(type = type, operationName = "set_custom_adjustment_${type.name.lowercase()}") {
             it.copy(
                 adjustment = AdjustmentAmount.CUSTOM,
                 customAdjustmentAmount = value.coerceAtLeast(1)
@@ -280,13 +301,13 @@ open class DoubleCounterViewModel @Inject constructor(
 
     suspend fun ensureSaved() {
         persistJob?.cancel()
-        saveToRoom()
+        saveToRoom(operationName = "ensure_saved")
     }
 
     fun attemptDismissal() {
         viewModelScope.launch {
             persistJob?.cancel()
-            saveToRoom()
+            saveToRoom(operationName = "attempt_dismissal")
             _dismissalResult.send(DismissalResult.Allowed)
         }
     }
@@ -306,32 +327,42 @@ open class DoubleCounterViewModel @Inject constructor(
         val state = _uiState.value
         if (state.id > 0) {
             CoroutineScope(Dispatchers.IO + NonCancellable).launch {
-                saveToRoom()
+                saveToRoom(operationName = "on_cleared")
             }
         }
     }
 
-    private fun persistToRoom(clearCompletedAt: Boolean = false) {
+    private fun persistToRoom(clearCompletedAt: Boolean = false, operationName: String = "state_change") {
         persistJob?.cancel()
         val state = _uiState.value
         if (state.id > 0) {
-            persistJob = viewModelScope.launch { saveToRoom(clearCompletedAt = clearCompletedAt) }
+            persistJob = viewModelScope.launch {
+                saveToRoom(clearCompletedAt = clearCompletedAt, operationName = operationName)
+            }
         }
     }
 
-    private suspend fun saveToRoom(clearCompletedAt: Boolean = false) {
+    private suspend fun saveToRoom(clearCompletedAt: Boolean = false, operationName: String = "state_change") {
         val state = _uiState.value
         if (state.id > 0) {
-            updateDoubleCounterValues(
-                id = state.id,
-                stitchCount = state.stitchCounterState.count,
-                stitchAdjustment = state.stitchCounterState.resolvedAdjustmentAmount,
-                rowCount = state.rowCounterState.count,
-                rowAdjustment = state.rowCounterState.resolvedAdjustmentAmount,
-                totalStitchesEver = state.totalStitchesEver,
-                clearCompletedAt = clearCompletedAt,
-                updatedAt = System.currentTimeMillis()
-            )
+            runCatching {
+                updateDoubleCounterValues(
+                    id = state.id,
+                    stitchCount = state.stitchCounterState.count,
+                    stitchAdjustment = state.stitchCounterState.resolvedAdjustmentAmount,
+                    rowCount = state.rowCounterState.count,
+                    rowAdjustment = state.rowCounterState.resolvedAdjustmentAmount,
+                    totalStitchesEver = state.totalStitchesEver,
+                    clearCompletedAt = clearCompletedAt,
+                    updatedAt = System.currentTimeMillis()
+                )
+            }.onFailure { throwable ->
+                appLogger.error(
+                    tag = Constants.LOG_TAG_DOUBLE_COUNTER_VIEW_MODEL,
+                    message = "event=counter_persist_failed operation=$operationName projectId=${state.id}",
+                    throwable = throwable
+                )
+            }
         }
     }
 
