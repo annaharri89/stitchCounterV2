@@ -19,6 +19,7 @@ import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavigationScree
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavigationViewModel
 import dev.harrisonsoftware.stitchCounter.feature.theme.LauncherIconManager
 import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeViewModel
+import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import dev.harrisonsoftware.stitchCounter.ui.theme.StitchCounterV3Theme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
@@ -27,12 +28,14 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
     @Inject
     lateinit var appPreferencesRepository: AppPreferencesRepository
 
     @Inject
     lateinit var launcherIconManager: LauncherIconManager
+
+    @Inject
+    lateinit var appLogger: AppLogger
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +66,10 @@ class MainActivity : ComponentActivity() {
     override fun onStop() {
         super.onStop()
         if (!isChangingConfigurations) {
+            appLogger.info(
+                tag = Constants.LOG_TAG_MAIN_ACTIVITY,
+                message = "event=apply_pending_launcher_icon_on_stop"
+            )
             launcherIconManager.applyPendingIconChangeIfNeeded()
         }
     }
@@ -71,8 +78,17 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             try {
                 val currentTheme = appPreferencesRepository.selectedTheme.first()
+                appLogger.info(
+                    tag = Constants.LOG_TAG_MAIN_ACTIVITY,
+                    message = "event=initialize_launcher_icon theme=${currentTheme.name}"
+                )
                 launcherIconManager.updateLauncherIcon(currentTheme)
             } catch (e: Exception) {
+                appLogger.warn(
+                    tag = Constants.LOG_TAG_MAIN_ACTIVITY,
+                    message = "event=initialize_launcher_icon_failed fallbackTheme=${AppTheme.FOREST_FIBER.name}",
+                    throwable = e
+                )
                 launcherIconManager.updateLauncherIcon(AppTheme.FOREST_FIBER)
             }
         }

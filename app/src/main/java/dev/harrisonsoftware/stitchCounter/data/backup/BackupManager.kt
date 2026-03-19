@@ -1,8 +1,9 @@
 package dev.harrisonsoftware.stitchCounter.data.backup
 
 import android.net.Uri
-import android.util.Log
+import dev.harrisonsoftware.stitchCounter.Constants
 import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
+import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileOutputStream
@@ -22,10 +23,10 @@ private const val PROJECT_IMAGE_FILE_PREFIX = "project_"
 
 class BackupManager(
     private val fileSystemProvider: FileSystemProvider,
-    private val uriStreamProvider: UriStreamProvider
+    private val uriStreamProvider: UriStreamProvider,
+    private val appLogger: AppLogger,
 ) {
     private val json = Json { ignoreUnknownKeys = true }
-    private val tag = "BackupManager"
     
     fun createBackupZip(
         backupData: BackupData,
@@ -52,7 +53,10 @@ class BackupManager(
                         destFile.parentFile?.mkdirs()
                         sourceFile.copyTo(destFile, overwrite = true)
                     } else {
-                        Log.w(tag, "Skipping missing image during export: $relativeImagePath")
+                        appLogger.warn(
+                            tag = Constants.LOG_TAG_BACKUP_MANAGER,
+                            message = "event=export_image_missing path=$relativeImagePath"
+                        )
                     }
                 }
             }
@@ -77,7 +81,11 @@ class BackupManager(
             
             BackupZipCreationResult.Success(ContentUri(resultUri.toString()))
         } catch (e: Exception) {
-            Log.e(tag, "Error creating backup", e)
+            appLogger.error(
+                tag = Constants.LOG_TAG_BACKUP_MANAGER,
+                message = "event=create_backup_failed",
+                throwable = e
+            )
             BackupZipCreationResult.Failure(BackupManagerError.Unexpected(e))
         }
     }
@@ -105,7 +113,11 @@ class BackupManager(
             
             BackupZipExtractionResult.Success(BackupExtraction(backupData, imagesDir, tempDir))
         } catch (e: Exception) {
-            Log.e(tag, "Error extracting backup", e)
+            appLogger.error(
+                tag = Constants.LOG_TAG_BACKUP_MANAGER,
+                message = "event=extract_backup_failed",
+                throwable = e
+            )
             BackupZipExtractionResult.Failure(BackupManagerError.Unexpected(e))
         }
     }
@@ -124,7 +136,11 @@ class BackupManager(
             
             "$INTERNAL_PROJECT_IMAGES_DIRECTORY_NAME/$fileName"
         } catch (e: Exception) {
-            Log.e(tag, "Error copying image", e)
+            appLogger.error(
+                tag = Constants.LOG_TAG_BACKUP_MANAGER,
+                message = "event=copy_import_image_failed source=${sourceFile.name}",
+                throwable = e
+            )
             null
         }
     }
@@ -133,7 +149,11 @@ class BackupManager(
         try {
             tempDir.deleteRecursively()
         } catch (e: Exception) {
-            Log.e(tag, "Error cleaning up temp directory", e)
+            appLogger.warn(
+                tag = Constants.LOG_TAG_BACKUP_MANAGER,
+                message = "event=cleanup_temp_directory_failed tempDir=${tempDir.name}",
+                throwable = e
+            )
         }
     }
     
@@ -194,11 +214,18 @@ class BackupManager(
             if (canonicalCandidatePath.startsWith(canonicalFilesDirectoryPath)) {
                 candidateFile
             } else {
-                Log.w(tag, "Skipping unsafe image path in export: $relativePath")
+                appLogger.warn(
+                    tag = Constants.LOG_TAG_BACKUP_MANAGER,
+                    message = "event=export_image_unsafe_path path=$relativePath"
+                )
                 null
             }
         } catch (e: Exception) {
-            Log.e(tag, "Error resolving image path for export", e)
+            appLogger.error(
+                tag = Constants.LOG_TAG_BACKUP_MANAGER,
+                message = "event=resolve_export_image_failed path=$relativePath",
+                throwable = e
+            )
             null
         }
     }

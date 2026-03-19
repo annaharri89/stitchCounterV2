@@ -1,6 +1,7 @@
 package dev.harrisonsoftware.stitchCounter.logging
 
 import android.util.Log
+import dev.harrisonsoftware.stitchCounter.Constants
 import dev.harrisonsoftware.stitchCounter.data.backup.FileSystemProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +17,6 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val FILE_LOG_SINK_LOG_TAG = "SCFileLogSink"
 private const val LOG_DIRECTORY_NAME = "logs"
 
 @Singleton
@@ -42,7 +42,7 @@ class FileLogSink @Inject constructor(
                     is FileLogCommand.WriteEntry -> {
                         runCatching { appendLogEntry(command.entry) }
                             .onFailure { throwable ->
-                                Log.w(FILE_LOG_SINK_LOG_TAG, "Failed writing log entry to file", throwable)
+                                Log.w(Constants.LOG_TAG_FILE_LOG_SINK, "Failed writing log entry to file", throwable)
                             }
                     }
                     is FileLogCommand.Flush -> {
@@ -57,7 +57,7 @@ class FileLogSink @Inject constructor(
         if (entry.level == AppLogLevel.DEBUG) return
         val sendResult = commandChannel.trySend(FileLogCommand.WriteEntry(entry))
         if (sendResult.isFailure) {
-            Log.w(FILE_LOG_SINK_LOG_TAG, "Failed enqueuing log entry for file persistence")
+            Log.w(Constants.LOG_TAG_FILE_LOG_SINK, "Failed enqueuing log entry for file persistence")
         }
     }
 
@@ -71,7 +71,7 @@ class FileLogSink @Inject constructor(
     fun runRetention(currentDate: LocalDate = LocalDate.now(ZoneOffset.UTC)) {
         runCatching { logRetentionPolicy.apply(resolveLogDirectory(), currentDate) }
             .onFailure { throwable ->
-                Log.w(FILE_LOG_SINK_LOG_TAG, "Failed applying log retention policy", throwable)
+                Log.w(Constants.LOG_TAG_FILE_LOG_SINK, "Failed applying log retention policy", throwable)
             }
     }
 

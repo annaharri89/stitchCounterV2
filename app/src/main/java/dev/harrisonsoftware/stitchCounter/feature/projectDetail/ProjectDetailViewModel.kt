@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.harrisonsoftware.stitchCounter.Constants
 import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult
 import dev.harrisonsoftware.stitchCounter.domain.model.Project
@@ -14,6 +15,7 @@ import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateProjectDetailResu
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateProjectDetailValues
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpsertProjectResult
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpsertProject
+import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import android.content.Context
 import android.net.Uri
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -52,6 +54,7 @@ class ProjectDetailViewModel @Inject constructor(
     private val getProject: GetProject,
     private val upsertProject: UpsertProject,
     private val updateProjectDetailValues: UpdateProjectDetailValues,
+    private val appLogger: AppLogger,
 ) : ViewModel() {
 
     private sealed interface SaveToRoomResult {
@@ -89,6 +92,10 @@ class ProjectDetailViewModel @Inject constructor(
             _uiState.update { currentState -> currentState.copy(isLoading = true) }
 
             if (projectId == null || projectId == 0) {
+                appLogger.info(
+                    tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                    message = "event=project_load mode=new projectType=$projectType"
+                )
                 val savedProjectId = savedStateHandle.get<Int>(SAVED_STATE_KEY_PROJECT_ID)
                 val previousProjectAlreadyCreated = savedProjectId != null && savedProjectId > 0
                 if (previousProjectAlreadyCreated) {
@@ -138,6 +145,10 @@ class ProjectDetailViewModel @Inject constructor(
             if (project != null) {
                 restoreExistingProjectState(project)
             } else {
+                appLogger.warn(
+                    tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                    message = "event=project_load_missing projectId=$projectId"
+                )
                 _uiState.update { currentState -> currentState.copy(isLoading = false) }
             }
         }
@@ -150,6 +161,10 @@ class ProjectDetailViewModel @Inject constructor(
             if (project != null) {
                 restoreExistingProjectState(project)
             } else {
+                appLogger.warn(
+                    tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                    message = "event=project_load_missing projectId=$projectId source=by_id"
+                )
                 _uiState.update { currentState -> currentState.copy(isLoading = false) }
             }
         }
@@ -218,6 +233,10 @@ class ProjectDetailViewModel @Inject constructor(
         }
 
         if (hasChangesFromSavedState) {
+            appLogger.info(
+                tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                message = "event=project_restore_saved_state projectId=${project.id}"
+            )
             triggerAutoSave()
         }
     }
@@ -295,11 +314,25 @@ class ProjectDetailViewModel @Inject constructor(
         autoSaveJob?.cancel()
         val state = _uiState.value
         val isExistingProject = state.project?.id != null && state.project.id > 0
-        if (state.hasUnsavedChanges && isExistingProject && canPersistState(state)) {
+        val canPersist = canPersistState(state)
+        if (state.hasUnsavedChanges && isExistingProject && canPersist) {
+            appLogger.info(
+                tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                message = "event=autosave_scheduled projectId=${state.project?.id ?: 0} delayMs=$AUTO_SAVE_DELAY_MS"
+            )
             autoSaveJob = viewModelScope.launch {
                 delay(AUTO_SAVE_DELAY_MS)
+                appLogger.info(
+                    tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                    message = "event=autosave_executed projectId=${_uiState.value.project?.id ?: 0}"
+                )
                 saveToRoom()
             }
+        } else {
+            appLogger.info(
+                tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                message = "event=autosave_skipped hasUnsavedChanges=${state.hasUnsavedChanges} isExistingProject=$isExistingProject canPersistState=$canPersist"
+            )
         }
     }
 
@@ -330,6 +363,10 @@ class ProjectDetailViewModel @Inject constructor(
                 updatedAt = now
             )
             if (!applyUpdateProjectDetailResult(updateResult)) {
+                appLogger.warn(
+                    tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                    message = "event=save_blocked_validation projectId=$projectId result=$updateResult"
+                )
                 return SaveToRoomResult.NotSavedValidation
             }
             val freshProject = getProject(projectId)
@@ -349,6 +386,10 @@ class ProjectDetailViewModel @Inject constructor(
                     )
                 }
             }
+            appLogger.info(
+                tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                message = "event=save_success projectId=$projectId mode=update"
+            )
             return SaveToRoomResult.Saved
         } else {
             val freshProject = if (projectId > 0) getProject(projectId) else null
@@ -373,6 +414,10 @@ class ProjectDetailViewModel @Inject constructor(
             val newId = when (upsertResult) {
                 is UpsertProjectResult.Success -> upsertResult.projectId.toInt()
                 UpsertProjectResult.InvalidTitle -> {
+                    appLogger.warn(
+                        tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                        message = "event=create_blocked_validation reason=invalid_title"
+                    )
                     _uiState.update { currentState ->
                         currentState.copy(titleError = R.string.error_title_required)
                     }
@@ -396,8 +441,16 @@ class ProjectDetailViewModel @Inject constructor(
                     )
                 }
                 persistToSavedState()
+                appLogger.info(
+                    tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                    message = "event=save_success projectId=$newId mode=create"
+                )
                 return SaveToRoomResult.Saved
             }
+            appLogger.warn(
+                tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                message = "event=save_failed_persistence mode=create"
+            )
             return SaveToRoomResult.NotSavedPersistence
         }
     }
@@ -417,6 +470,10 @@ class ProjectDetailViewModel @Inject constructor(
             val state = _uiState.value
 
             if (!ProjectValidator.isTitleValid(state.title)) {
+                appLogger.warn(
+                    tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                    message = "event=dismissal_blocked reason=invalid_title"
+                )
                 _uiState.update { currentState ->
                     currentState.copy(titleError = R.string.error_title_required)
                 }
@@ -425,7 +482,13 @@ class ProjectDetailViewModel @Inject constructor(
                 when (saveToRoom()) {
                     SaveToRoomResult.Saved -> _dismissalResult.send(DismissalResult.Allowed)
                     SaveToRoomResult.NotSavedValidation,
-                    SaveToRoomResult.NotSavedPersistence -> _dismissalResult.send(DismissalResult.ShowDiscardDialog)
+                    SaveToRoomResult.NotSavedPersistence -> {
+                        appLogger.warn(
+                            tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                            message = "event=dismissal_show_discard_dialog reason=save_failed"
+                        )
+                        _dismissalResult.send(DismissalResult.ShowDiscardDialog)
+                    }
                 }
             }
         }
@@ -452,6 +515,12 @@ class ProjectDetailViewModel @Inject constructor(
             val savedImagePath = withContext(Dispatchers.IO) {
                 saveImageToInternalStorage(context, uri)
             }
+            if (savedImagePath == null) {
+                appLogger.warn(
+                    tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                    message = "event=image_add_failed reason=save_returned_null"
+                )
+            }
             savedImagePath?.let { addImagePath(it) }
         }
     }
@@ -469,6 +538,13 @@ class ProjectDetailViewModel @Inject constructor(
     }
 
     fun removeImagePath(imagePath: String) {
+        val imageWasPresent = _uiState.value.imagePaths.contains(imagePath)
+        if (!imageWasPresent) {
+            appLogger.warn(
+                tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                message = "event=image_remove_missing path=$imagePath"
+            )
+        }
         val newImagePaths = _uiState.value.imagePaths.filter { it != imagePath }
         _uiState.update { currentState ->
             currentState.copy(
@@ -484,6 +560,10 @@ class ProjectDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val state = _uiState.value
             if (!ProjectValidator.isTitleValid(state.title)) {
+                appLogger.warn(
+                    tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                    message = "event=create_blocked_validation reason=invalid_title"
+                )
                 _uiState.update { currentState ->
                     currentState.copy(titleError = R.string.error_title_required)
                 }
@@ -492,6 +572,10 @@ class ProjectDetailViewModel @Inject constructor(
 
             val totalRowsValue = state.totalRows.toIntOrNull() ?: 0
             if (!ProjectValidator.areTotalRowsValidForType(totalRowsValue, state.projectType)) {
+                appLogger.warn(
+                    tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                    message = "event=create_blocked_validation reason=invalid_total_rows projectType=${state.projectType}"
+                )
                 _uiState.update { currentState ->
                     currentState.copy(totalRowsError = R.string.error_total_rows_required_and_greater)
                 }
@@ -520,6 +604,10 @@ class ProjectDetailViewModel @Inject constructor(
             val newId = when (upsertResult) {
                 is UpsertProjectResult.Success -> upsertResult.projectId.toInt()
                 UpsertProjectResult.InvalidTitle -> {
+                    appLogger.warn(
+                        tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                        message = "event=create_blocked_validation reason=invalid_title_upsert"
+                    )
                     _uiState.update { currentState ->
                         currentState.copy(titleError = R.string.error_title_required)
                     }
@@ -542,6 +630,10 @@ class ProjectDetailViewModel @Inject constructor(
                     )
                 }
                 persistToSavedState()
+                appLogger.info(
+                    tag = Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL,
+                    message = "event=create_success projectId=$newId"
+                )
             }
         }
     }

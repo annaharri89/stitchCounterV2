@@ -94,6 +94,10 @@ class ImportLibrary @Inject constructor(
                             importedProjects.add(project.copy(id = newId.toInt()))
                         } catch (e: Exception) {
                             failedProjects.add("${backupProject.title} (ID: ${backupProject.id})")
+                            appLogger.projectDataError(
+                                message = "import_project_failed projectId=${backupProject.id} title=${backupProject.title}",
+                                throwable = e
+                            )
                         }
                     }
                     

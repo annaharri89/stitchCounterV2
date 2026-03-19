@@ -7,6 +7,7 @@ import android.graphics.Matrix
 import android.media.ExifInterface
 import android.net.Uri
 import android.util.Log
+import dev.harrisonsoftware.stitchCounter.Constants
 import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
@@ -17,7 +18,6 @@ private const val MAX_IMAGE_DIMENSION = 1024
 private const val JPEG_COMPRESSION_QUALITY = 80
 private const val PROJECT_IMAGES_DIRECTORY_NAME = "project_images"
 private const val JPEG_FILE_EXTENSION = "jpg"
-private const val LOG_TAG = "ImageSave"
 
 /** Decodes, scales down to [MAX_IMAGE_DIMENSION], and saves as compressed JPEG. Returns a relative path or null on failure. */
 fun saveImageToInternalStorage(context: Context, uri: Uri): String? {
@@ -56,7 +56,7 @@ fun saveImageToInternalStorage(context: Context, uri: Uri): String? {
 
         "$PROJECT_IMAGES_DIRECTORY_NAME/$fileName"
     } catch (e: Exception) {
-        Log.e(LOG_TAG, "Error saving image", e)
+        Log.e(Constants.LOG_TAG_IMAGE_SAVE, "Error saving image", e)
         null
     }
 }
@@ -70,11 +70,11 @@ fun resolveImagePathToAbsolutePath(context: Context, relativeImagePath: String):
         if (canonicalCandidatePath.startsWith(canonicalFilesDirectoryPath)) {
             canonicalCandidatePath
         } else {
-            Log.w(LOG_TAG, "Skipping image path outside files directory: $relativeImagePath")
+            Log.w(Constants.LOG_TAG_IMAGE_SAVE, "Skipping image path outside files directory: $relativeImagePath")
             ""
         }
     } catch (e: Exception) {
-        Log.e(LOG_TAG, "Error resolving image path", e)
+        Log.e(Constants.LOG_TAG_IMAGE_SAVE, "Error resolving image path", e)
         ""
     }
 }
@@ -132,7 +132,7 @@ private fun readExifOrientationMatrix(context: Context, uri: Uri): Matrix {
             }
         }
     } catch (e: Exception) {
-        Log.w(LOG_TAG, "Failed to read EXIF orientation", e)
+        Log.w(Constants.LOG_TAG_IMAGE_SAVE, "Failed to read EXIF orientation", e)
     }
     return matrix
 }

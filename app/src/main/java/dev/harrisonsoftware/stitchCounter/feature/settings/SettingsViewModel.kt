@@ -32,8 +32,6 @@ import kotlinx.coroutines.launch
 import dev.harrisonsoftware.stitchCounter.Constants
 import javax.inject.Inject
 
-private const val SETTINGS_VIEW_MODEL_LOG_TAG = "SettingsViewModel"
-
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val appPreferencesRepository: AppPreferencesRepository,
@@ -81,13 +79,25 @@ class SettingsViewModel @Inject constructor(
 
     fun exportLibrary(outputUri: Uri? = null) {
         viewModelScope.launch {
+            appLogger.info(
+                tag = Constants.LOG_TAG_SETTINGS_VIEW_MODEL,
+                message = "event=export_requested hasOutputUri=${outputUri != null}"
+            )
             _uiState.update { it.copy(isExporting = true, exportError = null) }
             val outputContentUri = outputUri?.let { ContentUri(it.toString()) }
             when (val exportResult = exportLibraryUseCase(outputContentUri)) {
                 is ExportLibraryResult.Success -> {
+                    appLogger.info(
+                        tag = Constants.LOG_TAG_SETTINGS_VIEW_MODEL,
+                        message = "event=export_result status=success"
+                    )
                     _uiState.update { it.copy(isExporting = false, exportSuccess = true) }
                 }
                 is ExportLibraryResult.Failure -> {
+                    appLogger.warn(
+                        tag = Constants.LOG_TAG_SETTINGS_VIEW_MODEL,
+                        message = "event=export_result status=failure error=${exportResult.error}"
+                    )
                     _uiState.update {
                         it.copy(
                             isExporting = false,
@@ -101,9 +111,17 @@ class SettingsViewModel @Inject constructor(
     
     fun importLibrary(inputUri: Uri, replaceExisting: Boolean = false) {
         viewModelScope.launch {
+            appLogger.info(
+                tag = Constants.LOG_TAG_SETTINGS_VIEW_MODEL,
+                message = "event=import_requested replaceExisting=$replaceExisting"
+            )
             _uiState.update { it.copy(isImporting = true, importError = null) }
             when (val importResult = importLibraryUseCase(ContentUri(inputUri.toString()), replaceExisting)) {
                 is ImportLibraryResult.Success -> {
+                    appLogger.info(
+                        tag = Constants.LOG_TAG_SETTINGS_VIEW_MODEL,
+                        message = "event=import_result status=success imported=${importResult.result.importedCount} failed=${importResult.result.failedCount}"
+                    )
                     _uiState.update {
                         it.copy(
                             isImporting = false,
@@ -113,6 +131,10 @@ class SettingsViewModel @Inject constructor(
                     }
                 }
                 is ImportLibraryResult.Failure -> {
+                    appLogger.warn(
+                        tag = Constants.LOG_TAG_SETTINGS_VIEW_MODEL,
+                        message = "event=import_result status=failure error=${importResult.error}"
+                    )
                     _uiState.update {
                         it.copy(
                             isImporting = false,
@@ -134,13 +156,25 @@ class SettingsViewModel @Inject constructor(
 
     fun onReportBug(includeDiagnostics: Boolean = true) {
         viewModelScope.launch {
+            appLogger.info(
+                tag = Constants.LOG_TAG_SETTINGS_VIEW_MODEL,
+                message = "event=bug_report_requested includeDiagnostics=$includeDiagnostics"
+            )
             if (!includeDiagnostics) {
+                appLogger.info(
+                    tag = Constants.LOG_TAG_SETTINGS_VIEW_MODEL,
+                    message = "event=bug_report_result status=no_diagnostics_requested"
+                )
                 _effect.send(SettingsEffect.OpenBugReportShare(Constants.BUG_REPORT_SUBJECT, null))
                 return@launch
             }
 
             when (val packageResult = bugReportLogPackager.packageLogsAsHtmlZip()) {
                 is BugReportLogPackagerResult.Success -> {
+                    appLogger.info(
+                        tag = Constants.LOG_TAG_SETTINGS_VIEW_MODEL,
+                        message = "event=bug_report_result status=diagnostics_packaged attachmentPath=${packageResult.zipFile.absolutePath}"
+                    )
                     _effect.send(
                         SettingsEffect.OpenBugReportShare(
                             subject = Constants.BUG_REPORT_SUBJECT,
@@ -149,11 +183,15 @@ class SettingsViewModel @Inject constructor(
                     )
                 }
                 is BugReportLogPackagerResult.NoLogsAvailable -> {
+                    appLogger.info(
+                        tag = Constants.LOG_TAG_SETTINGS_VIEW_MODEL,
+                        message = "event=bug_report_result status=no_logs_available"
+                    )
                     _effect.send(SettingsEffect.OpenBugReportShare(Constants.BUG_REPORT_SUBJECT, null))
                 }
                 is BugReportLogPackagerResult.Failure -> {
                     appLogger.warn(
-                        tag = SETTINGS_VIEW_MODEL_LOG_TAG,
+                        tag = Constants.LOG_TAG_SETTINGS_VIEW_MODEL,
                         message = "Failed to package diagnostics for bug report",
                         throwable = packageResult.throwable
                     )

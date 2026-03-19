@@ -10,6 +10,7 @@ import dev.harrisonsoftware.stitchCounter.domain.model.Project
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.domain.usecase.GetProject
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateSingleCounterValues
+import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -34,6 +35,7 @@ class SingleCounterViewModelTest {
     private lateinit var getProject: GetProject
     private lateinit var updateSingleCounterValues: UpdateSingleCounterValues
     private lateinit var appPreferencesRepository: AppPreferencesRepository
+    private lateinit var appLogger: AppLogger
 
     @Before
     fun setUp() {
@@ -42,6 +44,7 @@ class SingleCounterViewModelTest {
         getProject = mockk()
         updateSingleCounterValues = mockk(relaxed = true)
         appPreferencesRepository = mockk()
+        appLogger = mockk(relaxed = true)
         coEvery { appPreferencesRepository.consumeShouldShowCustomAdjustmentTip() } returns false
     }
 
@@ -55,6 +58,7 @@ class SingleCounterViewModelTest {
         getProject = getProject,
         updateSingleCounterValues = updateSingleCounterValues,
         appPreferencesRepository = appPreferencesRepository,
+        appLogger = appLogger,
     )
 
     private fun sampleProject(id: Int = 1) = Project(
