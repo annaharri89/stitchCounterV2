@@ -128,6 +128,7 @@ dependencies {
     
     // Kotlinx Serialization for JSON
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.timber)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     
     testImplementation(libs.junit)
