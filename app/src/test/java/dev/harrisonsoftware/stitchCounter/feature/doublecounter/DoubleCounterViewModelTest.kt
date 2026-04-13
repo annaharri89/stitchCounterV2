@@ -9,7 +9,6 @@ import dev.harrisonsoftware.stitchCounter.domain.model.Project
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.domain.usecase.GetProject
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateDoubleCounterValues
-import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -35,7 +34,6 @@ class DoubleCounterViewModelTest {
     private lateinit var getProject: GetProject
     private lateinit var updateDoubleCounterValues: UpdateDoubleCounterValues
     private lateinit var appPreferencesRepository: AppPreferencesRepository
-    private lateinit var appLogger: AppLogger
 
     @Before
     fun setUp() {
@@ -44,7 +42,6 @@ class DoubleCounterViewModelTest {
         getProject = mockk()
         updateDoubleCounterValues = mockk(relaxed = true)
         appPreferencesRepository = mockk()
-        appLogger = mockk(relaxed = true)
         coEvery { appPreferencesRepository.consumeShouldShowCustomAdjustmentTip() } returns false
     }
 
@@ -58,7 +55,6 @@ class DoubleCounterViewModelTest {
         getProject = getProject,
         updateDoubleCounterValues = updateDoubleCounterValues,
         appPreferencesRepository = appPreferencesRepository,
-        appLogger = appLogger,
     )
 
     private fun sampleProject(id: Int = 1) = Project(

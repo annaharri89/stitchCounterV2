@@ -3,7 +3,6 @@ package dev.harrisonsoftware.stitchCounter.data.backup
 import android.net.Uri
 import dev.harrisonsoftware.stitchCounter.Constants
 import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
-import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileOutputStream
@@ -15,6 +14,7 @@ import java.util.UUID
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
+import timber.log.Timber
 
 private const val BACKUP_JSON_FILE_NAME = "backup.json"
 private const val BACKUP_IMAGES_DIRECTORY_NAME = "images"
@@ -24,7 +24,6 @@ private const val PROJECT_IMAGE_FILE_PREFIX = "project_"
 class BackupManager(
     private val fileSystemProvider: FileSystemProvider,
     private val uriStreamProvider: UriStreamProvider,
-    private val appLogger: AppLogger,
 ) {
     private val json = Json { ignoreUnknownKeys = true }
     
@@ -53,10 +52,7 @@ class BackupManager(
                         destFile.parentFile?.mkdirs()
                         sourceFile.copyTo(destFile, overwrite = true)
                     } else {
-                        appLogger.warn(
-                            tag = Constants.LOG_TAG_BACKUP_MANAGER,
-                            message = "event=export_image_missing path=$relativeImagePath"
-                        )
+                        Timber.tag(Constants.LOG_TAG_BACKUP_MANAGER).w("event=export_image_missing path=$relativeImagePath")
                     }
                 }
             }
@@ -81,11 +77,7 @@ class BackupManager(
             
             BackupZipCreationResult.Success(ContentUri(resultUri.toString()))
         } catch (e: Exception) {
-            appLogger.error(
-                tag = Constants.LOG_TAG_BACKUP_MANAGER,
-                message = "event=create_backup_failed",
-                throwable = e
-            )
+            Timber.tag(Constants.LOG_TAG_BACKUP_MANAGER).e(e, "event=create_backup_failed")
             BackupZipCreationResult.Failure(BackupManagerError.Unexpected(e))
         }
     }
@@ -113,11 +105,7 @@ class BackupManager(
             
             BackupZipExtractionResult.Success(BackupExtraction(backupData, imagesDir, tempDir))
         } catch (e: Exception) {
-            appLogger.error(
-                tag = Constants.LOG_TAG_BACKUP_MANAGER,
-                message = "event=extract_backup_failed",
-                throwable = e
-            )
+            Timber.tag(Constants.LOG_TAG_BACKUP_MANAGER).e(e, "event=extract_backup_failed")
             BackupZipExtractionResult.Failure(BackupManagerError.Unexpected(e))
         }
     }
@@ -136,11 +124,7 @@ class BackupManager(
             
             "$INTERNAL_PROJECT_IMAGES_DIRECTORY_NAME/$fileName"
         } catch (e: Exception) {
-            appLogger.error(
-                tag = Constants.LOG_TAG_BACKUP_MANAGER,
-                message = "event=copy_import_image_failed source=${sourceFile.name}",
-                throwable = e
-            )
+            Timber.tag(Constants.LOG_TAG_BACKUP_MANAGER).e(e, "event=copy_import_image_failed source=${sourceFile.name}")
             null
         }
     }
@@ -149,11 +133,7 @@ class BackupManager(
         try {
             tempDir.deleteRecursively()
         } catch (e: Exception) {
-            appLogger.warn(
-                tag = Constants.LOG_TAG_BACKUP_MANAGER,
-                message = "event=cleanup_temp_directory_failed tempDir=${tempDir.name}",
-                throwable = e
-            )
+            Timber.tag(Constants.LOG_TAG_BACKUP_MANAGER).w(e, "event=cleanup_temp_directory_failed tempDir=${tempDir.name}")
         }
     }
     
@@ -214,18 +194,11 @@ class BackupManager(
             if (canonicalCandidatePath.startsWith(canonicalFilesDirectoryPath)) {
                 candidateFile
             } else {
-                appLogger.warn(
-                    tag = Constants.LOG_TAG_BACKUP_MANAGER,
-                    message = "event=export_image_unsafe_path path=$relativePath"
-                )
+                Timber.tag(Constants.LOG_TAG_BACKUP_MANAGER).w("event=export_image_unsafe_path path=$relativePath")
                 null
             }
         } catch (e: Exception) {
-            appLogger.error(
-                tag = Constants.LOG_TAG_BACKUP_MANAGER,
-                message = "event=resolve_export_image_failed path=$relativePath",
-                throwable = e
-            )
+            Timber.tag(Constants.LOG_TAG_BACKUP_MANAGER).e(e, "event=resolve_export_image_failed path=$relativePath")
             null
         }
     }

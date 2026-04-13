@@ -7,7 +7,6 @@ import dev.harrisonsoftware.stitchCounter.data.backup.BackupZipCreationResult
 import dev.harrisonsoftware.stitchCounter.data.local.ProjectEntity
 import dev.harrisonsoftware.stitchCounter.data.repo.ProjectRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
-import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -23,7 +22,6 @@ class ExportLibraryTest {
 
     private lateinit var projectRepository: ProjectRepository
     private lateinit var backupManager: BackupManager
-    private lateinit var appLogger: AppLogger
     private lateinit var exportLibrary: ExportLibrary
 
     private val appVersion = "2.0.0"
@@ -32,8 +30,7 @@ class ExportLibraryTest {
     fun setUp() {
         projectRepository = mockk()
         backupManager = mockk()
-        appLogger = mockk(relaxed = true)
-        exportLibrary = ExportLibrary(projectRepository, backupManager, appVersion, appLogger)
+        exportLibrary = ExportLibrary(projectRepository, backupManager, appVersion)
     }
 
     private fun sampleEntity(id: Int = 1, title: String = "Scarf") = ProjectEntity(

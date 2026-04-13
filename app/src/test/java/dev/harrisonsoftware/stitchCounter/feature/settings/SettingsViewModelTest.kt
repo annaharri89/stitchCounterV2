@@ -16,7 +16,6 @@ import dev.harrisonsoftware.stitchCounter.domain.usecase.ImportLibraryResult
 import dev.harrisonsoftware.stitchCounter.domain.usecase.ImportResult
 import dev.harrisonsoftware.stitchCounter.feature.theme.LauncherIconManager
 import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeManager
-import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import dev.harrisonsoftware.stitchCounter.logging.BugReportLogPackager
 import dev.harrisonsoftware.stitchCounter.logging.BugReportLogPackagerResult
 import io.mockk.coEvery
@@ -48,7 +47,6 @@ class SettingsViewModelTest {
     private lateinit var exportLibrary: ExportLibrary
     private lateinit var importLibrary: ImportLibrary
     private lateinit var bugReportLogPackager: BugReportLogPackager
-    private lateinit var appLogger: AppLogger
 
     @Before
     fun setUp() {
@@ -59,7 +57,6 @@ class SettingsViewModelTest {
         exportLibrary = mockk()
         importLibrary = mockk()
         bugReportLogPackager = mockk()
-        appLogger = mockk(relaxed = true)
         every { appPreferencesRepository.selectedTheme } returns flowOf(AppTheme.FOREST_FIBER)
         every { themeManager.getThemeColors(any()) } returns emptyList()
     }
@@ -76,7 +73,6 @@ class SettingsViewModelTest {
         exportLibraryUseCase = exportLibrary,
         importLibraryUseCase = importLibrary,
         bugReportLogPackager = bugReportLogPackager,
-        appLogger = appLogger,
     )
 
     @Test

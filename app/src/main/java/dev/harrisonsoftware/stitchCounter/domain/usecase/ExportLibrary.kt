@@ -9,7 +9,6 @@ import dev.harrisonsoftware.stitchCounter.data.backup.BackupProject
 import dev.harrisonsoftware.stitchCounter.data.repo.ProjectRepository
 import dev.harrisonsoftware.stitchCounter.domain.mapper.toDomain
 import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
-import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import dev.harrisonsoftware.stitchCounter.logging.projectDataError
 import dev.harrisonsoftware.stitchCounter.logging.projectDataInfo
 import kotlinx.coroutines.flow.first
@@ -21,11 +20,10 @@ class ExportLibrary @Inject constructor(
     private val projectRepository: ProjectRepository,
     private val backupManager: BackupManager,
     private val appVersion: String,
-    private val appLogger: AppLogger,
 ) {
     suspend operator fun invoke(outputContentUri: ContentUri? = null): ExportLibraryResult {
         return try {
-            appLogger.projectDataInfo("export_start outputUri=${outputContentUri?.value ?: "app_storage"}")
+            projectDataInfo("export_start outputUri=${outputContentUri?.value ?: "app_storage"}")
             val projects = projectRepository.observeProjects().first().map { it.toDomain() }
             
             val backupProjects = projects.map { project ->
@@ -61,18 +59,18 @@ class ExportLibrary @Inject constructor(
             
             when (val backupResult = backupManager.createBackupZip(backupData, outputContentUri)) {
                 is BackupZipCreationResult.Success -> {
-                    appLogger.projectDataInfo("export_done projectCount=${projects.size} outputUri=${backupResult.contentUri.value}")
+                    projectDataInfo("export_done projectCount=${projects.size} outputUri=${backupResult.contentUri.value}")
                     ExportLibraryResult.Success(backupResult.contentUri)
                 }
                 is BackupZipCreationResult.Failure -> {
-                    appLogger.projectDataError("export_failed error=${backupResult.error}")
+                    projectDataError("export_failed error=${backupResult.error}")
                     ExportLibraryResult.Failure(
                         ExportLibraryError.BackupCreationFailed(backupResult.error)
                     )
                 }
             }
         } catch (e: Exception) {
-            appLogger.projectDataError("export_unexpected_error", e)
+            projectDataError("export_unexpected_error", e)
             ExportLibraryResult.Failure(ExportLibraryError.Unexpected(e))
         }
     }

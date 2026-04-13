@@ -11,7 +11,6 @@ import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateProjectDetailResu
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateProjectDetailValues
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpsertProjectResult
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpsertProject
-import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -38,7 +37,6 @@ class ProjectDetailViewModelTest {
     private lateinit var getProject: GetProject
     private lateinit var upsertProject: UpsertProject
     private lateinit var updateProjectDetailValues: UpdateProjectDetailValues
-    private lateinit var appLogger: AppLogger
 
     @Before
     fun setUp() {
@@ -47,7 +45,6 @@ class ProjectDetailViewModelTest {
         getProject = mockk()
         upsertProject = mockk()
         updateProjectDetailValues = mockk()
-        appLogger = mockk(relaxed = true)
         coEvery { upsertProject(any()) } returns UpsertProjectResult.Success(1L)
         coEvery {
             updateProjectDetailValues(
@@ -73,7 +70,6 @@ class ProjectDetailViewModelTest {
         getProject = getProject,
         upsertProject = upsertProject,
         updateProjectDetailValues = updateProjectDetailValues,
-        appLogger = appLogger,
     )
 
     private fun sampleProject(id: Int = 1) = Project(

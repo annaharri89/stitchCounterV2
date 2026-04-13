@@ -5,10 +5,10 @@ import android.content.Context
 import android.content.pm.PackageManager
 import dev.harrisonsoftware.stitchCounter.Constants
 import dev.harrisonsoftware.stitchCounter.domain.model.AppTheme
-import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import timber.log.Timber
 
 /**
  * Manages dynamic switching of launcher icons based on the selected theme.
@@ -17,7 +17,6 @@ import javax.inject.Singleton
 @Singleton
 class LauncherIconManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val appLogger: AppLogger,
 ) {
     private val packageManager: PackageManager = context.packageManager
     private val packageName: String = context.packageName
@@ -43,18 +42,12 @@ class LauncherIconManager @Inject constructor(
 
     fun applyPendingIconChangeIfNeeded() {
         if (consumeShouldSkipNextPendingIconApply()) {
-            appLogger.info(
-                tag = Constants.LOG_TAG_LAUNCHER_ICON_MANAGER,
-                message = "event=apply_pending_skipped reason=skip_next_guard"
-            )
+            Timber.tag(Constants.LOG_TAG_LAUNCHER_ICON_MANAGER).i("event=apply_pending_skipped reason=skip_next_guard")
             return
         }
 
         pendingTheme?.let { theme ->
-            appLogger.info(
-                tag = Constants.LOG_TAG_LAUNCHER_ICON_MANAGER,
-                message = "event=apply_pending_requested theme=${theme.name}"
-            )
+            Timber.tag(Constants.LOG_TAG_LAUNCHER_ICON_MANAGER).i("event=apply_pending_requested theme=${theme.name}")
             updateLauncherIcon(theme)
             pendingTheme = null
         }
@@ -63,19 +56,15 @@ class LauncherIconManager @Inject constructor(
     fun updateLauncherIcon(theme: AppTheme) {
         val targetComponent = themeToComponentName[theme]
             ?: run {
-                appLogger.warn(
-                    tag = Constants.LOG_TAG_LAUNCHER_ICON_MANAGER,
-                    message = "event=update_icon_skipped reason=unknown_theme theme=${theme.name}"
-                )
+                Timber.tag(Constants.LOG_TAG_LAUNCHER_ICON_MANAGER)
+                    .w("event=update_icon_skipped reason=unknown_theme theme=${theme.name}")
                 return
             }
 
         // Avoid unnecessary component toggling when the right launcher alias is already active.
         if (isTargetAliasAlreadyActive(targetComponent)) {
-            appLogger.info(
-                tag = Constants.LOG_TAG_LAUNCHER_ICON_MANAGER,
-                message = "event=update_icon_skipped reason=already_active theme=${theme.name}"
-            )
+            Timber.tag(Constants.LOG_TAG_LAUNCHER_ICON_MANAGER)
+                .i("event=update_icon_skipped reason=already_active theme=${theme.name}")
             return
         }
 
@@ -88,11 +77,8 @@ class LauncherIconManager @Inject constructor(
                     PackageManager.DONT_KILL_APP
                 )
             } catch (e: Exception) {
-                appLogger.warn(
-                    tag = Constants.LOG_TAG_LAUNCHER_ICON_MANAGER,
-                    message = "event=disable_alias_failed component=${componentName.className}",
-                    throwable = e
-                )
+                Timber.tag(Constants.LOG_TAG_LAUNCHER_ICON_MANAGER)
+                    .w(e, "event=disable_alias_failed component=${componentName.className}")
             }
         }
 
@@ -104,11 +90,8 @@ class LauncherIconManager @Inject constructor(
                 PackageManager.DONT_KILL_APP
             )
         } catch (e: Exception) {
-            appLogger.error(
-                tag = Constants.LOG_TAG_LAUNCHER_ICON_MANAGER,
-                message = "event=enable_alias_failed component=${targetComponent.className}",
-                throwable = e
-            )
+            Timber.tag(Constants.LOG_TAG_LAUNCHER_ICON_MANAGER)
+                .e(e, "event=enable_alias_failed component=${targetComponent.className}")
         }
     }
 
