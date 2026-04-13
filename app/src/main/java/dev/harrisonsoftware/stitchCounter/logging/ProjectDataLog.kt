@@ -1,19 +1,28 @@
 package dev.harrisonsoftware.stitchCounter.logging
 
 import dev.harrisonsoftware.stitchCounter.Constants
+import timber.log.Timber
 
-fun AppLogger.projectDataDebug(message: String) {
-    debug(Constants.LOG_TAG_PROJECT_DATA, message)
+fun projectDataDebug(message: String) {
+    Timber.tag(Constants.LOG_TAG_PROJECT_DATA).d(message)
 }
 
-fun AppLogger.projectDataInfo(message: String) {
-    info(Constants.LOG_TAG_PROJECT_DATA, message)
+fun projectDataInfo(message: String) {
+    Timber.tag(Constants.LOG_TAG_PROJECT_DATA).i(message)
 }
 
-fun AppLogger.projectDataWarn(message: String, throwable: Throwable? = null) {
-    warn(Constants.LOG_TAG_PROJECT_DATA, message, throwable)
+fun projectDataWarn(message: String, throwable: Throwable? = null) {
+    if (throwable == null) {
+        Timber.tag(Constants.LOG_TAG_PROJECT_DATA).w(message)
+    } else {
+        Timber.tag(Constants.LOG_TAG_PROJECT_DATA).w(throwable, message)
+    }
 }
 
-fun AppLogger.projectDataError(message: String, throwable: Throwable? = null) {
-    error(Constants.LOG_TAG_PROJECT_DATA, message, throwable)
+fun projectDataError(message: String, throwable: Throwable? = null) {
+    if (throwable == null) {
+        Timber.tag(Constants.LOG_TAG_PROJECT_DATA).e(message)
+    } else {
+        Timber.tag(Constants.LOG_TAG_PROJECT_DATA).e(throwable, message)
+    }
 }

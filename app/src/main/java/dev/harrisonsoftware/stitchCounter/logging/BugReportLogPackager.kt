@@ -3,6 +3,7 @@ package dev.harrisonsoftware.stitchCounter.logging
 import android.os.Build
 import dev.harrisonsoftware.stitchCounter.data.backup.FileSystemProvider
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
@@ -71,7 +72,7 @@ sealed interface BugReportLogPackagerResult {
 
 @Singleton
 class BugReportLogPackager @Inject constructor(
-    private val fileLogSink: FileLogSink,
+    private val fileLogTree: TimberFileLogTree,
     private val fileSystemProvider: FileSystemProvider,
     private val deviceMetadataProvider: DeviceMetadataProvider,
 ) {
@@ -79,9 +80,11 @@ class BugReportLogPackager @Inject constructor(
         retentionCurrentDate: LocalDate = LocalDate.now(ZoneOffset.UTC)
     ): BugReportLogPackagerResult = withContext(Dispatchers.IO) {
         runCatching {
-            fileLogSink.flushAndWait()
-            fileLogSink.runRetention(currentDate = retentionCurrentDate)
-            val logDirectory = fileLogSink.resolveLogDirectory()
+            withContext(NonCancellable) {
+                fileLogTree.flushAndSyncForPackaging()
+                fileLogTree.runRetention(currentDate = retentionCurrentDate)
+            }
+            val logDirectory = fileLogTree.resolveLogDirectory()
             val logFiles = logDirectory.listFiles()
                 ?.filter { it.isFile && it.extension == "log" }
                 ?.sortedBy { it.name }
