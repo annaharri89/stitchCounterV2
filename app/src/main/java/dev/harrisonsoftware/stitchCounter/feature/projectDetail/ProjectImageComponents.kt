@@ -8,11 +8,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -145,7 +144,7 @@ private fun ProjectImageThumbnail(
             error = ColorPainter(errorColor),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp)
+                .aspectRatio(1f)
                 .clip(RoundedCornerShape(12.dp))
                 .clickable(
                     role = Role.Image,
@@ -201,7 +200,8 @@ private fun ProjectImagePlaceholder(
                     Modifier
                 }
             )
-            .height(120.dp)
+            .fillMaxWidth()
+            .aspectRatio(2.5f)
             .clip(RoundedCornerShape(12.dp))
             .background(
                 if (isAtMax) {
@@ -245,7 +245,7 @@ private fun AddPhotoButton(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(120.dp)
+            .aspectRatio(1f)
             .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f))
             .clickable(role = Role.Button) { onImageClick() },
