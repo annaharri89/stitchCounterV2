@@ -21,4 +21,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Stitch Counter V3"
 include(":app")
- 

@@ -3,7 +3,6 @@ package dev.harrisonsoftware.stitchCounter.feature.settings
 import android.content.Intent
 import android.content.ClipData
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -31,6 +30,7 @@ import androidx.core.net.toUri
 import androidx.core.content.FileProvider
 import dev.harrisonsoftware.stitchCounter.Constants
 import java.io.File
+import timber.log.Timber
 
 @RootNavGraph
 @Destination
@@ -290,7 +290,7 @@ internal fun launchExternalActivitySafely(context: android.content.Context, inte
             onSuccess = { true },
             onFailure = { throwable ->
                 runCatching {
-                    Log.w(Constants.LOG_TAG_SETTINGS_SCREEN, "Failed to launch external activity", throwable)
+                    Timber.tag(Constants.LOG_TAG_SETTINGS_SCREEN).w(throwable, "Failed to launch external activity")
                 }
                 false
             }
@@ -329,7 +329,7 @@ private fun launchBugReportWithAttachment(
         launchExternalActivitySafely(context, chooserIntent)
     }.getOrElse { throwable ->
         runCatching {
-            Log.w(Constants.LOG_TAG_SETTINGS_SCREEN, "Failed to launch bug report with attachment", throwable)
+            Timber.tag(Constants.LOG_TAG_SETTINGS_SCREEN).w(throwable, "Failed to launch bug report with attachment")
         }
         false
     }

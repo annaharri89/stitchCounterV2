@@ -11,7 +11,7 @@ object Constants {
     const val LOG_TAG_DOUBLE_COUNTER_VIEW_MODEL = "DoubleCounterViewModel"
     const val LOG_TAG_LIBRARY_VIEW_MODEL = "LibraryViewModel"
     const val LOG_TAG_LAUNCHER_ICON_MANAGER = "LauncherIconManager"
-    const val LOG_TAG_FILE_LOG_SINK = "SCFileLogSink"
+    const val LOG_TAG_TIMBER_FILE_LOG_TREE = "SCTimberFileLogTree"
     const val LOG_TAG_IMAGE_SAVE = "ImageSave"
     const val PRIVACY_POLICY_URL = "https://harrisonsoftware.dev/stitch-counter-v2/privacy-policy"
     const val EULA_URL = "https://harrisonsoftware.dev/stitch-counter-v2/eula"

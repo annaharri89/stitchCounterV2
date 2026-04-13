@@ -7,7 +7,6 @@ import dev.harrisonsoftware.stitchCounter.data.backup.AndroidUriStreamProvider
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupManager
 import dev.harrisonsoftware.stitchCounter.data.backup.FileSystemProvider
 import dev.harrisonsoftware.stitchCounter.data.backup.UriStreamProvider
-import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,8 +33,7 @@ object BackupModule {
     fun provideBackupManager(
         fileSystemProvider: FileSystemProvider,
         uriStreamProvider: UriStreamProvider,
-        appLogger: AppLogger,
-    ): BackupManager = BackupManager(fileSystemProvider, uriStreamProvider, appLogger)
+    ): BackupManager = BackupManager(fileSystemProvider, uriStreamProvider)
     
     @Provides
     @Singleton

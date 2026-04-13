@@ -5,7 +5,6 @@ import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.domain.usecase.DeleteProject
 import dev.harrisonsoftware.stitchCounter.domain.usecase.DeleteProjects
 import dev.harrisonsoftware.stitchCounter.domain.usecase.ObserveProjects
-import dev.harrisonsoftware.stitchCounter.logging.AppLogger
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -32,7 +31,6 @@ class LibraryViewModelTest {
     private lateinit var observeProjects: ObserveProjects
     private lateinit var deleteProject: DeleteProject
     private lateinit var deleteProjects: DeleteProjects
-    private lateinit var appLogger: AppLogger
 
     private val sampleProjects = listOf(
         Project(id = 1, type = ProjectType.SINGLE, title = "Scarf", createdAt = 1L, updatedAt = 1L),
@@ -46,7 +44,6 @@ class LibraryViewModelTest {
         observeProjects = mockk()
         deleteProject = mockk(relaxed = true)
         deleteProjects = mockk(relaxed = true)
-        appLogger = mockk(relaxed = true)
         every { observeProjects() } returns flowOf(sampleProjects)
     }
 
@@ -59,7 +56,6 @@ class LibraryViewModelTest {
         observeProjects = observeProjects,
         deleteProject = deleteProject,
         deleteProjects = deleteProjects,
-        appLogger = appLogger,
     )
 
     @Test
