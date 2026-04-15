@@ -65,7 +65,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: dev.harrisonsoftware.stitchCounter
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
-          tracks: internal
+          track: internal
 
       - name: Commit version bump and push
         env:
