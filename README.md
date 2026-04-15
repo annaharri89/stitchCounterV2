@@ -6,11 +6,11 @@ A modern Android app for counting stitches and rows, with multiple themes, a pro
 
 | | |
 | --- | --- |
-| Counter | <img src="docs/readme/counter.jpg" alt="Counter" width="320" /> |
-| Project library (light) | <img src="docs/readme/library-light.jpg" alt="Project library (light)" width="320" /> |
-| Project library (dark) | <img src="docs/readme/library-dark.jpg" alt="Project library (dark)" width="320" /> |
-| Theme settings | <img src="docs/readme/theme-settings.png" alt="Theme settings" width="320" /> |
-| Backup & restore | <img src="docs/readme/backup-restore.jpg" alt="Backup and restore" width="320" /> |
+| Counter | <img src="docs/readme/counter.jpg" alt="Counter" width="220" /> |
+| Project library (light) | <img src="docs/readme/library-light.jpg" alt="Project library (light)" width="220" /> |
+| Project library (dark) | <img src="docs/readme/library-dark.jpg" alt="Project library (dark)" width="220" /> |
+| Theme settings | <img src="docs/readme/theme-settings.png" alt="Theme settings" width="220" /> |
+| Backup & restore | <img src="docs/readme/backup-restore.jpg" alt="Backup and restore" width="220" /> |
 
 ## Tech stack
 
@@ -28,22 +28,10 @@ A modern Android app for counting stitches and rows, with multiple themes, a pro
 
 ## Requirements & how to run
 
-- **Android Studio** Koala Feature Drop 2024.1.2 or newer (or another environment with **JDK 17** and Android SDK **36** / build-tools compatible with `compileSdk 36`).
-- Clone the repo, open the **project root** in Android Studio, let Gradle sync finish, then run the **`app`** configuration on a device or emulator (**API 24+**).
-
-**Command line (debug build):**
-
-```bash
-./gradlew :app:assembleDebug
-```
-
-**Unit tests (same task CI uses for JVM tests):**
-
-```bash
-./gradlew :app:testDebugUnitTest
-```
-
-Release signing is optional for local exploration; see **Release: Signed Play Store AAB** below if you are cutting a store build.
+- Use Android Studio Koala Feature Drop 2024.1.2+ (or any setup with JDK 17 and Android SDK 36).
+- Open the project root, wait for Gradle sync, then run the `app` configuration on API 24+.
+- CLI debug build: `./gradlew :app:assembleDebug`
+- CLI unit tests: `./gradlew :app:testDebugUnitTest`
 
 ## Project layout (high level)
 
@@ -61,16 +49,16 @@ stitchCounter/
 └── StitchCounterApp.kt
 ```
 
-**Data flow (short):** UI in `feature/*` talks to ViewModels; persistence goes through repositories into Room; import/export and zip backup go through `data/backup` and domain use cases. Theme and launcher icon updates are coordinated from `feature/theme`.
+**Data flow (short):** UI in `feature/*` talks to ViewModels. Persistence flows through repositories into Room. Import/export and zip backup run through `data/backup` and domain use cases. Theme and launcher icon updates are coordinated from `feature/theme`.
 
 ## Features
 
 - Single and double counter project modes for stitches and/or rows
 - Library of saved projects with Room
-- Six customizable Material 3 color themes plus light/dark; theme choice persists in DataStore and can update the launcher icon
+- Six Material 3 color themes with light/dark mode; selection is saved in DataStore and can update the launcher icon
 - Responsive Compose layouts for phones and tablets, portrait and landscape
-- Up to **6** photos per project: compressed JPEGs live in app-internal storage (`project_images`); Room stores relative paths; Coil loads from those files
-- Backup and restore export a **zip** containing `backup.json` (project metadata and image path entries) **plus copies of each JPEG** under an `images/` tree—import extracts the zip, writes photos back into internal storage, and loads the library—offline device migration with no cloud account
+- Up to **6** photos per project; images are compressed JPEGs in app-internal storage and loaded with Coil
+- Backups are zip files with metadata + images, so projects can move between devices without cloud sync
 - No in-app analytics; personal data stays on device (see in-app privacy policy URL in `Constants.kt`)
 
 ## Engineering guardrails
