@@ -4,15 +4,13 @@ A modern Android app for counting stitches and rows, with multiple themes, a pro
 
 ## Screenshots
 
-Files live in `docs/readme/` (paths below match the repo).
-
 | | |
 | --- | --- |
-| Counter | ![Counter](docs/readme/counter.jpg) |
-| Project library (light) | ![Project library — light](docs/readme/library-light.jpg) |
-| Project library (dark) | ![Project library — dark](docs/readme/library-dark.jpg) |
-| Theme settings | ![Theme settings](docs/readme/theme-settings.png) |
-| Backup & restore | ![Backup and restore](docs/readme/backup-restore.jpg) |
+| Counter | <img src="docs/readme/counter.jpg" alt="Counter" width="320" /> |
+| Project library (light) | <img src="docs/readme/library-light.jpg" alt="Project library (light)" width="320" /> |
+| Project library (dark) | <img src="docs/readme/library-dark.jpg" alt="Project library (dark)" width="320" /> |
+| Theme settings | <img src="docs/readme/theme-settings.png" alt="Theme settings" width="320" /> |
+| Backup & restore | <img src="docs/readme/backup-restore.jpg" alt="Backup and restore" width="320" /> |
 
 ## Tech stack
 
