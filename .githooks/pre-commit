@@ -9,7 +9,7 @@ fi
 
 should_run_tests="false"
 while IFS= read -r file_path; do
-  if [[ "$file_path" =~ ^app/src/main/.*\.kt$ ]] || [[ "$file_path" =~ ^app/src/test/ ]]; then
+  if [[ "$file_path" =~ ^app/src/main/.*\.kt$ ]] || [[ "$file_path" =~ ^app/src/test/ ]] || [[ "$file_path" =~ ^app/src/androidTest/.*\.kt$ ]]; then
     should_run_tests="true"
     break
   fi

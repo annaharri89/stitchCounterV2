@@ -1,3 +1,4 @@
+import java.awt.Desktop
 import java.util.Properties
 import org.gradle.api.GradleException
 
@@ -162,7 +163,8 @@ tasks.configureEach {
 
 tasks.register("buildPlayReleaseAab") {
     group = "release"
-    description = "Runs release unit tests, builds the signed Play Store AAB, and opens the output folder in Finder."
+    description =
+        "Runs release unit tests, builds the signed Play Store AAB, and opens the output folder when a graphical desktop is available."
     dependsOn("bundleRelease")
     doFirst {
         logger.lifecycle(
@@ -170,8 +172,23 @@ tasks.register("buildPlayReleaseAab") {
         )
     }
     doLast {
-        exec {
-            commandLine("open", "$projectDir/build/outputs/bundle/release")
+        val releaseBundleDir = file("$projectDir/build/outputs/bundle/release")
+        val absolutePath = releaseBundleDir.absolutePath
+        logger.lifecycle("[SCBuildReleaseAab] Output folder: $absolutePath")
+
+        if (!Desktop.isDesktopSupported()) {
+            return@doLast
+        }
+        val desktop = Desktop.getDesktop()
+        if (!desktop.isSupported(Desktop.Action.OPEN)) {
+            return@doLast
+        }
+        runCatching {
+            desktop.open(releaseBundleDir)
+        }.onFailure { throwable ->
+            logger.lifecycle(
+                "[SCBuildReleaseAab] Could not open folder in a file manager: ${throwable.message}"
+            )
         }
     }
 }

@@ -1,39 +1,139 @@
-# Stitch Counter
+# Stitch Counter (Android)
 
-A modern Android app for counting stitches with support for multiple themes and color schemes. This is rewritten from an older [Stitch Counter](https://github.com/annaharri89/stitchCounter) project I previously created.
+Solo-built Android app for tracking knitting and crochet projects. It supports single and double counters, project photo history, theme customization, and offline backup/restore.
+
+This repo is a rewrite of the older [Stitch Counter](https://github.com/annaharri89/stitchCounter) project.
+
+## Project highlights
+
+- **Engineering focus:** CI/CD, Jetpack Compose, Room/DataStore, Hilt, unit testing
+- **MVVM + repository flow:** UI in `feature/*` talks to ViewModels. Persistence flows through repositories into Room. Import/export and zip backup run through `data/backup` and domain use cases. Theme and launcher icon updates are coordinated from `feature/theme`.
+
+### Success Metrics
+
+- **Early usage signal:** 50+ users in Google Play internal testing
+- **Stability signal:** 0 reported crashes so far (early release stage)
+- **Quality signal:** 214 JVM unit tests (`app/src/test`)
+
+#### Backup and restore reliability
+- Backups complete without errors in real use
+- Restore recreates project data correctly
+- Photos remain preserved and readable after restore
+- Works across app restarts, devices, and app versions
+- Verified between iOS and Android devices
+- Import/export pipeline is covered by unit tests (`ImportLibraryTest`, `ExportLibraryTest`)
+
+
+## Live links
+
+- Play open testing: [Stitch Counter testing track](https://play.google.com/apps/testing/dev.harrisonsoftware.stitchCounter)
+- LinkedIn: [Anna Harrison](https://www.linkedin.com/in/anna-harrison-83a38628/)
+- Portfolio: [harrisonsoftware.dev](https://harrisonsoftware.dev)
+- Contact: [harrisonsoftware.dev/contact](https://harrisonsoftware.dev/contact)
+
+## Screenshots
+
+| | |
+| --- | --- |
+| Counter | <img src="docs/readme/counter.jpg" alt="Counter" width="220" /> |
+| Project library (light) | <img src="docs/readme/library-light.jpg" alt="Project library (light)" width="220" /> |
+| Project library (dark) | <img src="docs/readme/library-dark.jpg" alt="Project library (dark)" width="220" /> |
+| Theme settings | <img src="docs/readme/theme-settings.png" alt="Theme settings" width="220" /> |
+| Backup & restore | <img src="docs/readme/backup-restore.jpg" alt="Backup and restore" width="220" /> |
+
+## Key engineering decisions
+
+- **Compose + Material 3:** UI built with modern Android patterns and responsive layouts for phone/tablet and portrait/landscape.
+- **Room + DataStore:** Structured project persistence in Room, lightweight preference storage in DataStore.
+- **Offline-first backup:** Projects can be exported to zip with metadata and images, then restored on another device without cloud services.
+- **Hilt + feature separation:** Dependencies are injected with Hilt and features are separated by domain area for maintainability.
+
+## Tech stack
+
+| Area | Choices |
+| --- | --- |
+| Language | Kotlin |
+| UI | Jetpack Compose, Material 3 |
+| Min / compile / target SDK | 24 / 36 / 36 |
+| DI | Hilt |
+| Navigation | Compose Destinations, Navigation-Compose |
+| Local data | Room (SQLite), DataStore Preferences |
+| Images | Coil; JPEG compress + max dimension in `ImageStorageUtils` |
+| Serialization | Kotlinx Serialization (backup/metadata) |
+| Tooling | KSP, Compose compiler plugin, AGP 8.9.x, Kotlin 2.0.x (see `gradle/libs.versions.toml`) |
 
 ## Features
 
-- Single and Double counter project modes for tracking stitches and/or rows
-- Library system to save counters and return to them later using Room, an abstraction layer over SQLite, for the database.
-- Three different customizable color themes using Material3 and DataStore to save the theme selection. The theme selection changes the app icon. Light and Dark mode also supported.
-- Responsive design for all device sizes using Jetpack Compose. Optimized for portrait and landscape orientations.
-- The user can add up to 6 photos to each project. Photos are compressed and saved in app-managed internal storage (`project_images`), and relative file paths are stored in Room. Images are loaded with Coil from these resolved local paths.
-- Import/Export Library creates and restores an offline backup that includes both project data and project photos, so local-only data can be transferred to a new device.
-- No account, login, or cloud service is required to use backup and transfer features.
-- Stitch Counter does not collect analytics, tracking data, or personal information. All data is stored locally on the user’s device.
+- Single and double counter project modes for stitches and/or rows
+- Library of saved projects with Room
+- Six Material 3 color themes with light/dark mode; selection is saved in DataStore and can update the launcher icon
+- Responsive Compose layouts for phones and tablets, portrait and landscape
+- Up to **6** photos per project; images are compressed JPEGs in app-internal storage and loaded with Coil
+- Backups are zip files with metadata + images, so projects can move between devices without cloud sync
+- No in-app analytics; personal data stays on device (see in-app privacy policy URL in `Constants.kt`)
 
-## Engineering Guardrails
+## Requirements & how to run
 
-- CI runs `:app:testDebugUnitTest` and fails if Kotlin source in `app/src/main` changes without corresponding changes in `app/src/test`.
-- Install local Git hooks with:
-  - `bash scripts/install-git-hooks.sh`
-- The pre-commit hook runs `:app:testDebugUnitTest` when staged changes include Kotlin production or test files.
+- Use Android Studio Koala Feature Drop 2024.1.2+ (or any setup with JDK 17 and Android SDK 36)
+- Open the project root, wait for Gradle sync, then run the `app` configuration on API 24+
+- CLI debug build: `./gradlew :app:assembleDebug`
+- CLI unit tests: `./gradlew :app:testDebugUnitTest`
 
-## Release: Signed Play Store AAB
+## Project layout (high level)
 
-This project is configured to build signed release AABs with an upload key from `keystore.properties`.
+Kotlin sources live under `app/src/main/java/dev/harrisonsoftware/stitchCounter/`.
+
+```
+stitchCounter/
+├── feature/           # UI: library, single/double counter, project detail, settings, stats, support, navigation shell
+├── data/              # Room (`ProjectDao`, entities, migrations), backup zip pipeline, repository implementations
+├── domain/            # Models, validation, import/export use cases
+├── di/                # Hilt modules (database, backup, etc.)
+├── ui/theme/          # Material 3 theme, typography, colors
+├── logging/           # File + logcat sinks, retention, bug-report packaging
+├── MainActivity.kt
+└── StitchCounterApp.kt
+```
+
+## Engineering guardrails
+
+- CI runs `:app:testDebugUnitTest`
+- Install local Git hooks:
+
+  ```bash
+  bash scripts/install-git-hooks.sh
+  ```
+
+- The pre-commit hook runs `:app:testDebugUnitTest` when staged changes touch Kotlin under `app/src/main/`, `app/src/test/`, or `app/src/androidTest/` (JVM unit tests only; instrumentation tests are not run in the hook)
+
+# Release guide
+
+## Signed Play Store AAB
 
 1. Create `keystore.properties` in the project root:
    - `storeFile=/absolute/path/to/upload-keystore.jks`
    - `storePassword=YOUR_STORE_PASSWORD`
    - `keyAlias=upload`
    - `keyPassword=YOUR_KEY_PASSWORD`
-1. Build the signed AAB:
-   - Android Studio Gradle task: `:app:buildPlayReleaseAab`
-   - CLI equivalent: `./gradlew :app:buildPlayReleaseAab`
+2. Build the signed AAB:
+   - Android Studio task: `:app:buildPlayReleaseAab`
+   - CLI: `./gradlew :app:buildPlayReleaseAab`
 
-Notes:
-- `buildPlayReleaseAab` runs release unit tests before packaging by way of the `bundleRelease` task dependency chain.
-- On success, it opens the output folder in Finder.
-- AAB output path: `app/build/outputs/bundle/release/app-release.aab`.
+- `buildPlayReleaseAab` runs release unit tests before packaging
+- AAB output path: `app/build/outputs/bundle/release/app-release.aab`
+
+## Release automation (GitHub Actions)
+
+Workflow: [`.github/workflows/play-internal-cd.yml`](.github/workflows/play-internal-cd.yml)
+
+- **Push to `main`:** After [**CI**](.github/workflows/ci.yml) passes for a push to `main`, Play internal CD bumps version, builds `:app:bundleRelease`, uploads to Play internal, and commits updated `gradle/version.properties` with `[skip ci]`
+- **Manual run:** GitHub -> Actions -> **Play internal CD** -> **Run workflow**
+- If the version-bump push is blocked, allow GitHub Actions (or a scoped token) to push to `main`
+
+Workflow secrets:
+
+- `PLAY_SERVICE_ACCOUNT_JSON` - Google Play Developer API service account JSON (invited in Play Console for this app)
+- `RELEASE_KEYSTORE_BASE64` - Base64 of the upload keystore `.jks` used locally
+- `RELEASE_KEYSTORE_PASSWORD` - Keystore `storePassword` (matches `keystore.properties`)
+- `RELEASE_KEY_PASSWORD` - Signing `keyPassword` (matches `keystore.properties`)
+- `RELEASE_KEY_ALIAS` - Signing `keyAlias` (matches `keystore.properties`)
