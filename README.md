@@ -110,7 +110,7 @@ Workflow: [`.github/workflows/play-internal-cd.yml`](.github/workflows/play-inte
 - **Push to `main`:** When the [**CI**](.github/workflows/ci.yml) workflow completes successfully for a **`push`** to **`main`** (not pull requests), **Play internal CD** checks out that exact commit, runs [`scripts/bump-version-properties.sh`](scripts/bump-version-properties.sh) (increments `VERSION_CODE` and updates `VERSION_NAME` so every Play upload has a new `versionCode`), builds `./gradlew :app:bundleRelease`, uploads `app-release.aab` to the Play **internal** track, then commits `gradle/version.properties` and pushes to `main` with **`[skip ci]`** so that commit does not start another CI/CD cycle.
 - **Manual:** GitHub → Actions → **Play internal CD** → **Run workflow** — same bump, build, upload, and version commit (use when you want an internal drop without waiting on the push rule above).
 
-**Branch protection:** If the version-bump push is rejected, allow **GitHub Actions** to update `main` (for example a ruleset bypass for the default `GITHUB_TOKEN`), or use a fine-scoped PAT stored as a secret and wire the checkout/push steps to use it.
+**Branch protection:** If the version-bump push is rejected, allow **GitHub Actions** to update `main` (for example a ruleset bypass for the default `GITHUB_TOKEN`), or use a fine-scoped personal access token stored as a secret and wire the checkout/push steps to use it.
 
 **Secrets (repository):** These are the **secret names** GitHub Actions expects (see the workflow file); only the **values** live in GitHub Secrets—never commit keystores or passwords.
 
