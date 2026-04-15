@@ -91,19 +91,34 @@ Notes:
 - On success, it logs the bundle output folder and tries to open it with the JVM `Desktop` API when a graphical desktop is available; on WSL, headless CI, or unsupported setups it only prints the path, which is enough to locate the AAB.
 - AAB output path: `app/build/outputs/bundle/release/app-release.aab`.
 
-### Release automation (GitHub Actions)
+# Release Guide
 
-Workflow: [`.github/workflows/play-internal-cd.yml`](.github/workflows/play-internal-cd.yml).
+## Signed Play Store AAB
 
-- **Push to `main`:** When the [**CI**](.github/workflows/ci.yml) workflow completes successfully for a **`push`** to **`main`** (not pull requests), **Play internal CD** checks out that exact commit, runs [`scripts/bump-version-properties.sh`](scripts/bump-version-properties.sh) (increments `VERSION_CODE` and updates `VERSION_NAME` so every Play upload has a new `versionCode`), builds `./gradlew :app:bundleRelease`, uploads `app-release.aab` to the Play **internal** track, then commits `gradle/version.properties` and pushes to `main` with **`[skip ci]`** so that commit does not start another CI/CD cycle.
-- **Manual:** GitHub → Actions → **Play internal CD** → **Run workflow** — same bump, build, upload, and version commit (use when you want an internal drop without waiting on the push rule above).
+1. Create `keystore.properties` in the project root:
+   - `storeFile=/absolute/path/to/upload-keystore.jks`
+   - `storePassword=YOUR_STORE_PASSWORD`
+   - `keyAlias=upload`
+   - `keyPassword=YOUR_KEY_PASSWORD`
+2. Build the signed AAB:
+   - Android Studio task: `:app:buildPlayReleaseAab`
+   - CLI: `./gradlew :app:buildPlayReleaseAab`
 
-**Branch protection:** If the version-bump push is rejected, allow **GitHub Actions** to update `main` (for example a ruleset bypass for the default `GITHUB_TOKEN`), or use a fine-scoped personal access token stored as a secret and wire the checkout/push steps to use it.
+- `buildPlayReleaseAab` runs release unit tests before packaging.
+- AAB output path: `app/build/outputs/bundle/release/app-release.aab`.
 
-**Secrets (repository):** These are the **secret names** GitHub Actions expects (see the workflow file); only the **values** live in GitHub Secrets—never commit keystores or passwords.
+## Release automation (GitHub Actions)
 
-- `PLAY_SERVICE_ACCOUNT_JSON` — Google Play Developer API service account JSON (invited in Play Console for this app).
-- `RELEASE_KEYSTORE_BASE64` — Base64 of the same upload keystore `.jks` you use locally.
-- `RELEASE_KEYSTORE_PASSWORD` — Keystore `storePassword` (matches `keystore.properties`).
-- `RELEASE_KEY_PASSWORD` — Signing `keyPassword` (matches `keystore.properties`).
-- `RELEASE_KEY_ALIAS` — Signing `keyAlias` (matches `keystore.properties`).
+Workflow: [`.github/workflows/play-internal-cd.yml`](../.github/workflows/play-internal-cd.yml)
+
+- **Push to `main`:** After [**CI**](../.github/workflows/ci.yml) passes for a push to `main`, Play internal CD bumps version, builds `:app:bundleRelease`, uploads to Play internal, and commits updated `gradle/version.properties` with `[skip ci]`.
+- **Manual run:** GitHub -> Actions -> **Play internal CD** -> **Run workflow**.
+- If the version-bump push is blocked, allow GitHub Actions (or a scoped token) to push to `main`.
+
+Workflow secrets:
+
+- `PLAY_SERVICE_ACCOUNT_JSON` - Google Play Developer API service account JSON (invited in Play Console for this app)
+- `RELEASE_KEYSTORE_BASE64` - Base64 of the upload keystore `.jks` used locally
+- `RELEASE_KEYSTORE_PASSWORD` - Keystore `storePassword` (matches `keystore.properties`)
+- `RELEASE_KEY_PASSWORD` - Signing `keyPassword` (matches `keystore.properties`)
+- `RELEASE_KEY_ALIAS` - Signing `keyAlias` (matches `keystore.properties`)
