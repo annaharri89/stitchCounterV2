@@ -72,25 +72,6 @@ stitchCounter/
 
 - The pre-commit hook runs `:app:testDebugUnitTest` when staged changes touch Kotlin under `app/src/main/`, `app/src/test/`, or `app/src/androidTest/` (JVM unit tests only; instrumentation tests are not run in the hook).
 
-## Release: Signed Play Store AAB
-
-This project is configured to build signed release AABs with an upload key from `keystore.properties`.
-
-1. Create `keystore.properties` in the project root:
-   - `storeFile=/absolute/path/to/upload-keystore.jks`
-   - `storePassword=YOUR_STORE_PASSWORD`
-   - `keyAlias=upload`
-   - `keyPassword=YOUR_KEY_PASSWORD`
-2. Build the signed AAB:
-   - Android Studio Gradle task: `:app:buildPlayReleaseAab`
-   - CLI equivalent: `./gradlew :app:buildPlayReleaseAab`
-
-Notes:
-
-- `buildPlayReleaseAab` runs release unit tests before packaging by way of the `bundleRelease` task dependency chain.
-- On success, it logs the bundle output folder and tries to open it with the JVM `Desktop` API when a graphical desktop is available; on WSL, headless CI, or unsupported setups it only prints the path, which is enough to locate the AAB.
-- AAB output path: `app/build/outputs/bundle/release/app-release.aab`.
-
 # Release Guide
 
 ## Signed Play Store AAB
