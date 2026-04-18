@@ -11,6 +11,8 @@ jobs:
   unit-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
@@ -25,5 +27,50 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Run debug unit tests
-        run: ./gradlew :app:testDebugUnitTest
+      - name: Run debug unit tests with coverage
+        run: ./gradlew :app:koverXmlReportDebug
+
+      - name: Publish coverage summary
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          import os
+
+          report_path = Path("app/build/reports/kover/reportDebug.xml")
+          if not report_path.exists():
+              candidates = sorted(Path("app/build/reports/kover").rglob("*.xml"))
+              if not candidates:
+                  raise FileNotFoundError("No Kover XML coverage report found under app/build/reports/kover")
+              report_path = candidates[0]
+
+          root = ET.parse(report_path).getroot()
+          line_counter = root.find("./counter[@type='LINE']")
+          if line_counter is None:
+              raise RuntimeError("Could not find LINE counter in Kover XML report")
+
+          covered = int(line_counter.attrib["covered"])
+          missed = int(line_counter.attrib["missed"])
+          total = covered + missed
+          percent = (covered / total * 100.0) if total else 0.0
+          rounded = f"{percent:.2f}"
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output_file:
+              output_file.write(f"line_coverage_percent={rounded}\n")
+              output_file.write(f"coverage_report_path={report_path}\n")
+
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary_file:
+              summary_file.write("## JVM unit test coverage\n")
+              summary_file.write(f"- Line coverage: **{rounded}%**\n")
+              summary_file.write(f"- Covered lines: {covered}\n")
+              summary_file.write(f"- Missed lines: {missed}\n")
+              summary_file.write(f"- Report: `{report_path}`\n")
+          PY
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: app/build/reports/kover/reportDebug.xml
+          fail_ci_if_error: false
+          verbose: true

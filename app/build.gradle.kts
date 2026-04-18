@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlinx.kover)
 }
 
 val versionProps = Properties().apply {
@@ -146,6 +147,48 @@ dependencies {
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+kover {
+    reports {
+        filters {
+            excludes {
+                classes(
+                    "*.R",
+                    "*.R$*",
+                    "*.BuildConfig",
+                    "*.Manifest*",
+                    "*_Factory*",
+                    "*_Provide*Factory*",
+                    "*_MembersInjector*",
+                    "*_HiltModules*",
+                    "*_HiltComponents*",
+                    "*_Impl*",
+                    "*ComposableSingletons*",
+                    "*\$*",
+                    "*Hilt_*",
+                    "*MainActivity*",
+                    "*Destination*",
+                    "*ScreenKt",
+                    "*LayoutKt",
+                    "*ComponentsKt",
+                    "*BottomSheetKt",
+                    "dev.harrisonsoftware.stitchCounter.ui.theme.*",
+                    "dev.harrisonsoftware.stitchCounter.feature.*.*ScreenKt",
+                    "dev.harrisonsoftware.stitchCounter.feature.*.*LayoutKt",
+                    "dev.harrisonsoftware.stitchCounter.feature.sharedComposables.*"
+                )
+            }
+        }
+        variant("debug") {
+            xml {
+                onCheck = true
+            }
+            html {
+                onCheck = true
+            }
+        }
+    }
 }
 
 tasks.configureEach {
