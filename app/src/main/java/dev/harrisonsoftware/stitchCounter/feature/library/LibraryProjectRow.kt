@@ -186,6 +186,8 @@ internal fun resolveProjectRowTapAction(
     }
 }
 
+internal fun longClickEntersMultiSelectMode(isMultiSelectMode: Boolean): Boolean = !isMultiSelectMode
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ProjectRow(
@@ -213,7 +215,7 @@ fun ProjectRow(
                     }
                 },
                 onLongClick = {
-                    if (!isMultiSelectMode) {
+                    if (longClickEntersMultiSelectMode(isMultiSelectMode)) {
                         onToggleMultiSelect()
                         onSelect()
                     }
