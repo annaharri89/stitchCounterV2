@@ -28,9 +28,13 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Run debug unit tests with coverage
+        id: gradle_unit_tests
+        continue-on-error: true
         run: ./gradlew :app:koverXmlReportDebug
 
       - name: Publish coverage summary
+        if: always() && !cancelled()
+        continue-on-error: true
         shell: bash
         run: |
           python3 - <<'PY'
@@ -68,11 +72,46 @@ jobs:
               summary_file.write(f"- Report: `{report_path}`\n")
           PY
 
+      - name: Collect JUnit XML paths for Codecov
+        id: junit_xml
+        if: always() && !cancelled()
+        shell: bash
+        run: |
+          junit_dir="app/build/test-results/testDebugUnitTest"
+          if [ ! -d "$junit_dir" ]; then
+            echo "has_junit_xml=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          mapfile -t paths < <(find "$junit_dir" -maxdepth 1 -name 'TEST-*.xml' -type f | sort)
+          if [ ${#paths[@]} -eq 0 ]; then
+            echo "has_junit_xml=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "has_junit_xml=true" >> "$GITHUB_OUTPUT"
+          joined=$(printf '%s,' "${paths[@]}")
+          echo "file_list=${joined%,}" >> "$GITHUB_OUTPUT"
+
       - name: Upload coverage reports to Codecov
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        if: always() && !cancelled() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && hashFiles('app/build/reports/kover/reportDebug.xml') != ''
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: app/build/reports/kover/reportDebug.xml
           fail_ci_if_error: true
           verbose: true
+
+      - name: Upload test results to Codecov
+        if: always() && !cancelled() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && steps.junit_xml.outputs.has_junit_xml == 'true'
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
+          name: junit-debug-unit-test
+          files: ${{ steps.junit_xml.outputs.file_list }}
+          disable_search: true
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Fail if unit tests did not pass
+        if: steps.gradle_unit_tests.outcome == 'failure'
+        run: exit 1
