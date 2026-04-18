@@ -9,11 +9,30 @@ This repo is a rewrite of the older [Stitch Counter](https://github.com/annaharr
 - **Engineering focus:** CI/CD, Jetpack Compose, Room/DataStore, Hilt, unit testing
 - **MVVM + repository flow:** UI in `feature/*` talks to ViewModels. Persistence flows through repositories into Room. Import/export and zip backup run through `data/backup` and domain use cases. Theme and launcher icon updates are coordinated from `feature/theme`.
 
+## CI/CD status
+
+[![CI](https://github.com/annaharri89/stitchCounterV2/actions/workflows/ci.yml/badge.svg)](https://github.com/annaharri89/stitchCounterV2/actions/workflows/ci.yml)
+[![Play internal CD](https://github.com/annaharri89/stitchCounterV2/actions/workflows/play-internal-cd.yml/badge.svg)](https://github.com/annaharri89/stitchCounterV2/actions/workflows/play-internal-cd.yml)
+[![Codecov](https://codecov.io/gh/annaharri89/stitchCounterV2/branch/main/graph/badge.svg)](https://codecov.io/gh/annaharri89/stitchCounterV2)
+
 ### Success Metrics
 
 - **Early usage signal:** 50+ users in Google Play internal testing
 - **Stability signal:** 0 reported crashes so far (early release stage)
-- **Quality signal:** 214 JVM unit tests (`app/src/test`)
+- **Quality signal:** 214 JVM unit tests (`app/src/test`) with tracked line coverage ([Codecov](https://codecov.io/gh/annaharri89/stitchCounterV2))
+
+### Coverage scope (what the % means)
+
+Coverage is reported from JVM unit tests in CI via Kover (`:app:koverXmlReportDebug`).
+
+To keep this metric aligned with testable business logic, coverage excludes generated and UI-heavy classes that are not strong targets for JVM unit tests:
+
+- Generated/build output classes (`R`, `BuildConfig`, `Manifest`, `*_Impl*`, synthetic/lambda classes, DI/Hilt generated classes)
+- Navigation/generated destination classes (`*Destination*`)
+- UI-heavy Compose files (`*ScreenKt`, `*LayoutKt`, `*ComponentsKt`, `*BottomSheetKt`)
+- Shared composables and theme presentation package (`feature.sharedComposables.*`, `ui.theme.*`)
+
+Because exclusions change the denominator, coverage % can shift even when test count stays the same. Treat this as a scoped business-logic coverage signal, not full-app UI/instrumentation coverage.
 
 #### Backup and restore reliability
 - Backups complete without errors in real use
@@ -97,7 +116,7 @@ stitchCounter/
 
 ## Engineering guardrails
 
-- CI runs `:app:testDebugUnitTest`
+- CI runs `:app:koverXmlReportDebug` (which runs debug JVM unit tests and publishes line coverage)
 - Install local Git hooks:
 
   ```bash
