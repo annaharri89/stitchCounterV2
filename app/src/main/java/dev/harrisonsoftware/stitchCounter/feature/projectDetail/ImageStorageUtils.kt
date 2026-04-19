@@ -19,6 +19,41 @@ private const val JPEG_COMPRESSION_QUALITY = 80
 private const val PROJECT_IMAGES_DIRECTORY_NAME = "project_images"
 private const val JPEG_FILE_EXTENSION = "jpg"
 
+internal fun isPathInsideDirectory(directory: File, candidateFile: File): Boolean {
+    val canonicalDirectoryPath = directory.canonicalPath + File.separator
+    val canonicalCandidatePath = candidateFile.canonicalPath
+    return canonicalCandidatePath.startsWith(canonicalDirectoryPath)
+}
+
+internal fun calculateInSampleSizeForDimensions(
+    imageWidth: Int,
+    imageHeight: Int,
+    maxDimension: Int
+): Int {
+    var inSampleSize = 1
+    if (imageWidth > maxDimension || imageHeight > maxDimension) {
+        val largerDimension = max(imageWidth, imageHeight)
+        while (largerDimension / (inSampleSize * 2) >= maxDimension) {
+            inSampleSize *= 2
+        }
+    }
+    return inSampleSize
+}
+
+internal fun calculateScaledDimensions(
+    width: Int,
+    height: Int,
+    maxDimension: Int
+): Pair<Int, Int>? {
+    val largerDimension = max(width, height)
+    if (largerDimension <= maxDimension) return null
+
+    val scaleFactor = maxDimension.toFloat() / largerDimension
+    val scaledWidth = (width * scaleFactor).roundToInt()
+    val scaledHeight = (height * scaleFactor).roundToInt()
+    return scaledWidth to scaledHeight
+}
+
 /** Decodes, scales down to [MAX_IMAGE_DIMENSION], and saves as compressed JPEG. Returns a relative path or null on failure. */
 fun saveImageToInternalStorage(context: Context, uri: Uri): String? {
     return try {
@@ -65,10 +100,8 @@ fun resolveImagePathToAbsolutePath(context: Context, relativeImagePath: String):
     return try {
         val filesDirectory = context.filesDir
         val candidateFile = File(filesDirectory, relativeImagePath)
-        val canonicalFilesDirectoryPath = filesDirectory.canonicalPath + File.separator
-        val canonicalCandidatePath = candidateFile.canonicalPath
-        if (canonicalCandidatePath.startsWith(canonicalFilesDirectoryPath)) {
-            canonicalCandidatePath
+        if (isPathInsideDirectory(filesDirectory, candidateFile)) {
+            candidateFile.canonicalPath
         } else {
             Log.w(Constants.LOG_TAG_IMAGE_SAVE, "Skipping image path outside files directory: $relativeImagePath")
             ""
@@ -89,55 +122,57 @@ private fun calculateInSampleSize(context: Context, uri: Uri, maxDimension: Int)
 
     val imageWidth = boundsOptions.outWidth
     val imageHeight = boundsOptions.outHeight
-    var inSampleSize = 1
-
-    if (imageWidth > maxDimension || imageHeight > maxDimension) {
-        val largerDimension = max(imageWidth, imageHeight)
-        while (largerDimension / (inSampleSize * 2) >= maxDimension) {
-            inSampleSize *= 2
-        }
-    }
-    return inSampleSize
+    return calculateInSampleSizeForDimensions(imageWidth, imageHeight, maxDimension)
 }
 
 private fun scaleDownBitmap(bitmap: Bitmap, maxDimension: Int): Bitmap {
-    val largerDimension = max(bitmap.width, bitmap.height)
-    if (largerDimension <= maxDimension) return bitmap
-
-    val scaleFactor = maxDimension.toFloat() / largerDimension
-    val scaledWidth = (bitmap.width * scaleFactor).roundToInt()
-    val scaledHeight = (bitmap.height * scaleFactor).roundToInt()
-    return Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true)
+    val scaledDimensions = calculateScaledDimensions(bitmap.width, bitmap.height, maxDimension)
+    if (scaledDimensions == null) return bitmap
+    return Bitmap.createScaledBitmap(
+        bitmap,
+        scaledDimensions.first,
+        scaledDimensions.second,
+        true
+    )
 }
 
-private fun readExifOrientationMatrix(context: Context, uri: Uri): Matrix {
+internal fun matrixForExifOrientation(orientation: Int): Matrix {
     val matrix = Matrix()
-    try {
-        context.contentResolver.openInputStream(uri)?.use { inputStream ->
-            val exif = ExifInterface(inputStream)
-            when (exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)) {
-                ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.setScale(-1f, 1f)
-                ExifInterface.ORIENTATION_ROTATE_180 -> matrix.setRotate(180f)
-                ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.setScale(1f, -1f)
-                ExifInterface.ORIENTATION_TRANSPOSE -> {
-                    matrix.setRotate(90f)
-                    matrix.postScale(-1f, 1f)
-                }
-                ExifInterface.ORIENTATION_ROTATE_90 -> matrix.setRotate(90f)
-                ExifInterface.ORIENTATION_TRANSVERSE -> {
-                    matrix.setRotate(-90f)
-                    matrix.postScale(-1f, 1f)
-                }
-                ExifInterface.ORIENTATION_ROTATE_270 -> matrix.setRotate(-90f)
-            }
+    when (orientation) {
+        ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.setScale(-1f, 1f)
+        ExifInterface.ORIENTATION_ROTATE_180 -> matrix.setRotate(180f)
+        ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.setScale(1f, -1f)
+        ExifInterface.ORIENTATION_TRANSPOSE -> {
+            matrix.setRotate(90f)
+            matrix.postScale(-1f, 1f)
         }
-    } catch (e: Exception) {
-        Log.w(Constants.LOG_TAG_IMAGE_SAVE, "Failed to read EXIF orientation", e)
+        ExifInterface.ORIENTATION_ROTATE_90 -> matrix.setRotate(90f)
+        ExifInterface.ORIENTATION_TRANSVERSE -> {
+            matrix.setRotate(-90f)
+            matrix.postScale(-1f, 1f)
+        }
+        ExifInterface.ORIENTATION_ROTATE_270 -> matrix.setRotate(-90f)
     }
     return matrix
 }
 
-private fun applyExifOrientation(bitmap: Bitmap, exifMatrix: Matrix): Bitmap {
+private fun readExifOrientationMatrix(context: Context, uri: Uri): Matrix {
+    try {
+        context.contentResolver.openInputStream(uri)?.use { inputStream ->
+            val exif = ExifInterface(inputStream)
+            val orientation = exif.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )
+            return matrixForExifOrientation(orientation)
+        }
+    } catch (e: Exception) {
+        Log.w(Constants.LOG_TAG_IMAGE_SAVE, "Failed to read EXIF orientation", e)
+    }
+    return Matrix()
+}
+
+internal fun applyExifOrientation(bitmap: Bitmap, exifMatrix: Matrix): Bitmap {
     if (exifMatrix.isIdentity) return bitmap
     return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, exifMatrix, true)
 }
