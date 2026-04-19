@@ -35,6 +35,57 @@ import dev.harrisonsoftware.stitchCounter.feature.projectDetail.ProjectDetailVie
 import dev.harrisonsoftware.stitchCounter.feature.singleCounter.SingleCounterScreen
 import dev.harrisonsoftware.stitchCounter.feature.singleCounter.SingleCounterViewModel
 
+internal enum class DragEndAction {
+    DismissSheet,
+    RequestValidation,
+    ResetDragOffset,
+}
+
+internal fun shouldRenderAfterVisibilityChange(isSheetVisible: Boolean): Boolean = isSheetVisible
+
+internal fun shouldTriggerDismissValidation(isDismissalAllowed: Boolean): Boolean = !isDismissalAllowed
+
+internal fun shouldRunDismissalAttempt(
+    isValidationPending: Boolean,
+    currentSheetScreen: SheetScreen?,
+    targetScreen: SheetScreen,
+): Boolean = isValidationPending && currentSheetScreen == targetScreen
+
+internal fun dragEndAction(
+    dragOffset: androidx.compose.ui.unit.Dp,
+    dismissThreshold: androidx.compose.ui.unit.Dp,
+    isDismissalAllowed: Boolean,
+): DragEndAction {
+    if (dragOffset <= dismissThreshold) {
+        return DragEndAction.ResetDragOffset
+    }
+    return if (isDismissalAllowed) DragEndAction.DismissSheet else DragEndAction.RequestValidation
+}
+
+internal fun shouldAutoNavigateFromNewProject(
+    screenProjectId: Int?,
+    lastObservedProjectId: Int?,
+    currentProjectId: Int?,
+    initialProjectIdWhenCreatingNew: Int?,
+    hasNavigatedToCounter: Boolean,
+): Boolean {
+    val wasNewProject = lastObservedProjectId == null || lastObservedProjectId == 0
+    val isNowSaved = currentProjectId != null && currentProjectId > 0
+    val isNewProjectScreen = screenProjectId == null
+    val isProjectIdChanged = lastObservedProjectId != currentProjectId
+    val isNotStaleProjectId =
+        initialProjectIdWhenCreatingNew == null ||
+            currentProjectId == null ||
+            currentProjectId == 0 ||
+            currentProjectId != initialProjectIdWhenCreatingNew
+    return isNewProjectScreen &&
+        wasNewProject &&
+        isNowSaved &&
+        isProjectIdChanged &&
+        isNotStaleProjectId &&
+        !hasNavigatedToCounter
+}
+
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BottomSheetManager(
@@ -56,12 +107,12 @@ fun BottomSheetManager(
 
     LaunchedEffect(isSheetVisible) {
         if (isSheetVisible) {
-            shouldRenderSheet = true
+            shouldRenderSheet = shouldRenderAfterVisibilityChange(isSheetVisible = true)
             dragOffset.value = 0.dp
             isDragging.value = false
         } else {
             kotlinx.coroutines.delay(AnimationConstants.NAVIGATION_ANIMATION_DURATION.toLong())
-            shouldRenderSheet = false
+            shouldRenderSheet = shouldRenderAfterVisibilityChange(isSheetVisible = false)
             dragOffset.value = 0.dp
             isDragging.value = false
         }
@@ -106,14 +157,20 @@ fun BottomSheetManager(
         }
 
         LaunchedEffect(isValidationPending.value, currentSheetScreen) {
-            if (isValidationPending.value && currentSheetScreen == screen) {
+            if (
+                shouldRunDismissalAttempt(
+                    isValidationPending = isValidationPending.value,
+                    currentSheetScreen = currentSheetScreen,
+                    targetScreen = screen
+                )
+            ) {
                 onAttemptDismissal()
             }
         }
     }
 
     val onDismissRequestHandler: () -> Unit = {
-        if (!isDismissalAllowedState.value) {
+        if (shouldTriggerDismissValidation(isDismissalAllowed = isDismissalAllowedState.value)) {
             isValidationPending.value = true
         }
     }
@@ -151,14 +208,16 @@ fun BottomSheetManager(
                         if (isSheetVisible && screenHeight > 0.dp) {
                             detectVerticalDragGestures(
                                 onDragEnd = {
-                                    if (dragOffset.value > dismissThreshold) {
-                                        if (isDismissalAllowedState.value) {
-                                            viewModel.showBottomSheet(null)
-                                        } else {
-                                            onDismissRequestHandler()
-                                        }
-                                    } else {
-                                        dragOffset.value = 0.dp
+                                    when (
+                                        dragEndAction(
+                                            dragOffset = dragOffset.value,
+                                            dismissThreshold = dismissThreshold,
+                                            isDismissalAllowed = isDismissalAllowedState.value
+                                        )
+                                    ) {
+                                        DragEndAction.DismissSheet -> viewModel.showBottomSheet(null)
+                                        DragEndAction.RequestValidation -> onDismissRequestHandler()
+                                        DragEndAction.ResetDragOffset -> dragOffset.value = 0.dp
                                     }
                                     isDragging.value = false
                                 }
@@ -245,19 +304,15 @@ fun BottomSheetManager(
 
                             LaunchedEffect(projectDetailUiState.project?.id) {
                                 val currentProjectId = projectDetailUiState.project?.id
-
-                                val wasNewProject =
-                                    lastObservedProjectId.value == null || lastObservedProjectId.value == 0
-                                val isNowSaved = currentProjectId != null && currentProjectId > 0
-                                val isNewProjectScreen = screen.projectId == null
-                                val isProjectIdChanged =
-                                    lastObservedProjectId.value != currentProjectId
-                                val isNotStaleProjectId = initialProjectIdWhenCreatingNew == null ||
-                                        currentProjectId == null ||
-                                        currentProjectId == 0 ||
-                                        currentProjectId != initialProjectIdWhenCreatingNew
-
-                                if (isNewProjectScreen && wasNewProject && isNowSaved && isProjectIdChanged && isNotStaleProjectId && !hasNavigatedToCounter.value) {
+                                if (
+                                    shouldAutoNavigateFromNewProject(
+                                        screenProjectId = screen.projectId,
+                                        lastObservedProjectId = lastObservedProjectId.value,
+                                        currentProjectId = currentProjectId,
+                                        initialProjectIdWhenCreatingNew = initialProjectIdWhenCreatingNew,
+                                        hasNavigatedToCounter = hasNavigatedToCounter.value
+                                    )
+                                ) {
                                     hasNavigatedToCounter.value = true
                                     viewModel.showBottomSheet(
                                         createSheetScreenForProjectType(

@@ -1,6 +1,8 @@
 package dev.harrisonsoftware.stitchCounter.feature.library
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class LibraryProjectRowTapActionTest {
@@ -43,5 +45,11 @@ class LibraryProjectRowTapActionTest {
         )
 
         assertEquals(ProjectRowTapAction.OpenProject, action)
+    }
+
+    @Test
+    fun longClickEntersMultiSelectMode_returnsTrueOnlyWhenNotAlreadyInMultiSelect() {
+        assertTrue(longClickEntersMultiSelectMode(isMultiSelectMode = false))
+        assertFalse(longClickEntersMultiSelectMode(isMultiSelectMode = true))
     }
 }

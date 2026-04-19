@@ -11,6 +11,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -31,6 +32,7 @@ class LibraryViewModelTest {
     private lateinit var observeProjects: ObserveProjects
     private lateinit var deleteProject: DeleteProject
     private lateinit var deleteProjects: DeleteProjects
+    private lateinit var projectsFlow: MutableStateFlow<List<Project>>
 
     private val sampleProjects = listOf(
         Project(id = 1, type = ProjectType.SINGLE, title = "Scarf", createdAt = 1L, updatedAt = 1L),
@@ -44,7 +46,8 @@ class LibraryViewModelTest {
         observeProjects = mockk()
         deleteProject = mockk(relaxed = true)
         deleteProjects = mockk(relaxed = true)
-        every { observeProjects() } returns flowOf(sampleProjects)
+        projectsFlow = MutableStateFlow(sampleProjects)
+        every { observeProjects() } returns projectsFlow
     }
 
     @After
@@ -209,5 +212,60 @@ class LibraryViewModelTest {
         val state = viewModel.uiState.value
         assertFalse(state.showDeleteConfirmation)
         assertTrue(state.projectsToDelete.isEmpty())
+    }
+
+    @Test
+    fun `requestBulkDelete includes only projects still present in list`() = runTest {
+        val viewModel = createViewModel()
+        backgroundScope.launch(testDispatcher) { viewModel.projects.collect {} }
+        viewModel.toggleProjectSelection(1)
+        viewModel.toggleProjectSelection(2)
+        projectsFlow.value = listOf(sampleProjects[0])
+
+        viewModel.requestBulkDelete()
+
+        val state = viewModel.uiState.value
+        assertTrue(state.showDeleteConfirmation)
+        assertEquals(1, state.projectsToDelete.size)
+        assertEquals(1, state.projectsToDelete.first().id)
+    }
+
+    @Test
+    fun `requestBulkDelete does nothing when selected ids are not in current projects`() = runTest {
+        val viewModel = createViewModel()
+        backgroundScope.launch(testDispatcher) { viewModel.projects.collect {} }
+        viewModel.toggleProjectSelection(99)
+        viewModel.toggleProjectSelection(100)
+
+        viewModel.requestBulkDelete()
+
+        assertFalse(viewModel.uiState.value.showDeleteConfirmation)
+    }
+
+    @Test
+    fun `selectAllProjects selects nothing when project list is empty`() = runTest {
+        projectsFlow.value = emptyList()
+        val viewModel = createViewModel()
+        backgroundScope.launch(testDispatcher) { viewModel.projects.collect {} }
+
+        viewModel.selectAllProjects()
+
+        assertEquals(emptySet<Int>(), viewModel.uiState.value.selectedProjectIds)
+    }
+
+    @Test
+    fun `cancelDelete keeps multi select and selection after bulk prompt`() = runTest {
+        val viewModel = createViewModel()
+        backgroundScope.launch(testDispatcher) { viewModel.projects.collect {} }
+        viewModel.toggleMultiSelectMode()
+        viewModel.toggleProjectSelection(1)
+        viewModel.requestBulkDelete()
+        viewModel.cancelDelete()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.showDeleteConfirmation)
+        assertTrue(state.projectsToDelete.isEmpty())
+        assertTrue(state.isMultiSelectMode)
+        assertEquals(setOf(1), state.selectedProjectIds)
     }
 }

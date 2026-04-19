@@ -27,11 +27,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.harrisonsoftware.stitchCounter.R
 
+internal fun deleteDialogTitleRes(projectCount: Int): Int {
+    return if (projectCount == 1) R.string.delete_project_title else R.string.delete_projects_title
+}
+
+internal fun deleteDialogMessageRes(projectCount: Int): Int {
+    return if (projectCount == 1) R.string.delete_project_message else R.string.delete_projects_message
+}
+
+internal fun loadingIndicatorDescriptionRes(): Int = R.string.cd_loading
+
+internal fun emptyLibraryDescriptionRes(): Int = R.string.cd_empty_library
+
+internal fun emptyLibraryTitleRes(): Int = R.string.library_empty_title
+
+internal fun emptyLibraryMessageRes(): Int = R.string.library_empty_message
+
 @Composable
 fun LoadingState(
     modifier: Modifier = Modifier
 ) {
-    val loadingDescription = stringResource(R.string.cd_loading)
+    val loadingDescription = stringResource(loadingIndicatorDescriptionRes())
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
@@ -57,12 +73,12 @@ fun EmptyLibraryState(
         ) {
             Icon(
                 imageVector = Icons.Default.FolderOpen,
-                contentDescription = stringResource(R.string.cd_empty_library),
+                contentDescription = stringResource(emptyLibraryDescriptionRes()),
                 modifier = Modifier.size(80.dp),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
             )
             Text(
-                text = stringResource(R.string.library_empty_title),
+                text = stringResource(emptyLibraryTitleRes()),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -70,7 +86,7 @@ fun EmptyLibraryState(
                 modifier = Modifier.semantics { heading() }
             )
             Text(
-                text = stringResource(R.string.library_empty_message),
+                text = stringResource(emptyLibraryMessageRes()),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -89,21 +105,12 @@ fun DeleteConfirmationDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = if (projectCount == 1) {
-                    stringResource(R.string.delete_project_title)
-                } else {
-                    stringResource(R.string.delete_projects_title)
-                }
+                text = stringResource(deleteDialogTitleRes(projectCount))
             )
         },
         text = {
-            Text(
-                text = if (projectCount == 1) {
-                    stringResource(R.string.delete_project_message)
-                } else {
-                    stringResource(R.string.delete_projects_message, projectCount)
-                }
-            )
+            val messageRes = deleteDialogMessageRes(projectCount)
+            Text(text = if (projectCount == 1) stringResource(messageRes) else stringResource(messageRes, projectCount))
         },
         confirmButton = {
             TextButton(
