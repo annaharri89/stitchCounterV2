@@ -9,6 +9,12 @@ import org.junit.Test
 class BottomSheetManagerLogicTest {
 
     @Test
+    fun `shouldRenderAfterVisibilityChange mirrors sheet visibility`() {
+        assertTrue(shouldRenderAfterVisibilityChange(isSheetVisible = true))
+        assertFalse(shouldRenderAfterVisibilityChange(isSheetVisible = false))
+    }
+
+    @Test
     fun `shouldTriggerDismissValidation returns true only when dismissal is not allowed`() {
         assertTrue(shouldTriggerDismissValidation(isDismissalAllowed = false))
         assertFalse(shouldTriggerDismissValidation(isDismissalAllowed = true))
@@ -47,6 +53,17 @@ class BottomSheetManagerLogicTest {
             dragOffset = 80.dp,
             dismissThreshold = 100.dp,
             isDismissalAllowed = false
+        )
+
+        assertEquals(DragEndAction.ResetDragOffset, action)
+    }
+
+    @Test
+    fun `dragEndAction returns reset when drag offset equals dismiss threshold`() {
+        val action = dragEndAction(
+            dragOffset = 100.dp,
+            dismissThreshold = 100.dp,
+            isDismissalAllowed = true
         )
 
         assertEquals(DragEndAction.ResetDragOffset, action)
@@ -121,6 +138,32 @@ class BottomSheetManagerLogicTest {
                 lastObservedProjectId = null,
                 currentProjectId = 11,
                 initialProjectIdWhenCreatingNew = 11,
+                hasNavigatedToCounter = false
+            )
+        )
+    }
+
+    @Test
+    fun `shouldAutoNavigateFromNewProject treats last observed id zero as unsaved placeholder`() {
+        assertTrue(
+            shouldAutoNavigateFromNewProject(
+                screenProjectId = null,
+                lastObservedProjectId = 0,
+                currentProjectId = 9,
+                initialProjectIdWhenCreatingNew = null,
+                hasNavigatedToCounter = false
+            )
+        )
+    }
+
+    @Test
+    fun `shouldAutoNavigateFromNewProject returns true when saved id replaces initial placeholder`() {
+        assertTrue(
+            shouldAutoNavigateFromNewProject(
+                screenProjectId = null,
+                lastObservedProjectId = null,
+                currentProjectId = 42,
+                initialProjectIdWhenCreatingNew = 5,
                 hasNavigatedToCounter = false
             )
         )
