@@ -151,3 +151,4 @@ Workflow secrets:
 ## Roadmap
 
 - **Accessibility:** More assistive features and polish are planned for upcoming releases (this area is under active development).
+- **Stats:** This page will provide the user with app usage statistics based on data stored in the Room db
