@@ -60,12 +60,12 @@ jobs:
         run: ./gradlew :app:bundleRelease
 
       - name: Upload to Play internal track
-        uses: r0adkll/upload-google-play@v1
+        uses: r0adkll/upload-google-play@1e452461d767d6e16e77f4900bd45f7004560a93 # v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: dev.harrisonsoftware.stitchCounter
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
-          track: internal
+          tracks: internal
 
       - name: Commit version bump and push
         env:
