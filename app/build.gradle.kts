@@ -90,6 +90,11 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -137,6 +142,7 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -173,6 +179,15 @@ kover {
                     "*LayoutKt",
                     "*ComponentsKt",
                     "*BottomSheetKt",
+                    "*TopBarKt",
+                    "*TopBarsKt",
+                    "*ProjectRowKt",
+                    "*ExpandableSectionKt",
+                    "*ThemeComponentsKt",
+                    "*BackupComponentsKt",
+                    "*SupportLegalComponentsKt",
+                    "*NavGraphsKt",
+                    "dev.harrisonsoftware.stitchCounter.StitchCounterAppKt",
                     "dev.harrisonsoftware.stitchCounter.ui.theme.*",
                     "dev.harrisonsoftware.stitchCounter.feature.*.*ScreenKt",
                     "dev.harrisonsoftware.stitchCounter.feature.*.*LayoutKt",

@@ -1,6 +1,6 @@
 # Stitch Counter (Android)
 
-Solo-built Android app for tracking knitting and crochet projects. It supports single and double counters, project photo history, theme customization, and offline backup/restore.
+Solo-built Android app for tracking knitting and crochet projects. It supports single and double counters, project photo history, theme customization, and local zip backup/restore (no cloud).
 
 This repo is a rewrite of the older [Stitch Counter](https://github.com/annaharri89/stitchCounter) project.
 
@@ -18,23 +18,10 @@ This repo is a rewrite of the older [Stitch Counter](https://github.com/annaharr
 ### Success Metrics
 
 - **Early usage signal:** 50+ users in Google Play internal testing
-- **Stability signal:** 0 reported crashes so far (early release stage)
-- **Quality signal:** 214 JVM unit tests (`app/src/test`) with tracked line coverage ([Codecov](https://codecov.io/gh/annaharri89/stitchCounterV2))
+- **Stability signal:** 0 crashes in Google Play Console (Android vitals) for the current early-stage release
+- **Quality signal:** JVM unit tests in `app/src/test`; line coverage on [Codecov](https://codecov.io/gh/annaharri89/stitchCounterV2)
 
-### Coverage scope (what the % means)
-
-Coverage is reported from JVM unit tests in CI via Kover (`:app:koverXmlReportDebug`).
-
-To keep this metric aligned with testable business logic, coverage excludes generated and UI-heavy classes that are not strong targets for JVM unit tests:
-
-- Generated/build output classes (`R`, `BuildConfig`, `Manifest`, `*_Impl*`, synthetic/lambda classes, DI/Hilt generated classes)
-- Navigation/generated destination classes (`*Destination*`)
-- UI-heavy Compose files (`*ScreenKt`, `*LayoutKt`, `*ComponentsKt`, `*BottomSheetKt`)
-- Shared composables and theme presentation package (`feature.sharedComposables.*`, `ui.theme.*`)
-
-Because exclusions change the denominator, coverage % can shift even when test count stays the same. Treat this as a scoped business-logic coverage signal, not full-app UI/instrumentation coverage.
-
-#### Backup and restore reliability
+### Backup and restore reliability
 - Backups complete without errors in real use
 - Restore recreates project data correctly
 - Photos remain preserved and readable after restore
@@ -60,11 +47,18 @@ Because exclusions change the denominator, coverage % can shift even when test c
 | Theme settings | <img src="docs/readme/theme-settings.png" alt="Theme settings" width="220" /> |
 | Backup & restore | <img src="docs/readme/backup-restore.jpg" alt="Backup and restore" width="220" /> |
 
+## Requirements & how to run
+
+- Use Android Studio Koala Feature Drop 2024.1.2+ (or any setup with JDK 17 and Android SDK 36)
+- Open the project root, wait for Gradle sync, then run the `app` configuration on API 24+
+- CLI debug build: `./gradlew :app:assembleDebug`
+- CLI unit tests: `./gradlew :app:testDebugUnitTest`
+
 ## Key engineering decisions
 
 - **Compose + Material 3:** UI built with modern Android patterns and responsive layouts for phone/tablet and portrait/landscape.
 - **Room + DataStore:** Structured project persistence in Room, lightweight preference storage in DataStore.
-- **Offline-first backup:** Projects can be exported to zip with metadata and images, then restored on another device without cloud services.
+- **Local backup (no cloud):** Projects can be exported to zip with metadata and images, then restored on another device. The app does not sync to cloud services; data stays on the device unless you export it yourself.
 - **Hilt + feature separation:** Dependencies are injected with Hilt and features are separated by domain area for maintainability.
 
 ## Tech stack
@@ -88,15 +82,19 @@ Because exclusions change the denominator, coverage % can shift even when test c
 - Six Material 3 color themes with light/dark mode; selection is saved in DataStore and can update the launcher icon
 - Responsive Compose layouts for phones and tablets, portrait and landscape
 - Up to **6** photos per project; images are compressed JPEGs in app-internal storage and loaded with Coil
-- Backups are zip files with metadata + images, so projects can move between devices without cloud sync
+- Backups are zip files with metadata + images, so projects can move between devices without cloud sync or accounts
 - No in-app analytics; personal data stays on device (see in-app privacy policy URL in `Constants.kt`)
 
-## Requirements & how to run
+## Accessibility
 
-- Use Android Studio Koala Feature Drop 2024.1.2+ (or any setup with JDK 17 and Android SDK 36)
-- Open the project root, wait for Gradle sync, then run the `app` configuration on API 24+
-- CLI debug build: `./gradlew :app:assembleDebug`
-- CLI unit tests: `./gradlew :app:testDebugUnitTest`
+The Compose UI targets screen readers and system text settings:
+
+- **TalkBack:** Interactive elements use `contentDescription` / `Modifier.semantics` with dedicated strings (`cd_*` in `strings.xml`) for navigation, counters, adjustment controls, library rows, bottom sheets, settings, and image actions. Decorative visuals use `contentDescription = null` where they add no meaning.
+- **Live regions:** The main counter value uses a polite live region so count changes can be announced without searching the layout (see shared counter composables).
+- **Semantics roles:** Controls use appropriate roles where it helps (e.g. adjustment chips as a radio group, switches for toggles).
+- **Library rows:** Project rows in the library support **custom accessibility actions** (e.g. delete, multi-select, open details) from a single focused row. Related content is sometimes **merged** so it reads as one unit.
+- **Font scaling:** Counter text scales with system font size via `sp`-based sizing (`ResizableText` and typography).
+- **Theme:** Light/dark themes and Material 3 semantic colors support readable contrast in both modes.
 
 ## Project layout (high level)
 
@@ -116,14 +114,7 @@ stitchCounter/
 
 ## Engineering guardrails
 
-- CI runs `:app:koverXmlReportDebug` (which runs debug JVM unit tests and publishes line coverage)
-- Install local Git hooks:
-
-  ```bash
-  bash scripts/install-git-hooks.sh
-  ```
-
-- The pre-commit hook runs `:app:testDebugUnitTest` when staged changes touch Kotlin under `app/src/main/`, `app/src/test/`, or `app/src/androidTest/` (JVM unit tests only; instrumentation tests are not run in the hook)
+- CI runs JVM unit tests and publishes line coverage to Codecov
 
 # Release guide
 
@@ -156,3 +147,7 @@ Workflow secrets:
 - `RELEASE_KEYSTORE_PASSWORD` - Keystore `storePassword` (matches `keystore.properties`)
 - `RELEASE_KEY_PASSWORD` - Signing `keyPassword` (matches `keystore.properties`)
 - `RELEASE_KEY_ALIAS` - Signing `keyAlias` (matches `keystore.properties`)
+
+## Roadmap
+
+- **Accessibility:** More assistive features and polish are planned for upcoming releases (this area is under active development).
