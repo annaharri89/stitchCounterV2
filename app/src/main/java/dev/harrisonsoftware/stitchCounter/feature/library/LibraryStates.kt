@@ -1,5 +1,6 @@
 package dev.harrisonsoftware.stitchCounter.feature.library
 
+import android.content.res.Resources
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -33,6 +35,12 @@ internal fun deleteDialogTitleRes(projectCount: Int): Int {
 
 internal fun deleteDialogMessageRes(projectCount: Int): Int {
     return if (projectCount == 1) R.string.delete_project_message else R.string.delete_projects_message
+}
+
+internal fun deleteDialogMessageText(resources: Resources, projectCount: Int): String {
+    val messageRes = deleteDialogMessageRes(projectCount)
+    return if (projectCount == 1) resources.getString(messageRes)
+    else resources.getString(messageRes, projectCount)
 }
 
 internal fun loadingIndicatorDescriptionRes(): Int = R.string.cd_loading
@@ -109,8 +117,7 @@ fun DeleteConfirmationDialog(
             )
         },
         text = {
-            val messageRes = deleteDialogMessageRes(projectCount)
-            Text(text = if (projectCount == 1) stringResource(messageRes) else stringResource(messageRes, projectCount))
+            Text(text = deleteDialogMessageText(LocalContext.current.resources, projectCount))
         },
         confirmButton = {
             TextButton(

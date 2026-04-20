@@ -2,8 +2,15 @@ package dev.harrisonsoftware.stitchCounter.feature.library
 
 import dev.harrisonsoftware.stitchCounter.R
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33])
 class LibraryStatesTest {
 
     @Test
@@ -32,5 +39,23 @@ class LibraryStatesTest {
         assertEquals(R.string.cd_empty_library, emptyLibraryDescriptionRes())
         assertEquals(R.string.library_empty_title, emptyLibraryTitleRes())
         assertEquals(R.string.library_empty_message, emptyLibraryMessageRes())
+    }
+
+    @Test
+    fun `deleteDialogMessageText matches singular string for one project`() {
+        val resources = RuntimeEnvironment.getApplication().resources
+        val text = deleteDialogMessageText(resources, projectCount = 1)
+
+        assertEquals(resources.getString(R.string.delete_project_message), text)
+    }
+
+    @Test
+    fun `deleteDialogMessageText formats plural string with project count`() {
+        val resources = RuntimeEnvironment.getApplication().resources
+        val projectCount = 4
+        val text = deleteDialogMessageText(resources, projectCount)
+
+        assertEquals(resources.getString(R.string.delete_projects_message, projectCount), text)
+        assertTrue(text.contains("4"))
     }
 }
