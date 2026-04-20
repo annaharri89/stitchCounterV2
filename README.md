@@ -47,6 +47,13 @@ This repo is a rewrite of the older [Stitch Counter](https://github.com/annaharr
 | Theme settings | <img src="docs/readme/theme-settings.png" alt="Theme settings" width="220" /> |
 | Backup & restore | <img src="docs/readme/backup-restore.jpg" alt="Backup and restore" width="220" /> |
 
+## Requirements & how to run
+
+- Use Android Studio Koala Feature Drop 2024.1.2+ (or any setup with JDK 17 and Android SDK 36)
+- Open the project root, wait for Gradle sync, then run the `app` configuration on API 24+
+- CLI debug build: `./gradlew :app:assembleDebug`
+- CLI unit tests: `./gradlew :app:testDebugUnitTest`
+
 ## Key engineering decisions
 
 - **Compose + Material 3:** UI built with modern Android patterns and responsive layouts for phone/tablet and portrait/landscape.
@@ -88,17 +95,6 @@ The Compose UI targets screen readers and system text settings:
 - **Library rows:** Project rows in the library support **custom accessibility actions** (e.g. delete, multi-select, open details) from a single focused row. Related content is sometimes **merged** so it reads as one unit.
 - **Font scaling:** Counter text scales with system font size via `sp`-based sizing (`ResizableText` and typography).
 - **Theme:** Light/dark themes and Material 3 semantic colors support readable contrast in both modes.
-
-## Roadmap
-
-- **Accessibility:** More assistive features and polish are planned for upcoming releases (this area is under active development).
-
-## Requirements & how to run
-
-- Use Android Studio Koala Feature Drop 2024.1.2+ (or any setup with JDK 17 and Android SDK 36)
-- Open the project root, wait for Gradle sync, then run the `app` configuration on API 24+
-- CLI debug build: `./gradlew :app:assembleDebug`
-- CLI unit tests: `./gradlew :app:testDebugUnitTest`
 
 ## Project layout (high level)
 
@@ -151,3 +147,7 @@ Workflow secrets:
 - `RELEASE_KEYSTORE_PASSWORD` - Keystore `storePassword` (matches `keystore.properties`)
 - `RELEASE_KEY_PASSWORD` - Signing `keyPassword` (matches `keystore.properties`)
 - `RELEASE_KEY_ALIAS` - Signing `keyAlias` (matches `keystore.properties`)
+
+## Roadmap
+
+- **Accessibility:** More assistive features and polish are planned for upcoming releases (this area is under active development).
