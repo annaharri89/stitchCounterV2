@@ -103,6 +103,7 @@
     <string name="settings_bug_report_dialog_include_diagnostics">Include diagnostics logs</string>
     <string name="settings_bug_report_dialog_send">Send Bug Report</string>
     <string name="settings_give_feedback">Give Feedback</string>
+    <string name="settings_dark_mode">Dark Mode</string>
     <string name="settings_request_feature">Request a Feature</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
     <string name="settings_eula">EULA</string>

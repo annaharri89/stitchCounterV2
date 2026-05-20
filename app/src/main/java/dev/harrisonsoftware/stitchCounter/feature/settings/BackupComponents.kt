@@ -44,6 +44,11 @@ internal fun BackupRestoreCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            Text(
+                text = stringResource(R.string.settings_export_import_library),
+                style = MaterialTheme.typography.titleMedium
+            )
+
             Button(
                 onClick = onExport,
                 enabled = !isExporting && !isImporting,
