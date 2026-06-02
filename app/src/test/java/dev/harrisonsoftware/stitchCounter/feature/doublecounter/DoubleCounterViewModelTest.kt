@@ -11,9 +11,11 @@ import dev.harrisonsoftware.stitchCounter.domain.usecase.GetProject
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateDoubleCounterValues
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -42,6 +44,7 @@ class DoubleCounterViewModelTest {
         getProject = mockk()
         updateDoubleCounterValues = mockk(relaxed = true)
         appPreferencesRepository = mockk()
+        every { appPreferencesRepository.forceCounterScreensOn } returns flowOf(false)
         coEvery { appPreferencesRepository.consumeShouldShowCustomAdjustmentTip() } returns false
     }
 
@@ -78,6 +81,26 @@ class DoubleCounterViewModelTest {
         assertEquals(0, state.stitchCounterState.count)
         assertEquals(0, state.rowCounterState.count)
         assertEquals(0, state.totalRows)
+    }
+
+    @Test
+    fun `init observes keep screen on`() {
+        every { appPreferencesRepository.forceCounterScreensOn } returns flowOf(true)
+        val viewModel = createViewModel()
+
+        assertTrue(viewModel.uiState.value.forceCounterScreensOn)
+    }
+
+    @Test
+    fun `resetState keeps screen on preference`() = runTest {
+        every { appPreferencesRepository.forceCounterScreensOn } returns flowOf(true)
+        coEvery { getProject(1) } returns sampleProject()
+
+        val viewModel = createViewModel()
+        viewModel.loadProject(1)
+        viewModel.resetState()
+
+        assertTrue(viewModel.uiState.value.forceCounterScreensOn)
     }
 
     @Test
