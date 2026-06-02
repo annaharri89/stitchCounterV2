@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import android.content.res.Configuration
@@ -49,7 +50,10 @@ class MainActivity : ComponentActivity() {
             val configuration = LocalConfiguration.current
             val isWideLayout = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
             
-            StitchCounterV3Theme(theme = themeUiState.selectedTheme) {
+            StitchCounterV3Theme(
+                darkTheme = themeUiState.resolveDarkTheme(isSystemInDarkTheme()),
+                theme = themeUiState.selectedTheme
+            ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     RootNavigationScreen(
                         viewModel = rootNavigationViewModel,
