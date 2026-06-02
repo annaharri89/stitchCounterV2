@@ -16,7 +16,11 @@ class TimberFileLogTreeTest {
         val filesDirectory = Files.createTempDirectory("file_log_sink_files").toFile()
         val cacheDirectory = Files.createTempDirectory("file_log_sink_cache").toFile()
         val fileSystemProvider = TestFileSystemProvider(filesDirectory, cacheDirectory)
-        val fileLogTree = TimberFileLogTree(fileSystemProvider, LogRetentionPolicy())
+        val fileLogTree = TimberFileLogTree(
+            fileSystemProvider = fileSystemProvider,
+            logRetentionPolicy = LogRetentionPolicy(),
+            appVersion = "1.0.0.6"
+        )
         Timber.plant(fileLogTree)
 
         Timber.tag("TestTag").d("debug_entry_should_not_persist")
@@ -32,9 +36,9 @@ class TimberFileLogTreeTest {
             .joinToString("\n") { it.readText() }
 
         assertFalse(persistedContent.contains("debug_entry_should_not_persist"))
-        assertTrue(persistedContent.contains("info_entry_should_persist"))
-        assertTrue(persistedContent.contains("warn_entry_should_persist"))
-        assertTrue(persistedContent.contains("error_entry_should_persist"))
+        assertTrue(persistedContent.contains("| app=1.0.0.6 | info_entry_should_persist"))
+        assertTrue(persistedContent.contains("| app=1.0.0.6 | warn_entry_should_persist"))
+        assertTrue(persistedContent.contains("| app=1.0.0.6 | error_entry_should_persist"))
         Timber.uproot(fileLogTree)
     }
 
@@ -43,7 +47,11 @@ class TimberFileLogTreeTest {
         val filesDirectory = Files.createTempDirectory("file_log_sync_files").toFile()
         val cacheDirectory = Files.createTempDirectory("file_log_sync_cache").toFile()
         val fileSystemProvider = TestFileSystemProvider(filesDirectory, cacheDirectory)
-        val fileLogTree = TimberFileLogTree(fileSystemProvider, LogRetentionPolicy())
+        val fileLogTree = TimberFileLogTree(
+            fileSystemProvider = fileSystemProvider,
+            logRetentionPolicy = LogRetentionPolicy(),
+            appVersion = "1.0.0.6"
+        )
         Timber.plant(fileLogTree)
 
         Timber.tag("TestTag").i("entry_before_sync_packaging")
@@ -55,7 +63,7 @@ class TimberFileLogTreeTest {
             .orEmpty()
             .joinToString("\n") { it.readText() }
 
-        assertTrue(persistedContent.contains("entry_before_sync_packaging"))
+        assertTrue(persistedContent.contains("| app=1.0.0.6 | entry_before_sync_packaging"))
         Timber.uproot(fileLogTree)
     }
 }
