@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -131,19 +132,20 @@ fun SettingsScreen(
     }
 
     Surface {
-        LazyColumn(
-            state = lazyListState,
-            contentPadding = PaddingValues(vertical = 16.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-
-            items(
-                items = settingsSections,
-                key = { sectionType -> sectionType.name }
-            ) { sectionType ->
+        Column(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                state = lazyListState,
+                contentPadding = PaddingValues(top = 16.dp, bottom = 8.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(
+                    items = settingsSections,
+                    key = { sectionType -> sectionType.name }
+                ) { sectionType ->
                 SettingsSection(
                     sectionName = stringResource(sectionType.titleId),
                     isExpanded = isSectionExpanded(sectionType),
@@ -162,7 +164,12 @@ fun SettingsScreen(
                         }
                         SettingsScreenSection.SETTINGS -> {
                             SettingsCard(
-
+                                forceDarkMode = uiState.forceDarkMode,
+                                onForceDarkModeChange = viewModel::onForceDarkModeChanged,
+                                forceLightMode = uiState.forceLightMode,
+                                onForceLightModeChange = viewModel::onForceLightModeChanged,
+                                forceCounterScreensOn = uiState.forceCounterScreensOn,
+                                onForceCounterScreensOnChange = viewModel::onForceCounterScreensOnChanged
                             )
                         }
                         SettingsScreenSection.BACKUP_RESTORE -> {
@@ -213,6 +220,9 @@ fun SettingsScreen(
                     }
                 }
             }
+            }
+
+            SettingsAppVersionLabel(appVersion = uiState.appVersion)
         }
 
         if (showImportDialog.value) {
@@ -350,6 +360,22 @@ private fun launchBugReportWithAttachment(
         }
         false
     }
+}
+
+@Composable
+private fun SettingsAppVersionLabel(
+    appVersion: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = stringResource(R.string.settings_app_version, appVersion),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    )
 }
 
 @Composable

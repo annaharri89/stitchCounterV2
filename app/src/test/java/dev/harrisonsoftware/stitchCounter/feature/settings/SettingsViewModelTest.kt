@@ -19,6 +19,7 @@ import dev.harrisonsoftware.stitchCounter.feature.theme.ThemeManager
 import dev.harrisonsoftware.stitchCounter.logging.BugReportLogPackager
 import dev.harrisonsoftware.stitchCounter.logging.BugReportLogPackagerResult
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -58,6 +59,9 @@ class SettingsViewModelTest {
         importLibrary = mockk()
         bugReportLogPackager = mockk()
         every { appPreferencesRepository.selectedTheme } returns flowOf(AppTheme.FOREST_FIBER)
+        every { appPreferencesRepository.forceDarkMode } returns flowOf(false)
+        every { appPreferencesRepository.forceLightMode } returns flowOf(false)
+        every { appPreferencesRepository.forceCounterScreensOn } returns flowOf(false)
         every { themeManager.getThemeColors(any()) } returns emptyList()
     }
 
@@ -66,18 +70,35 @@ class SettingsViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun createViewModel() = SettingsViewModel(
+    private fun createViewModel(appVersion: String = "1.0.0.6") = SettingsViewModel(
         appPreferencesRepository = appPreferencesRepository,
         themeManager = themeManager,
         launcherIconManager = launcherIconManager,
         exportLibraryUseCase = exportLibrary,
         importLibraryUseCase = importLibrary,
         bugReportLogPackager = bugReportLogPackager,
+        appVersion = appVersion,
     )
+
+    @Test
+    fun `ui state shows app version`() {
+        val viewModel = createViewModel(appVersion = "2.0.0")
+
+        assertEquals("2.0.0", viewModel.uiState.value.appVersion)
+    }
 
     @Test
     fun `settings ui state defaults to forest fiber theme`() {
         assertEquals(AppTheme.FOREST_FIBER, SettingsUiState().selectedTheme)
+    }
+
+    @Test
+    fun `display toggles default to off`() {
+        val state = SettingsUiState()
+
+        assertFalse(state.forceDarkMode)
+        assertFalse(state.forceLightMode)
+        assertFalse(state.forceCounterScreensOn)
     }
 
     @Test
@@ -86,6 +107,84 @@ class SettingsViewModelTest {
         val viewModel = createViewModel()
 
         assertEquals(AppTheme.SEA_COTTAGE, viewModel.uiState.value.selectedTheme)
+    }
+
+    @Test
+    fun `init observes force dark mode`() {
+        every { appPreferencesRepository.forceDarkMode } returns flowOf(true)
+        val viewModel = createViewModel()
+
+        assertTrue(viewModel.uiState.value.forceDarkMode)
+    }
+
+    @Test
+    fun `init observes force light mode`() {
+        every { appPreferencesRepository.forceLightMode } returns flowOf(true)
+        val viewModel = createViewModel()
+
+        assertTrue(viewModel.uiState.value.forceLightMode)
+    }
+
+    @Test
+    fun `init observes keep screen on`() {
+        every { appPreferencesRepository.forceCounterScreensOn } returns flowOf(true)
+        val viewModel = createViewModel()
+
+        assertTrue(viewModel.uiState.value.forceCounterScreensOn)
+    }
+
+    @Test
+    fun `onForceDarkModeChanged calls setForceDarkMode when true`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onForceDarkModeChanged(true)
+
+        coVerify(exactly = 1) { appPreferencesRepository.setForceDarkMode(true) }
+    }
+
+    @Test
+    fun `onForceDarkModeChanged calls setForceDarkMode when false`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onForceDarkModeChanged(false)
+
+        coVerify(exactly = 1) { appPreferencesRepository.setForceDarkMode(false) }
+    }
+
+    @Test
+    fun `onForceLightModeChanged calls setForceLightMode when true`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onForceLightModeChanged(true)
+
+        coVerify(exactly = 1) { appPreferencesRepository.setForceLightMode(true) }
+    }
+
+    @Test
+    fun `onForceLightModeChanged calls setForceLightMode when false`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onForceLightModeChanged(false)
+
+        coVerify(exactly = 1) { appPreferencesRepository.setForceLightMode(false) }
+    }
+
+    @Test
+    fun `onForceCounterScreensOnChanged calls setForceCounterScreensOn when true`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onForceCounterScreensOnChanged(true)
+
+        coVerify(exactly = 1) { appPreferencesRepository.setForceCounterScreensOn(true) }
+    }
+
+    @Test
+    fun `onForceCounterScreensOnChanged calls setForceCounterScreensOn when false`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onForceCounterScreensOnChanged(false)
+
+        coVerify(exactly = 1) { appPreferencesRepository.setForceCounterScreensOn(false) }
     }
 
     @Test
