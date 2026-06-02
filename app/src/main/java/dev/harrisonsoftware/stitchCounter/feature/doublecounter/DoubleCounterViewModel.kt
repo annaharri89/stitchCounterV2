@@ -34,6 +34,7 @@ data class DoubleCounterUiState(
     val totalRows: Int = 0,
     val totalStitchesEver: Int = 0,
     val shouldShowCustomAdjustmentTip: Boolean = false,
+    val forceCounterScreensOn: Boolean = false,
     val activeCustomAdjustmentDialogCounterType: CounterType? = null,
     val customAdjustmentDialogInput: String = "",
 ) {
@@ -81,9 +82,20 @@ open class DoubleCounterViewModel @Inject constructor(
     private var persistJob: Job? = null
 
     init {
+        observeForceCounterScreensOn()
         viewModelScope.launch {
             if (appPreferencesRepository.consumeShouldShowCustomAdjustmentTip()) {
                 showCustomAdjustmentTip()
+            }
+        }
+    }
+
+    private fun observeForceCounterScreensOn() {
+        viewModelScope.launch {
+            appPreferencesRepository.forceCounterScreensOn.collect { forceCounterScreensOn ->
+                _uiState.update { currentState ->
+                    currentState.copy(forceCounterScreensOn = forceCounterScreensOn)
+                }
             }
         }
     }
@@ -97,7 +109,9 @@ open class DoubleCounterViewModel @Inject constructor(
                 return@launch
             }
             if (_uiState.value.id != projectId) {
-                _uiState.update { DoubleCounterUiState() }
+                _uiState.update { currentState ->
+                    DoubleCounterUiState(forceCounterScreensOn = currentState.forceCounterScreensOn)
+                }
             }
             val project = getProject(projectId)
             if (project != null) {
@@ -196,6 +210,7 @@ open class DoubleCounterViewModel @Inject constructor(
                         ),
                         totalRows = project.totalRows,
                         totalStitchesEver = restoredTotalStitchesEver,
+                        forceCounterScreensOn = current.forceCounterScreensOn,
                         activeCustomAdjustmentDialogCounterType = current.activeCustomAdjustmentDialogCounterType,
                         customAdjustmentDialogInput = current.customAdjustmentDialogInput
                     )
@@ -306,7 +321,9 @@ open class DoubleCounterViewModel @Inject constructor(
     }
 
     fun resetState() {
-        _uiState.update { _ -> DoubleCounterUiState() }
+        _uiState.update { currentState ->
+            DoubleCounterUiState(forceCounterScreensOn = currentState.forceCounterScreensOn)
+        }
         clearSavedState()
     }
 

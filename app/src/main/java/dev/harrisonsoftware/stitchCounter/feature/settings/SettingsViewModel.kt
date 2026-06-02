@@ -40,9 +40,10 @@ class SettingsViewModel @Inject constructor(
     private val exportLibraryUseCase: ExportLibrary,
     private val importLibraryUseCase: ImportLibrary,
     private val bugReportLogPackager: BugReportLogPackager,
+    appVersion: String,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(SettingsUiState())
+    private val _uiState = MutableStateFlow(SettingsUiState(appVersion = appVersion))
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     private val _effect = Channel<SettingsEffect>(Channel.BUFFERED)
@@ -50,6 +51,9 @@ class SettingsViewModel @Inject constructor(
 
     init {
         observeTheme()
+        observeForceDarkMode()
+        observeForceLightMode()
+        observeForceCounterScreensOn()
     }
 
     private fun observeTheme() {
@@ -69,6 +73,54 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             appPreferencesRepository.setTheme(theme)
             launcherIconManager.pendingTheme = theme
+        }
+    }
+
+    private fun observeForceDarkMode() {
+        viewModelScope.launch {
+            appPreferencesRepository.forceDarkMode.collect { forceDarkMode ->
+                _uiState.update { currentState ->
+                    currentState.copy(forceDarkMode = forceDarkMode)
+                }
+            }
+        }
+    }
+
+    private fun observeForceLightMode() {
+        viewModelScope.launch {
+            appPreferencesRepository.forceLightMode.collect { forceLightMode ->
+                _uiState.update { currentState ->
+                    currentState.copy(forceLightMode = forceLightMode)
+                }
+            }
+        }
+    }
+
+    private fun observeForceCounterScreensOn() {
+        viewModelScope.launch {
+            appPreferencesRepository.forceCounterScreensOn.collect { forceCounterScreensOn ->
+                _uiState.update { currentState ->
+                    currentState.copy(forceCounterScreensOn = forceCounterScreensOn)
+                }
+            }
+        }
+    }
+
+    fun onForceDarkModeChanged(enabled: Boolean) {
+        viewModelScope.launch {
+            appPreferencesRepository.setForceDarkMode(enabled)
+        }
+    }
+
+    fun onForceLightModeChanged(enabled: Boolean) {
+        viewModelScope.launch {
+            appPreferencesRepository.setForceLightMode(enabled)
+        }
+    }
+
+    fun onForceCounterScreensOnChanged(enabled: Boolean) {
+        viewModelScope.launch {
+            appPreferencesRepository.setForceCounterScreensOn(enabled)
         }
     }
 
@@ -225,8 +277,12 @@ private fun ImportLibraryError.toUserMessage(): SettingsUiText = when (this) {
 }
 
 data class SettingsUiState(
+    val appVersion: String = "",
     val selectedTheme: AppTheme = AppTheme.FOREST_FIBER,
     val themeColors: List<ThemeColor> = emptyList(),
+    val forceDarkMode: Boolean = false,
+    val forceLightMode: Boolean = false,
+    val forceCounterScreensOn: Boolean = false,
     val isExporting: Boolean = false,
     val exportSuccess: Boolean = false,
     val exportError: SettingsUiText? = null,

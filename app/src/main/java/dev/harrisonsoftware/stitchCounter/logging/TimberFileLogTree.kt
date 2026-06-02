@@ -25,6 +25,7 @@ private const val LOG_DIRECTORY_NAME = "logs"
 class TimberFileLogTree @Inject constructor(
     private val fileSystemProvider: FileSystemProvider,
     private val logRetentionPolicy: LogRetentionPolicy,
+    private val appVersion: String,
 ) : Timber.Tree() {
     private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val commandChannel = Channel<TimberLogTreeCommand>(Channel.UNLIMITED)
@@ -99,22 +100,14 @@ class TimberFileLogTree @Inject constructor(
 
     private fun appendLogEntry(entry: TimberLogEntry) {
         val logFile = File(resolveLogDirectory(), buildFileName(entry.timestampEpochMillis))
-        val sanitizedMessage = entry.message.replace("\n", "\\n")
-        val logLine = buildString {
-            append(Instant.ofEpochMilli(entry.timestampEpochMillis).toString())
-            append(" | ")
-            append(LogPriorityFormatter.toLabel(entry.priority))
-            append(" | ")
-            append(entry.tag)
-            append(" | ")
-            append(sanitizedMessage)
-            if (entry.throwable != null) {
-                append(" | throwable=")
-                append(entry.throwable::class.java.simpleName)
-                append(":")
-                append(entry.throwable.message ?: "no_message")
-            }
-        }
+        val logLine = formatLogLine(
+            timestamp = Instant.ofEpochMilli(entry.timestampEpochMillis).toString(),
+            levelLabel = LogPriorityFormatter.toLabel(entry.priority),
+            tag = entry.tag,
+            appVersion = appVersion,
+            message = entry.message,
+            throwable = entry.throwable
+        )
         logFile.appendText("$logLine\n")
     }
 

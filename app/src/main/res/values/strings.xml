@@ -103,10 +103,17 @@
     <string name="settings_bug_report_dialog_include_diagnostics">Include diagnostics logs</string>
     <string name="settings_bug_report_dialog_send">Send Bug Report</string>
     <string name="settings_give_feedback">Give Feedback</string>
+    <string name="settings_dark_mode">Dark Mode</string>
+    <string name="settings_dark_mode_subtitle">Always use dark mode, regardless of system settings.</string>
+    <string name="settings_light_mode">Light Mode</string>
+    <string name="settings_light_mode_subtitle">Always use light mode, regardless of system settings.</string>
+    <string name="settings_force_counter_screens_on">Keep Counter Screens Awake</string>
+    <string name="settings_force_counter_screens_on_subtitle">Keeps the screen on while you count.</string>
     <string name="settings_request_feature">Request a Feature</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
     <string name="settings_eula">EULA</string>
     <string name="settings_eula_description">By using Stitch Counter, you agree to the EULA.</string>
+    <string name="settings_app_version">Version %1$s</string>
     <string name="settings_import_complete">Import Complete</string>
     <string name="settings_imported_count">Imported %1$d project(s)</string>
     <string name="settings_failed_import_count">Failed to import %1$d project(s)</string>
@@ -188,4 +195,6 @@
     <string name="cd_thank_you_for_support">Thank you for your support!</string>
     <string name="cd_i_supported_on">I supported toggle, currently on</string>
     <string name="cd_i_supported_off">I supported toggle, currently off</string>
+    <string name="cd_setting_on">On</string>
+    <string name="cd_setting_off">Off</string>
 </resources>

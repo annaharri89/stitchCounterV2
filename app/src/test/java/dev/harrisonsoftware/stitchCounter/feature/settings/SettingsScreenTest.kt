@@ -7,6 +7,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -35,5 +36,38 @@ class SettingsScreenTest {
 
         assertFalse(wasLaunched)
         verify(exactly = 1) { context.startActivity(intent) }
+    }
+
+    @Test
+    fun `updatedExpandedSettingsSectionNames adds section without removing already expanded sections`() {
+        val expandedSections = updatedExpandedSettingsSectionNames(
+            expandedSectionNames = listOf("THEME"),
+            sectionName = "SUPPORT",
+            isExpanded = true
+        )
+
+        assertEquals(listOf("THEME", "SUPPORT"), expandedSections)
+    }
+
+    @Test
+    fun `updatedExpandedSettingsSectionNames does not duplicate an expanded section`() {
+        val expandedSections = updatedExpandedSettingsSectionNames(
+            expandedSectionNames = listOf("THEME", "SUPPORT"),
+            sectionName = "SUPPORT",
+            isExpanded = true
+        )
+
+        assertEquals(listOf("THEME", "SUPPORT"), expandedSections)
+    }
+
+    @Test
+    fun `updatedExpandedSettingsSectionNames removes only the collapsed section`() {
+        val expandedSections = updatedExpandedSettingsSectionNames(
+            expandedSectionNames = listOf("THEME", "SUPPORT", "LEGAL"),
+            sectionName = "SUPPORT",
+            isExpanded = false
+        )
+
+        assertEquals(listOf("THEME", "LEGAL"), expandedSections)
     }
 }

@@ -5,6 +5,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
@@ -24,7 +25,11 @@ class BugReportLogPackagerTest {
         val expectedHtmlFileName = "app-log-$retentionCurrentDate.html"
 
         val fileSystemProvider = FakeFileSystemProvider(filesDirectory, cacheDirectory)
-        val fileLogTree = TimberFileLogTree(fileSystemProvider, LogRetentionPolicy())
+        val fileLogTree = TimberFileLogTree(
+            fileSystemProvider = fileSystemProvider,
+            logRetentionPolicy = LogRetentionPolicy(),
+            appVersion = "1.0.0.6"
+        )
         val logDirectory = fileLogTree.resolveLogDirectory()
         File(logDirectory, logFileName).writeText(
             "2026-03-13T10:00:00.000Z | INFO | SCProjectData | delete_bulk_start count=2"
@@ -50,6 +55,47 @@ class BugReportLogPackagerTest {
             assertTrue(htmlContent.contains("Android version:</strong> 14"))
             assertTrue(htmlContent.contains("Device model:</strong> Pixel Test"))
             assertTrue(htmlContent.contains("SCProjectData"))
+            assertTrue(htmlContent.contains("| app=3.2.1 | delete_bulk_start count=2"))
+        }
+    }
+
+    @Test
+    fun `packageLogsAsHtmlZip stamps app version on legacy log lines`() = runTest {
+        val filesDirectory = Files.createTempDirectory("bug_report_line_version_files").toFile()
+        val cacheDirectory = Files.createTempDirectory("bug_report_line_version_cache").toFile()
+        val retentionCurrentDate = LocalDate.of(2026, 3, 13)
+        val logFileName = "app-log-$retentionCurrentDate.log"
+
+        val fileSystemProvider = FakeFileSystemProvider(filesDirectory, cacheDirectory)
+        val fileLogTree = TimberFileLogTree(
+            fileSystemProvider = fileSystemProvider,
+            logRetentionPolicy = LogRetentionPolicy(),
+            appVersion = "1.0.0.6"
+        )
+        val logDirectory = fileLogTree.resolveLogDirectory()
+        File(logDirectory, logFileName).writeText(
+            """
+            2026-03-13T10:00:00.000Z | INFO | SCProjectData | legacy_event
+            2026-03-13T10:00:01.000Z | WARN | SCProjectData | app=1.0.0.6 | current_event
+            """.trimIndent()
+        )
+        val packager = BugReportLogPackager(
+            fileLogTree = fileLogTree,
+            fileSystemProvider = fileSystemProvider,
+            deviceMetadataProvider = FakeDeviceMetadataProvider()
+        )
+
+        val result = packager.packageLogsAsHtmlZip(retentionCurrentDate = retentionCurrentDate)
+
+        assertTrue(result is BugReportLogPackagerResult.Success)
+        val zipFile = (result as BugReportLogPackagerResult.Success).zipFile
+        ZipFile(zipFile).use { diagnosticsZip ->
+            val htmlContent = diagnosticsZip.entries().asSequence()
+                .map { diagnosticsZip.getInputStream(it).bufferedReader().readText() }
+                .first()
+            assertTrue(htmlContent.contains("| app=3.2.1 | legacy_event"))
+            assertTrue(htmlContent.contains("| app=1.0.0.6 | current_event"))
+            assertFalse(htmlContent.contains("| app=3.2.1 | app=1.0.0.6"))
         }
     }
 
@@ -58,7 +104,11 @@ class BugReportLogPackagerTest {
         val filesDirectory = Files.createTempDirectory("bug_report_latest_log_files").toFile()
         val cacheDirectory = Files.createTempDirectory("bug_report_latest_log_cache").toFile()
         val fileSystemProvider = FakeFileSystemProvider(filesDirectory, cacheDirectory)
-        val fileLogTree = TimberFileLogTree(fileSystemProvider, LogRetentionPolicy())
+        val fileLogTree = TimberFileLogTree(
+            fileSystemProvider = fileSystemProvider,
+            logRetentionPolicy = LogRetentionPolicy(),
+            appVersion = "1.0.0.6"
+        )
         Timber.plant(fileLogTree)
         val packager = BugReportLogPackager(
             fileLogTree = fileLogTree,
@@ -75,7 +125,7 @@ class BugReportLogPackagerTest {
         ZipFile(zipFile).use { diagnosticsZip ->
             val entry = diagnosticsZip.entries().asSequence().first()
             val htmlContent = diagnosticsZip.getInputStream(entry).bufferedReader().readText()
-            assertTrue(htmlContent.contains("latest_log_before_packaging"))
+            assertTrue(htmlContent.contains("| app=1.0.0.6 | latest_log_before_packaging"))
         }
         Timber.uproot(fileLogTree)
     }
@@ -85,7 +135,11 @@ class BugReportLogPackagerTest {
         val filesDirectory = Files.createTempDirectory("bug_report_no_logs_files").toFile()
         val cacheDirectory = Files.createTempDirectory("bug_report_no_logs_cache").toFile()
         val fileSystemProvider = FakeFileSystemProvider(filesDirectory, cacheDirectory)
-        val fileLogTree = TimberFileLogTree(fileSystemProvider, LogRetentionPolicy())
+        val fileLogTree = TimberFileLogTree(
+            fileSystemProvider = fileSystemProvider,
+            logRetentionPolicy = LogRetentionPolicy(),
+            appVersion = "1.0.0.6"
+        )
         val packager = BugReportLogPackager(
             fileLogTree = fileLogTree,
             fileSystemProvider = fileSystemProvider,
@@ -102,7 +156,11 @@ class BugReportLogPackagerTest {
         val filesDirectory = Files.createTempDirectory("bug_report_concurrent_log_files").toFile()
         val cacheDirectory = Files.createTempDirectory("bug_report_concurrent_log_cache").toFile()
         val fileSystemProvider = FakeFileSystemProvider(filesDirectory, cacheDirectory)
-        val fileLogTree = TimberFileLogTree(fileSystemProvider, LogRetentionPolicy())
+        val fileLogTree = TimberFileLogTree(
+            fileSystemProvider = fileSystemProvider,
+            logRetentionPolicy = LogRetentionPolicy(),
+            appVersion = "1.0.0.6"
+        )
         Timber.plant(fileLogTree)
         val packager = BugReportLogPackager(
             fileLogTree = fileLogTree,

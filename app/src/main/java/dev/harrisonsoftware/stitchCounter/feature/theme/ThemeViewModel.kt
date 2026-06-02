@@ -22,6 +22,8 @@ class ThemeViewModel @Inject constructor(
 
     init {
         observeTheme()
+        observeForceDarkMode()
+        observeForceLightMode()
     }
 
     private fun observeTheme() {
@@ -31,8 +33,32 @@ class ThemeViewModel @Inject constructor(
             }
         }
     }
+
+    private fun observeForceDarkMode() {
+        viewModelScope.launch {
+            appPreferencesRepository.forceDarkMode.collect { forceDarkMode ->
+                _uiState.update { currentState -> currentState.copy(forceDarkMode = forceDarkMode) }
+            }
+        }
+    }
+
+    private fun observeForceLightMode() {
+        viewModelScope.launch {
+            appPreferencesRepository.forceLightMode.collect { forceLightMode ->
+                _uiState.update { currentState -> currentState.copy(forceLightMode = forceLightMode) }
+            }
+        }
+    }
 }
 
 data class ThemeUiState(
-    val selectedTheme: AppTheme = AppTheme.FOREST_FIBER
-)
+    val selectedTheme: AppTheme = AppTheme.FOREST_FIBER,
+    val forceDarkMode: Boolean = false,
+    val forceLightMode: Boolean = false,
+) {
+    fun resolveDarkTheme(systemInDarkTheme: Boolean): Boolean = when {
+        forceDarkMode -> true
+        forceLightMode -> false
+        else -> systemInDarkTheme
+    }
+}

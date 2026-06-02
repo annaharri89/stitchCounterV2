@@ -122,7 +122,11 @@ class BugReportLogPackager @Inject constructor(
     ): File {
         val outputFileName = "${logFile.nameWithoutExtension}.html"
         val outputFile = File(outputDirectory, outputFileName)
-        val escapedLogContent = runCatching { logFile.readText() }.getOrDefault("").escapeHtml()
+        val logContentWithAppVersion = addAppVersionToFile(
+            logFileContent = runCatching { logFile.readText() }.getOrDefault(""),
+            appVersion = metadata.appVersion
+        )
+        val escapedLogContent = logContentWithAppVersion.escapeHtml()
 
         val html = buildString {
             append("<!doctype html><html><head><meta charset=\"utf-8\">")

@@ -32,6 +32,7 @@ data class SingleCounterUiState(
     val counterState: CounterState = CounterState(),
     val totalStitchesEver: Int = 0,
     val shouldShowCustomAdjustmentTip: Boolean = false,
+    val forceCounterScreensOn: Boolean = false,
     val customAdjustmentDialogState: CustomAdjustmentDialogState = CustomAdjustmentDialogState(),
 )
 
@@ -59,9 +60,20 @@ open class SingleCounterViewModel @Inject constructor(
     private var persistJob: Job? = null
 
     init {
+        observeForceCounterScreensOn()
         viewModelScope.launch {
             if (appPreferencesRepository.consumeShouldShowCustomAdjustmentTip()) {
                 showCustomAdjustmentTip()
+            }
+        }
+    }
+
+    private fun observeForceCounterScreensOn() {
+        viewModelScope.launch {
+            appPreferencesRepository.forceCounterScreensOn.collect { forceCounterScreensOn ->
+                _uiState.update { currentState ->
+                    currentState.copy(forceCounterScreensOn = forceCounterScreensOn)
+                }
             }
         }
     }
@@ -75,7 +87,9 @@ open class SingleCounterViewModel @Inject constructor(
                 return@launch
             }
             if (_uiState.value.id != projectId) {
-                _uiState.update { SingleCounterUiState() }
+                _uiState.update { currentState ->
+                    SingleCounterUiState(forceCounterScreensOn = currentState.forceCounterScreensOn)
+                }
             }
             val project = getProject(projectId)
             if (project != null) {
@@ -134,6 +148,7 @@ open class SingleCounterViewModel @Inject constructor(
                             customAdjustmentAmount = restoredCustomAdjustmentAmount
                         ),
                         totalStitchesEver = restoredTotalStitchesEver,
+                        forceCounterScreensOn = current.forceCounterScreensOn,
                         customAdjustmentDialogState = current.customAdjustmentDialogState
                     )
                 }
@@ -232,7 +247,9 @@ open class SingleCounterViewModel @Inject constructor(
     }
 
     fun resetState() {
-        _uiState.update { _ -> SingleCounterUiState() }
+        _uiState.update { currentState ->
+            SingleCounterUiState(forceCounterScreensOn = currentState.forceCounterScreensOn)
+        }
         clearSavedState()
     }
 

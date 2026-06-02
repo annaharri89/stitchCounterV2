@@ -44,6 +44,50 @@ class AppPreferencesRepository @Inject constructor(
 
     // endregion
 
+    // region Display
+
+    private val forceDarkModeKey = booleanPreferencesKey("force_dark_mode")
+    private val forceLightModeKey = booleanPreferencesKey("force_light_mode")
+    private val forceCounterScreensOnKey = booleanPreferencesKey("force_counter_screens_on")
+
+    val forceDarkMode: Flow<Boolean> = context.appDataStore.data.map { preferences ->
+        preferences[forceDarkModeKey] ?: false
+    }
+
+    val forceLightMode: Flow<Boolean> = context.appDataStore.data.map { preferences ->
+        preferences[forceLightModeKey] ?: false
+    }
+
+    val forceCounterScreensOn: Flow<Boolean> = context.appDataStore.data.map { preferences ->
+        preferences[forceCounterScreensOnKey] ?: false
+    }
+
+    suspend fun setForceDarkMode(enabled: Boolean) {
+        context.appDataStore.edit { preferences ->
+            preferences[forceDarkModeKey] = enabled
+            if (enabled) {
+                preferences[forceLightModeKey] = false
+            }
+        }
+    }
+
+    suspend fun setForceLightMode(enabled: Boolean) {
+        context.appDataStore.edit { preferences ->
+            preferences[forceLightModeKey] = enabled
+            if (enabled) {
+                preferences[forceDarkModeKey] = false
+            }
+        }
+    }
+
+    suspend fun setForceCounterScreensOn(enabled: Boolean) {
+        context.appDataStore.edit { preferences ->
+            preferences[forceCounterScreensOnKey] = enabled
+        }
+    }
+
+    // endregion
+
     // region Support
 
     private val hasSupportedKey = booleanPreferencesKey("has_supported_app")

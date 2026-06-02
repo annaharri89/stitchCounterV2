@@ -5,8 +5,10 @@ import android.content.ClipData
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -19,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -56,11 +59,21 @@ fun SettingsScreen(
     val showImportDialog = remember { mutableStateOf(false) }
     val showBugReportDialog = remember { mutableStateOf(false) }
     val includeDiagnosticsForCurrentBugReport = rememberSaveable { mutableStateOf(true) }
-    val isThemeSectionExpanded = remember { mutableStateOf(false) }
-    val isBackupSectionExpanded = remember { mutableStateOf(false) }
-    val isSupportSectionExpanded = remember { mutableStateOf(false) }
-    val isLegalSectionExpanded = remember { mutableStateOf(false) }
+    val settingsSections = remember { SettingsScreenSection.entries.toList() }
+    val expandedSectionNames = rememberSaveable { mutableStateOf(emptyList<String>()) }
     val lazyListState = rememberLazyListState()
+
+    fun isSectionExpanded(section: SettingsScreenSection): Boolean {
+        return section.name in expandedSectionNames.value
+    }
+
+    fun updateSectionExpanded(section: SettingsScreenSection, isExpanded: Boolean) {
+        expandedSectionNames.value = updatedExpandedSettingsSectionNames(
+            expandedSectionNames = expandedSectionNames.value,
+            sectionName = section.name,
+            isExpanded = isExpanded
+        )
+    }
     
     LaunchedEffect(uiState.exportSuccess) {
         if (uiState.exportSuccess) {
@@ -114,112 +127,102 @@ fun SettingsScreen(
         }
     }
 
-    ScrollToRevealExpandedItem(isBackupSectionExpanded.value, 1, lazyListState)
-    ScrollToRevealExpandedItem(isSupportSectionExpanded.value, 2, lazyListState)
-    ScrollToRevealExpandedItem(isLegalSectionExpanded.value, 3, lazyListState)
+    settingsSections.forEachIndexed { index, section ->
+        ScrollToRevealExpandedItem(isSectionExpanded(section), index, lazyListState)
+    }
 
     Surface {
-        LazyColumn(
-            state = lazyListState,
-            contentPadding = PaddingValues(vertical = 16.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                ExpandableSection(
-                    title = stringResource(R.string.settings_theme),
-                    isExpanded = isThemeSectionExpanded.value,
-                    onToggleExpanded = { isThemeSectionExpanded.value = !isThemeSectionExpanded.value }
+        Column(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                state = lazyListState,
+                contentPadding = PaddingValues(top = 16.dp, bottom = 8.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(
+                    items = settingsSections,
+                    key = { sectionType -> sectionType.name }
+                ) { sectionType ->
+                SettingsSection(
+                    sectionName = stringResource(sectionType.titleId),
+                    isExpanded = isSectionExpanded(sectionType),
+                    updateExpanded = { newIsExpanded ->
+                        updateSectionExpanded(sectionType, newIsExpanded)
+                    }
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Text(
-                            text = stringResource(R.string.settings_choose_color_scheme),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
-                        AppTheme.entries.forEach { theme ->
-                            ThemeOptionCard(
-                                theme = theme,
-                                isSelected = uiState.selectedTheme == theme,
-                                themeColors = if (uiState.selectedTheme == theme) uiState.themeColors else emptyList(),
-                                onThemeSelected = { viewModel.onThemeSelected(theme) }
+                    when (sectionType) {
+                        SettingsScreenSection.THEME -> {
+                            ThemeCard(
+                                themeColors = uiState.themeColors,
+                                selectedTheme = uiState.selectedTheme,
+                                updateTheme = { newTheme ->
+                                    viewModel.onThemeSelected(newTheme)
+                            })
+                        }
+                        SettingsScreenSection.SETTINGS -> {
+                            SettingsCard(
+                                forceDarkMode = uiState.forceDarkMode,
+                                onForceDarkModeChange = viewModel::onForceDarkModeChanged,
+                                forceLightMode = uiState.forceLightMode,
+                                onForceLightModeChange = viewModel::onForceLightModeChanged,
+                                forceCounterScreensOn = uiState.forceCounterScreensOn,
+                                onForceCounterScreensOnChange = viewModel::onForceCounterScreensOnChanged
+                            )
+                        }
+                        SettingsScreenSection.BACKUP_RESTORE -> {
+                            BackupRestoreCard(
+                                isExporting = uiState.isExporting,
+                                isImporting = uiState.isImporting,
+                                exportError = uiState.exportError,
+                                importError = uiState.importError,
+                                onExport = {
+                                    viewModel.onLaunchingExternalActivity()
+                                    val timestamp = java.text.SimpleDateFormat(
+                                        "yyyyMMdd_HHmmss",
+                                        java.util.Locale.US
+                                    )
+                                        .format(java.util.Date())
+                                    exportLauncher.launch("stitch_counter_backup_$timestamp.zip")
+                                },
+                                onImport = {
+                                    viewModel.onLaunchingExternalActivity()
+                                    importLauncher.launch("application/zip")
+                                }
+                            )
+                        }
+                        SettingsScreenSection.SUPPORT -> {
+                            SupportCard(
+                                onReportBug = {
+                                    includeDiagnosticsForCurrentBugReport.value = true
+                                    showBugReportDialog.value = true
+                                },
+                                onGiveFeedback = {
+                                    viewModel.onGiveFeedback()
+                                },
+                                onRequestFeature = {
+                                    viewModel.onRequestFeature()
+                                }
+                            )
+                        }
+                        SettingsScreenSection.LEGAL -> {
+                            LegalCard(
+                                onOpenPrivacyPolicy = {
+                                    viewModel.onOpenPrivacyPolicy()
+                                },
+                                onOpenEULA = {
+                                    viewModel.onOpenEULA()
+                                }
                             )
                         }
                     }
                 }
             }
-
-            item {
-                ExpandableSection(
-                    title = stringResource(R.string.settings_backup_restore),
-                    isExpanded = isBackupSectionExpanded.value,
-                    onToggleExpanded = { isBackupSectionExpanded.value = !isBackupSectionExpanded.value }
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Text(
-                            text = stringResource(R.string.settings_export_import_library),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
-                        BackupRestoreCard(
-                            isExporting = uiState.isExporting,
-                            isImporting = uiState.isImporting,
-                            exportError = uiState.exportError,
-                            importError = uiState.importError,
-                            onExport = {
-                                viewModel.onLaunchingExternalActivity()
-                                val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US)
-                                    .format(java.util.Date())
-                                exportLauncher.launch("stitch_counter_backup_$timestamp.zip")
-                            },
-                            onImport = {
-                                viewModel.onLaunchingExternalActivity()
-                                importLauncher.launch("application/zip")
-                            }
-                        )
-                    }
-                }
             }
 
-            item {
-                ExpandableSection(
-                    title = stringResource(R.string.settings_support),
-                    isExpanded = isSupportSectionExpanded.value,
-                    onToggleExpanded = { isSupportSectionExpanded.value = !isSupportSectionExpanded.value }
-                ) {
-                    SupportCard(
-                        onReportBug = {
-                            includeDiagnosticsForCurrentBugReport.value = true
-                            showBugReportDialog.value = true
-                        },
-                        onGiveFeedback = {
-                            viewModel.onGiveFeedback()
-                        },
-                        onRequestFeature = {
-                            viewModel.onRequestFeature()
-                        }
-                    )
-                }
-            }
-
-            item {
-                ExpandableSection(
-                    title = stringResource(R.string.settings_privacy_legal),
-                    isExpanded = isLegalSectionExpanded.value,
-                    onToggleExpanded = { isLegalSectionExpanded.value = !isLegalSectionExpanded.value }
-                ) {
-                    LegalCard(
-                        onOpenPrivacyPolicy = {
-                            viewModel.onOpenPrivacyPolicy()
-                        },
-                        onOpenEULA = {
-                            viewModel.onOpenEULA()
-                        }
-                    )
-                }
-            }
+            SettingsAppVersionLabel(appVersion = uiState.appVersion)
         }
 
         if (showImportDialog.value) {
@@ -284,6 +287,30 @@ fun SettingsScreen(
     }
 }
 
+private enum class SettingsScreenSection(@param:StringRes val titleId: Int) {
+    THEME(R.string.settings_theme),
+    SETTINGS(R.string.nav_settings),
+    BACKUP_RESTORE(R.string.settings_backup_restore),
+    SUPPORT(R.string.settings_support),
+    LEGAL(R.string.settings_privacy_legal)
+}
+
+internal fun updatedExpandedSettingsSectionNames(
+    expandedSectionNames: List<String>,
+    sectionName: String,
+    isExpanded: Boolean
+): List<String> {
+    return if (isExpanded) {
+        if (sectionName in expandedSectionNames) {
+            expandedSectionNames
+        } else {
+            expandedSectionNames + sectionName
+        }
+    } else {
+        expandedSectionNames - sectionName
+    }
+}
+
 internal fun launchExternalActivitySafely(context: android.content.Context, intent: Intent): Boolean {
     return runCatching { context.startActivity(intent) }
         .fold(
@@ -333,4 +360,35 @@ private fun launchBugReportWithAttachment(
         }
         false
     }
+}
+
+@Composable
+private fun SettingsAppVersionLabel(
+    appVersion: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = stringResource(R.string.settings_app_version, appVersion),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    )
+}
+
+@Composable
+private fun SettingsSection(
+    sectionName: String,
+    isExpanded: Boolean,
+    updateExpanded: (isExpanded: Boolean) -> Unit,
+    content: @Composable () -> Unit
+) {
+    ExpandableSection(
+        title = sectionName,
+        isExpanded = isExpanded,
+        onToggleExpanded = { updateExpanded(!isExpanded) },
+        content = content
+    )
 }
