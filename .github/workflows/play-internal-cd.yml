@@ -14,6 +14,9 @@ jobs:
   deploy-internal:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    concurrency:
+      group: play-internal-deploy
+      cancel-in-progress: false
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'workflow_run' &&
@@ -37,6 +40,13 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
+
+      - name: Sync version properties from main before bump
+        env:
+          TARGET_BRANCH: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}
+        run: |
+          git fetch origin "${TARGET_BRANCH}"
+          git show "origin/${TARGET_BRANCH}:gradle/version.properties" > gradle/version.properties
 
       - name: Bump version for Play (monotonic versionCode)
         run: bash scripts/bump-version-properties.sh
