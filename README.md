@@ -33,9 +33,8 @@ This repo is a rewrite of the older [Stitch Counter](https://github.com/annaharr
 ## Live links
 
 - Play open testing: [Stitch Counter open track](https://play.google.com/apps/testing/dev.harrisonsoftware.stitchCounter)
-- LinkedIn: [Anna Harrison](https://www.linkedin.com/in/anna-harrison-83a38628/)
-- Portfolio: [harrisonsoftware.dev](https://harrisonsoftware.dev)
-- Contact: [harrisonsoftware.dev/contact](https://harrisonsoftware.dev/contact)
+- Portfolio & case study: [upwork.harrisonsoftware.dev](https://upwork.harrisonsoftware.dev)
+- Available on Upwork: [Anna Harrison](https://www.upwork.com/freelancers/annah80)
 
 ## Screenshots
 

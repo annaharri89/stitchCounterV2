@@ -59,7 +59,7 @@ class AppPreferencesRepository @Inject constructor(
     }
 
     val forceCounterScreensOn: Flow<Boolean> = context.appDataStore.data.map { preferences ->
-        preferences[forceCounterScreensOnKey] ?: false
+        preferences[forceCounterScreensOnKey] ?: true
     }
 
     suspend fun setForceDarkMode(enabled: Boolean) {
@@ -83,6 +83,12 @@ class AppPreferencesRepository @Inject constructor(
     suspend fun setForceCounterScreensOn(enabled: Boolean) {
         context.appDataStore.edit { preferences ->
             preferences[forceCounterScreensOnKey] = enabled
+        }
+    }
+
+    internal suspend fun removeStoredForceCounterScreensOnPreference() {
+        context.appDataStore.edit { preferences ->
+            preferences.remove(forceCounterScreensOnKey)
         }
     }
 

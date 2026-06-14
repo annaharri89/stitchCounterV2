@@ -29,7 +29,7 @@ class AppPreferencesRepositoryTest {
     fun tearDown() = runTest {
         repository.setForceDarkMode(false)
         repository.setForceLightMode(false)
-        repository.setForceCounterScreensOn(false)
+        repository.removeStoredForceCounterScreensOnPreference()
     }
 
     @Test
@@ -43,8 +43,9 @@ class AppPreferencesRepositoryTest {
     }
 
     @Test
-    fun `forceCounterScreensOn defaults to false`() = runTest {
-        assertFalse(repository.forceCounterScreensOn.first())
+    fun `forceCounterScreensOn defaults to true`() = runTest {
+        repository.removeStoredForceCounterScreensOnPreference()
+        assertTrue(repository.forceCounterScreensOn.first())
     }
 
     @Test
