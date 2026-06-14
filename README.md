@@ -17,8 +17,8 @@ This repo is a rewrite of the older [Stitch Counter](https://github.com/annaharr
 
 ### Success Metrics
 
-- **Early usage signal:** 50+ users in Google Play internal testing
-- **Stability signal:** 0 crashes in Google Play Console (Android vitals) for the current early-stage release
+- **Usage signal:** 500+ installs on Google Play (production)
+- **Stability signal:** 0 crashes in Google Play Console (Android vitals) for the current production release
 - **Quality signal:** JVM unit tests in `app/src/test`; line coverage on [Codecov](https://codecov.io/gh/annaharri89/stitchCounterV2)
 
 ### Backup and restore reliability
@@ -32,7 +32,7 @@ This repo is a rewrite of the older [Stitch Counter](https://github.com/annaharr
 
 ## Live links
 
-- Play open testing: [Stitch Counter open track](https://play.google.com/apps/testing/dev.harrisonsoftware.stitchCounter)
+- Google Play: [Stitch Counter: Knit Crochet](https://play.google.com/store/apps/details?id=dev.harrisonsoftware.stitchCounter)
 - Portfolio & case study: [upwork.harrisonsoftware.dev](https://upwork.harrisonsoftware.dev)
 - Available on Upwork: [Anna Harrison](https://www.upwork.com/freelancers/annah80)
 
