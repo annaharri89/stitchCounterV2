@@ -17,7 +17,7 @@ This repo is a rewrite of the older [Stitch Counter](https://github.com/annaharr
 
 ### Success Metrics
 
-- **Usage signal:** 500+ installs on Google Play (production)
+- **Usage signal:** 1000+ installs on Google Play (production)
 - **Stability signal:** 0 crashes in Google Play Console (Android vitals) for the current production release
 - **Quality signal:** JVM unit tests in `app/src/test`; line coverage on [Codecov](https://codecov.io/gh/annaharri89/stitchCounterV2)
 
