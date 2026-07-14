@@ -92,6 +92,28 @@ interface ProjectDao {
 
     @Query("""
         UPDATE entry 
+        SET title = :title,
+            notes = :notes,
+            total_rows = :repeatGoal,
+            row_adjustment = :rowsPerRepeat,
+            image_paths = :imagePaths,
+            completed_at = :completedAt,
+            updated_at = :updatedAt
+        WHERE _id = :id
+    """)
+    suspend fun updateRowAndRepeatProjectDetailValues(
+        id: Int,
+        title: String,
+        notes: String,
+        repeatGoal: Int,
+        rowsPerRepeat: Int,
+        imagePaths: List<String>,
+        completedAt: Long?,
+        updatedAt: Long
+    )
+
+    @Query("""
+        UPDATE entry 
         SET stitch_counter_number = :stitchCount,
             stitch_adjustment = :stitchAdjustment,
             total_stitches_ever = :totalStitchesEver,
@@ -126,6 +148,26 @@ interface ProjectDao {
         rowCount: Int,
         rowAdjustment: Int,
         totalStitchesEver: Int,
+        clearCompletedAt: Boolean,
+        updatedAt: Long
+    )
+
+    @Query("""
+        UPDATE entry 
+        SET stitch_counter_number = :repeatCount,
+            row_counter_number = :rowCount,
+            row_adjustment = :rowsPerRepeat,
+            total_rows = :repeatGoal,
+            completed_at = CASE WHEN :clearCompletedAt THEN NULL ELSE completed_at END,
+            updated_at = :updatedAt
+        WHERE _id = :id
+    """)
+    suspend fun updateRowAndRepeatValues(
+        id: Int,
+        repeatCount: Int,
+        rowCount: Int,
+        rowsPerRepeat: Int,
+        repeatGoal: Int,
         clearCompletedAt: Boolean,
         updatedAt: Long
     )

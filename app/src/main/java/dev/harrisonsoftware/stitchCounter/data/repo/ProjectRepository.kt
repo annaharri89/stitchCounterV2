@@ -59,7 +59,37 @@ class ProjectRepository @Inject constructor(
         completedAt: Long?,
         updatedAt: Long
     ) {
-        projectDao.updateProjectDetailValues(id, title, notes, totalRows, imagePaths, completedAt, updatedAt)
+        projectDao.updateProjectDetailValues(
+            id = id,
+            title = title,
+            notes = notes,
+            totalRows = totalRows,
+            imagePaths = imagePaths,
+            completedAt = completedAt,
+            updatedAt = updatedAt
+        )
+    }
+
+    suspend fun updateRowAndRepeatProjectDetailValues(
+        id: Int,
+        title: String,
+        notes: String,
+        repeatGoal: Int,
+        rowsPerRepeat: Int,
+        imagePaths: List<String>,
+        completedAt: Long?,
+        updatedAt: Long
+    ) {
+        projectDao.updateRowAndRepeatProjectDetailValues(
+            id = id,
+            title = title,
+            notes = notes,
+            repeatGoal = repeatGoal,
+            rowsPerRepeat = rowsPerRepeat,
+            imagePaths = imagePaths,
+            completedAt = completedAt,
+            updatedAt = updatedAt
+        )
     }
 
     suspend fun updateSingleCounterValues(
@@ -97,6 +127,26 @@ class ProjectRepository @Inject constructor(
             rowCount = rowCount,
             rowAdjustment = rowAdjustment,
             totalStitchesEver = totalStitchesEver,
+            clearCompletedAt = clearCompletedAt,
+            updatedAt = updatedAt
+        )
+    }
+
+    suspend fun updateRowAndRepeatValues(
+        id: Int,
+        repeatCount: Int,
+        rowCount: Int,
+        rowsPerRepeat: Int,
+        repeatGoal: Int,
+        clearCompletedAt: Boolean,
+        updatedAt: Long
+    ) {
+        projectDao.updateRowAndRepeatValues(
+            id = id,
+            repeatCount = repeatCount,
+            rowCount = rowCount,
+            rowsPerRepeat = rowsPerRepeat,
+            repeatGoal = repeatGoal,
             clearCompletedAt = clearCompletedAt,
             updatedAt = updatedAt
         )
