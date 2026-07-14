@@ -55,4 +55,31 @@ class ProjectValidatorTest {
     fun `areTotalRowsValidForType returns false for DOUBLE with negative rows`() {
         assertFalse(ProjectValidator.areTotalRowsValidForType(-1, ProjectType.DOUBLE))
     }
+
+    @Test
+    fun `areTotalRowsValidForType returns false for ROW_AND_REPEAT with zero rows`() {
+        assertFalse(ProjectValidator.areTotalRowsValidForType(0, ProjectType.ROW_AND_REPEAT))
+    }
+
+    @Test
+    fun `areTotalRowsValidForType returns true for ROW_AND_REPEAT with positive rows`() {
+        assertTrue(ProjectValidator.areTotalRowsValidForType(20, ProjectType.ROW_AND_REPEAT))
+    }
+
+    @Test
+    fun `areRowsPerRepeatValid returns true for positive values`() {
+        assertTrue(ProjectValidator.areRowsPerRepeatValid(8))
+    }
+
+    @Test
+    fun `areRowsPerRepeatValid returns false for zero or negative values`() {
+        assertFalse(ProjectValidator.areRowsPerRepeatValid(0))
+        assertFalse(ProjectValidator.areRowsPerRepeatValid(-1))
+    }
+
+    @Test
+    fun `areTotalRowsValidForType returns true for UNKNOWN regardless of total rows`() {
+        assertTrue(ProjectValidator.areTotalRowsValidForType(0, ProjectType.UNKNOWN))
+        assertTrue(ProjectValidator.areTotalRowsValidForType(-1, ProjectType.UNKNOWN))
+    }
 }

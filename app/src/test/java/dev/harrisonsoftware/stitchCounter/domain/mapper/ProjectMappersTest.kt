@@ -64,6 +64,12 @@ class ProjectMappersTest {
     }
 
     @Test
+    fun `toDomain maps row and repeat entity correctly`() {
+        val domain = sampleEntity(type = "row_and_repeat").toDomain()
+        assertEquals(ProjectType.ROW_AND_REPEAT, domain.type)
+    }
+
+    @Test
     fun `toDomain is case insensitive for double type`() {
         assertEquals(ProjectType.DOUBLE, sampleEntity(type = "Double").toDomain().type)
         assertEquals(ProjectType.DOUBLE, sampleEntity(type = "DOUBLE").toDomain().type)
@@ -71,9 +77,9 @@ class ProjectMappersTest {
     }
 
     @Test
-    fun `toDomain treats unknown type as SINGLE`() {
-        assertEquals(ProjectType.SINGLE, sampleEntity(type = "triple").toDomain().type)
-        assertEquals(ProjectType.SINGLE, sampleEntity(type = "").toDomain().type)
+    fun `toDomain treats unknown type as UNKNOWN`() {
+        assertEquals(ProjectType.UNKNOWN, sampleEntity(type = "triple").toDomain().type)
+        assertEquals(ProjectType.UNKNOWN, sampleEntity(type = "").toDomain().type)
     }
 
     @Test
@@ -99,6 +105,12 @@ class ProjectMappersTest {
     fun `toEntity maps DOUBLE to double string`() {
         val entity = sampleDomain(type = ProjectType.DOUBLE).toEntity()
         assertEquals("double", entity.type)
+    }
+
+    @Test
+    fun `toEntity maps ROW_AND_REPEAT to row_and_repeat string`() {
+        val entity = sampleDomain(type = ProjectType.ROW_AND_REPEAT).toEntity()
+        assertEquals("row_and_repeat", entity.type)
     }
 
     @Test

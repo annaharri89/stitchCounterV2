@@ -20,5 +20,5 @@ data class Project(
     val totalStitchesEver: Int = 0,
 )
 
-enum class ProjectType { SINGLE, DOUBLE }
+enum class ProjectType { SINGLE, DOUBLE, ROW_AND_REPEAT, UNKNOWN }
 
