@@ -1,8 +1,10 @@
 package dev.harrisonsoftware.stitchCounter.feature.singleCounter
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.Constants
 import dev.harrisonsoftware.stitchCounter.data.repo.AppPreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount
@@ -35,6 +37,7 @@ data class SingleCounterUiState(
     val forceCounterScreensOn: Boolean = false,
     val counterHapticFeedbackEnabled: Boolean = true,
     val customAdjustmentDialogState: CustomAdjustmentDialogState = CustomAdjustmentDialogState(),
+    @StringRes val loadError: Int? = null,
 )
 
 @HiltViewModel
@@ -178,6 +181,9 @@ open class SingleCounterViewModel @Inject constructor(
             } else {
                 Timber.tag(Constants.LOG_TAG_SINGLE_COUNTER_VIEW_MODEL)
                     .w("event=project_load_missing projectId=$projectId")
+                _uiState.update { currentState ->
+                    currentState.copy(loadError = R.string.error_project_not_found)
+                }
             }
         }
     }

@@ -1,9 +1,11 @@
 package dev.harrisonsoftware.stitchCounter.feature.doublecounter
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.harrisonsoftware.stitchCounter.Constants
+import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.data.repo.AppPreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount
 import dev.harrisonsoftware.stitchCounter.domain.model.CounterState
@@ -38,6 +40,7 @@ data class DoubleCounterUiState(
     val counterHapticFeedbackEnabled: Boolean = true,
     val activeCustomAdjustmentDialogCounterType: CounterType? = null,
     val customAdjustmentDialogInput: String = "",
+    @StringRes val loadError: Int? = null,
 ) {
     fun customAdjustmentDialogStateFor(counterType: CounterType) = CustomAdjustmentDialogState(
         isVisible = activeCustomAdjustmentDialogCounterType == counterType,
@@ -241,6 +244,9 @@ open class DoubleCounterViewModel @Inject constructor(
             } else {
                 Timber.tag(Constants.LOG_TAG_DOUBLE_COUNTER_VIEW_MODEL)
                     .w("event=project_load_missing projectId=$projectId")
+                _uiState.update { currentState ->
+                    currentState.copy(loadError = R.string.error_project_not_found)
+                }
             }
         }
     }

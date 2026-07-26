@@ -60,6 +60,7 @@
     <string name="dialog_discard_changes">Discard Changes?</string>
     <string name="dialog_title_required_message">Project title is required. Do you want to discard this project?</string>
     <string name="dialog_discard_changes_message">You have unsaved changes. Are you sure you want to discard them?</string>
+    <string name="error_project_not_found">This project was deleted or could not be found.</string>
     <string name="error_title_required">Title is required</string>
     <string name="error_total_rows_greater_than_zero">Total rows must be greater than 0</string>
     <string name="error_total_rows_required">Total rows is required</string>

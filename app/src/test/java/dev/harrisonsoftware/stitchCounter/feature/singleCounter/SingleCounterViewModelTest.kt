@@ -2,6 +2,7 @@ package dev.harrisonsoftware.stitchCounter.feature.singleCounter
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.data.repo.AppPreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount
 import dev.harrisonsoftware.stitchCounter.domain.model.CounterState
@@ -141,6 +142,17 @@ class SingleCounterViewModelTest {
         viewModel.loadProject(0)
 
         assertEquals(SingleCounterUiState(), viewModel.uiState.value)
+    }
+
+    @Test
+    fun `loadProject with missing project sets load error`() = runTest {
+        coEvery { getProject(99) } returns null
+        val viewModel = createViewModel()
+
+        viewModel.loadProject(99)
+
+        assertEquals(R.string.error_project_not_found, viewModel.uiState.value.loadError)
+        assertEquals(0, viewModel.uiState.value.id)
     }
 
     @Test
