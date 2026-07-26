@@ -71,6 +71,5 @@ fun RootNavigationScreen(
         currentSheetScreen = currentSheetScreen,
         viewModel = viewModel,
         isWideLayout = isWideLayout,
-        onDismissalResult = { }
     )
 }

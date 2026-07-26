@@ -146,6 +146,62 @@ fun ProjectStatsContent(
                 modifier = modifier
             )
         }
+        ProjectType.ROW_AND_REPEAT -> {
+            RowAndRepeatProjectStats(
+                project = project,
+                modifier = modifier
+            )
+        }
+        ProjectType.UNKNOWN -> {
+            Text(
+                text = stringResource(R.string.library_unknown_project_type),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                modifier = modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun RowAndRepeatProjectStats(
+    project: Project,
+    modifier: Modifier = Modifier
+) {
+    val repeatGoal = if (project.totalRows > 0) project.totalRows else null
+    val repeatProgress: Float? = repeatGoal?.let { goal ->
+        (project.stitchCounterNumber.toFloat() / goal.toFloat()).coerceIn(0f, 1f)
+    }
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            StatBadge(
+                label = stringResource(R.string.row_and_repeat_row_label),
+                value = project.rowCounterNumber.toString(),
+                modifier = Modifier.weight(1f)
+            )
+            StatBadge(
+                label = stringResource(R.string.label_repeat),
+                value = buildString {
+                    append(project.stitchCounterNumber)
+                    repeatGoal?.let { append("/$it") }
+                },
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        if (repeatProgress != null) {
+            RowProgressIndicator(
+                progress = repeatProgress,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 

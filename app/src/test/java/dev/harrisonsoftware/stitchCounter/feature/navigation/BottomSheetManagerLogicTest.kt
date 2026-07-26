@@ -1,12 +1,24 @@
 package dev.harrisonsoftware.stitchCounter.feature.navigation
 
 import androidx.compose.ui.unit.dp
+import dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class BottomSheetManagerLogicTest {
+
+    @Test
+    fun `validationPendingAfterHandlingDismissalResult clears pending validation`() {
+        assertFalse(validationPendingAfterHandlingDismissalResult())
+    }
+
+    @Test
+    fun `shouldShowDiscardDialogForDismissalResult returns true only for ShowDiscardDialog`() {
+        assertTrue(shouldShowDiscardDialogForDismissalResult(DismissalResult.ShowDiscardDialog))
+        assertFalse(shouldShowDiscardDialogForDismissalResult(DismissalResult.Allowed))
+    }
 
     @Test
     fun `shouldRenderAfterVisibilityChange mirrors sheet visibility`() {

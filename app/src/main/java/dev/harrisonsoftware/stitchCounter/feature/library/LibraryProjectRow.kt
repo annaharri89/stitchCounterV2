@@ -9,9 +9,9 @@ import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -57,6 +57,7 @@ internal enum class ProjectRowSwipeState {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SwipeableProjectRow(
+    modifier: Modifier = Modifier,
     project: Project,
     isSelected: Boolean,
     isMultiSelectMode: Boolean,
@@ -158,7 +159,8 @@ fun SwipeableProjectRow(
             onResetSwipe = {
                 swipeResetVersion += 1
             },
-            modifier = Modifier
+            modifier = modifier
+                .fillMaxWidth()
                 .offset { IntOffset(swipeState.requireOffset().roundToInt(), 0) }
                 .anchoredDraggable(
                     state = swipeState,
@@ -231,38 +233,38 @@ fun ProjectRow(
             }
         )
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ProjectImageOrCheckbox(
-                project = project,
-                isSelected = isSelected,
-                isMultiSelectMode = isMultiSelectMode,
-                onSelect = onSelect
-            )
-            
-            ProjectInfoSection(
-                project = project,
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            )
-            
-            if (!isMultiSelectMode) {
-                ProjectActionButtons(
-                    onInfoClick = onInfoClick,
-                    onDelete = onDelete
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ProjectImageOrCheckbox(
+                    project = project,
+                    isSelected = isSelected,
+                    isMultiSelectMode = isMultiSelectMode,
+                    onSelect = onSelect
                 )
+
+                ProjectInfoSection(
+                    project = project,
+                    modifier = Modifier.weight(1f)
+                )
+
+                if (!isMultiSelectMode) {
+                    ProjectActionButtons(
+                        onInfoClick = onInfoClick,
+                        onDelete = onDelete
+                    )
+                }
             }
+            ProjectStatsContent(
+                project = project,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+            )
         }
-        ProjectStatsContent(
-            project = project,
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-        )
     }
 }
 

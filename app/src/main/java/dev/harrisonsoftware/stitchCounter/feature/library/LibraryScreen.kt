@@ -1,6 +1,5 @@
 package dev.harrisonsoftware.stitchCounter.feature.library
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,12 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
@@ -28,9 +21,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.window.Dialog
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -69,40 +60,6 @@ fun LibraryScreen(
     var showNewProjectDialog by remember { mutableStateOf(false) }
 
     val currentSheet by rootNavigationViewModel.currentSheet.collectAsStateWithLifecycle()
-    val lazyListState = rememberLazyListState()
-    val projectCountWhenSheetOpened = remember { mutableIntStateOf(-1) }
-    val sheetWasOpenedDuringSession = remember { mutableStateOf(false) }
-
-    LaunchedEffect(currentSheet) {
-        if (!sheetWasOpenedDuringSession.value && currentSheet != null) {
-            sheetWasOpenedDuringSession.value = true
-            projectCountWhenSheetOpened.intValue = projects.size
-        }
-        if (sheetWasOpenedDuringSession.value && currentSheet == null) {
-            sheetWasOpenedDuringSession.value = false
-        }
-    }
-
-    LaunchedEffect(currentSheet, projects.size, lazyListState.isScrollInProgress) {
-        if (
-            currentSheet == null &&
-            !lazyListState.isScrollInProgress &&
-            projectCountWhenSheetOpened.intValue >= 0 &&
-            projects.size > projectCountWhenSheetOpened.intValue
-        ) {
-            val averageItemHeight = lazyListState.layoutInfo.visibleItemsInfo
-                .map { it.size }
-                .average()
-                .takeIf { !it.isNaN() } ?: 100.0
-            val itemsToScroll = projects.lastIndex - lazyListState.firstVisibleItemIndex
-            val estimatedScrollDistance = (itemsToScroll * averageItemHeight).toFloat()
-            lazyListState.animateScrollBy(
-                estimatedScrollDistance,
-                tween(durationMillis = 600, easing = FastOutSlowInEasing)
-            )
-            projectCountWhenSheetOpened.intValue = -1
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -159,45 +116,38 @@ fun LibraryScreen(
                     )
                 }
                 else -> {
-                    LazyColumn(
-                        state = lazyListState,
-                        modifier = Modifier.fillMaxSize(),
+                    LibraryProjectCollection(
+                        projects = projects,
+                        selectedProjectIds = uiState.selectedProjectIds,
+                        isMultiSelectMode = uiState.isMultiSelectMode,
+                        currentSheet = currentSheet,
                         contentPadding = PaddingValues(
                             top = paddingValues.calculateTopPadding(),
                             bottom = 80.dp,
                             start = 16.dp,
                             end = 16.dp
                         ),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(projects, key = { it.id }) { project ->
-                            SwipeableProjectRow(
-                                project = project,
-                                isSelected = uiState.selectedProjectIds.contains(project.id),
-                                isMultiSelectMode = uiState.isMultiSelectMode,
-                                onOpen = { 
-                                    if (!uiState.isMultiSelectMode) {
-                                        rootNavigationViewModel.showBottomSheet(
-                                            createSheetScreenForProjectType(project.type, project.id)
-                                        )
-                                    }
-                                },
-                                onSelect = { viewModel.toggleProjectSelection(project.id) },
-                                onDelete = { viewModel.requestDelete(project) },
-                                onToggleMultiSelect = { viewModel.toggleMultiSelectMode() },
-                                onInfoClick = {
-                                    if (!uiState.isMultiSelectMode && project.id > 0) {
-                                        rootNavigationViewModel.showBottomSheet(
-                                            SheetScreen.ProjectDetail(
-                                                projectId = project.id,
-                                                projectType = project.type
-                                            )
-                                        )
-                                    }
-                                }
-                            )
+                        onOpen = { project ->
+                            if (!uiState.isMultiSelectMode) {
+                                rootNavigationViewModel.showBottomSheet(
+                                    createSheetScreenForProjectType(project.type, project.id)
+                                )
+                            }
+                        },
+                        onSelect = { project -> viewModel.toggleProjectSelection(project.id) },
+                        onDelete = { project -> viewModel.requestDelete(project) },
+                        onToggleMultiSelect = { viewModel.toggleMultiSelectMode() },
+                        onInfoClick = { project ->
+                            if (!uiState.isMultiSelectMode && project.id > 0) {
+                                rootNavigationViewModel.showBottomSheet(
+                                    SheetScreen.ProjectDetail(
+                                        projectId = project.id,
+                                        projectType = project.type
+                                    )
+                                )
+                            }
                         }
-                    }
+                    )
                 }
             }
         }
@@ -225,6 +175,12 @@ fun LibraryScreen(
                     SheetScreen.ProjectDetail(projectId = null, projectType = ProjectType.DOUBLE)
                 )
             },
+            onSelectRowAndRepeat = {
+                showNewProjectDialog = false
+                rootNavigationViewModel.showBottomSheet(
+                    SheetScreen.ProjectDetail(projectId = null, projectType = ProjectType.ROW_AND_REPEAT)
+                )
+            },
             onDismiss = { showNewProjectDialog = false }
         )
     }
@@ -234,6 +190,7 @@ fun LibraryScreen(
 fun NewProjectDialog(
     onSelectSingleCounter: () -> Unit,
     onSelectDoubleCounter: () -> Unit,
+    onSelectRowAndRepeat: () -> Unit,
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
@@ -269,6 +226,18 @@ fun NewProjectDialog(
                     )
                 ) {
                     Text(stringResource(R.string.new_project_double_counter))
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Button(
+                    onClick = onSelectRowAndRepeat,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary
+                    )
+                ) {
+                    Text(stringResource(R.string.new_project_row_and_repeat))
                 }
 
                 Spacer(modifier = Modifier.height(4.dp))

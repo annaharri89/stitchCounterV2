@@ -123,6 +123,7 @@
     <string name="settings_import_complete">Import Complete</string>
     <string name="settings_imported_count">Imported %1$d project(s)</string>
     <string name="settings_failed_import_count">Failed to import %1$d project(s)</string>
+    <string name="library_unknown_project_type">Unknown project type</string>
     <string name="theme_name_dusty_rose">Dusty Rose</string>
     <string name="theme_name_golden_hearth">Golden Earth</string>
     <string name="theme_name_sea_cottage">Sea Cottage</string>
@@ -142,6 +143,7 @@
     <string name="new_project_dialog_title">New Project</string>
     <string name="new_project_single_counter">New Single Counter</string>
     <string name="new_project_double_counter">New Double Counter</string>
+    <string name="new_project_row_and_repeat">New Row and Repeat Counter</string>
     <string name="cd_create_new_project">Create new project</string>
 
     <!-- Navigation tabs -->

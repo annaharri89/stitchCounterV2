@@ -1,5 +1,6 @@
 package dev.harrisonsoftware.stitchCounter.feature.navigation
 
+import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.feature.destinations.LibraryScreenDestination
 import dev.harrisonsoftware.stitchCounter.feature.destinations.SettingsScreenDestination
 import dev.harrisonsoftware.stitchCounter.feature.destinations.StatsScreenDestination
@@ -32,4 +33,29 @@ class NavigationHelpersTest {
     fun `getTabForRoute returns library for unknown route`() {
         assertEquals(BottomNavTab.LIBRARY, getTabForRoute("unknown_route"))
     }
+
+    @Test
+    fun `createSheetScreenForProjectType maps single counter`() {
+        val screen = createSheetScreenForProjectType(ProjectType.SINGLE, projectId = 5)
+        assertEquals(SheetScreen.SingleCounter(projectId = 5), screen)
+    }
+
+    @Test
+    fun `createSheetScreenForProjectType maps double counter`() {
+        val screen = createSheetScreenForProjectType(ProjectType.DOUBLE, projectId = 5)
+        assertEquals(SheetScreen.DoubleCounter(projectId = 5), screen)
+    }
+
+    @Test
+    fun `createSheetScreenForProjectType maps row and repeat`() {
+        val screen = createSheetScreenForProjectType(ProjectType.ROW_AND_REPEAT, projectId = 5)
+        assertEquals(SheetScreen.RowAndRepeat(projectId = 5), screen)
+    }
+
+    @Test
+    fun `createSheetScreenForProjectType maps unknown to project detail`() {
+        val screen = createSheetScreenForProjectType(ProjectType.UNKNOWN, projectId = 5)
+        assertEquals(SheetScreen.ProjectDetail(projectId = 5, projectType = ProjectType.UNKNOWN), screen)
+    }
+
 }
