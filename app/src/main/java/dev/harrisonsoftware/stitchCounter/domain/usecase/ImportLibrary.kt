@@ -1,13 +1,18 @@
 package dev.harrisonsoftware.stitchCounter.domain.usecase
 
+import dev.harrisonsoftware.stitchCounter.data.backup.BACKUP_FORMAT_VERSION_1
+import dev.harrisonsoftware.stitchCounter.data.backup.BACKUP_FORMAT_VERSION_2
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupManagerError
+import dev.harrisonsoftware.stitchCounter.data.backup.BackupNote
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupZipExtractionResult
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupManager
+import dev.harrisonsoftware.stitchCounter.data.repo.NoteRepository
 import dev.harrisonsoftware.stitchCounter.data.repo.ProjectRepository
 import dev.harrisonsoftware.stitchCounter.domain.mapper.toEntity
 import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
+import dev.harrisonsoftware.stitchCounter.domain.model.Note
 import dev.harrisonsoftware.stitchCounter.domain.model.Project
-import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
+import dev.harrisonsoftware.stitchCounter.domain.mapper.toImportProjectType
 import dev.harrisonsoftware.stitchCounter.logging.projectDataError
 import dev.harrisonsoftware.stitchCounter.logging.projectDataInfo
 import dev.harrisonsoftware.stitchCounter.logging.projectDataWarn
@@ -17,11 +22,12 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val SUPPORTED_BACKUP_VERSION = 1
+private val SUPPORTED_BACKUP_VERSIONS = setOf(BACKUP_FORMAT_VERSION_1, BACKUP_FORMAT_VERSION_2)
 
 @Singleton
 class ImportLibrary @Inject constructor(
     private val projectRepository: ProjectRepository,
+    private val noteRepository: NoteRepository,
     private val backupManager: BackupManager,
 ) {
     suspend operator fun invoke(
@@ -42,7 +48,7 @@ class ImportLibrary @Inject constructor(
                     }
                 }
 
-                if (extraction.backupData.metadata.version != SUPPORTED_BACKUP_VERSION) {
+                if (extraction.backupData.metadata.version !in SUPPORTED_BACKUP_VERSIONS) {
                     backupManager.cleanupTempDirectory(extraction.tempDir)
                     projectDataError("import_version_unsupported version=${extraction.backupData.metadata.version}")
                     return@withContext ImportLibraryResult.Failure(
@@ -57,7 +63,7 @@ class ImportLibrary @Inject constructor(
                     extraction.backupData.projects.forEach { backupProject ->
                         try {
                             val imagePaths = mutableListOf<String>()
-                            
+
                             backupProject.imagePaths.forEach { relativePath ->
                                 val sourceImageFile = File(extraction.imagesDir, relativePath)
                                 if (sourceImageFile.exists()) {
@@ -69,11 +75,11 @@ class ImportLibrary @Inject constructor(
                                     projectDataWarn("import_missing_image projectId=${backupProject.id} path=$relativePath")
                                 }
                             }
-                            
+
                             val now = System.currentTimeMillis()
                             val project = Project(
                                 id = if (replaceExisting) backupProject.id else 0,
-                                type = if (backupProject.type == "double") ProjectType.DOUBLE else ProjectType.SINGLE,
+                                type = backupProject.type.toImportProjectType(),
                                 title = backupProject.title,
                                 notes = backupProject.notes,
                                 stitchCounterNumber = backupProject.stitchCounterNumber,
@@ -87,7 +93,7 @@ class ImportLibrary @Inject constructor(
                                 completedAt = backupProject.completedAt,
                                 totalStitchesEver = backupProject.totalStitchesEver,
                             )
-                            
+
                             val newId = projectRepository.upsert(project.toEntity())
                             importedProjects.add(project.copy(id = newId.toInt()))
                         } catch (e: Exception) {
@@ -99,12 +105,24 @@ class ImportLibrary @Inject constructor(
                         }
                     }
                     
+                    val noteImportResult = importNotes(
+                        backupNotes = extraction.backupData.notes,
+                        replaceExisting = replaceExisting,
+                    )
+                    
                     val result = ImportResult(
                         importedCount = importedProjects.size,
                         failedCount = failedProjects.size,
-                        failedProjectNames = failedProjects
+                        failedProjectNames = failedProjects,
+                        importedNotesCount = noteImportResult.importedCount,
+                        failedNotesCount = noteImportResult.failedCount,
+                        failedNoteNames = noteImportResult.failedNames,
                     )
-                    projectDataInfo("import_done replaceExisting=$replaceExisting imported=${result.importedCount} failed=${result.failedCount}")
+                    projectDataInfo(
+                        "import_done replaceExisting=$replaceExisting " +
+                            "imported=${result.importedCount} failed=${result.failedCount} " +
+                            "notesImported=${result.importedNotesCount} notesFailed=${result.failedNotesCount}"
+                    )
                     
                     ImportLibraryResult.Success(result)
                 } finally {
@@ -116,7 +134,48 @@ class ImportLibrary @Inject constructor(
             }
         }
     }
+
+    private suspend fun importNotes(
+        backupNotes: List<BackupNote>,
+        replaceExisting: Boolean,
+    ): NoteImportResult {
+        val importedCount = mutableListOf<Note>()
+        val failedNames = mutableListOf<String>()
+
+        backupNotes.forEach { backupNote ->
+            try {
+                val now = System.currentTimeMillis()
+                val note = Note(
+                    id = if (replaceExisting) backupNote.id else 0,
+                    title = backupNote.title,
+                    body = backupNote.body,
+                    createdAt = if (backupNote.createdAt > 0L) backupNote.createdAt else now,
+                    updatedAt = if (backupNote.updatedAt > 0L) backupNote.updatedAt else now,
+                )
+                val newId = noteRepository.upsert(note.toEntity())
+                importedCount.add(note.copy(id = newId.toInt()))
+            } catch (e: Exception) {
+                failedNames.add("${backupNote.title} (ID: ${backupNote.id})")
+                projectDataError(
+                    message = "import_note_failed noteId=${backupNote.id} title=${backupNote.title}",
+                    throwable = e
+                )
+            }
+        }
+
+        return NoteImportResult(
+            importedCount = importedCount.size,
+            failedCount = failedNames.size,
+            failedNames = failedNames,
+        )
+    }
 }
+
+private data class NoteImportResult(
+    val importedCount: Int,
+    val failedCount: Int,
+    val failedNames: List<String>,
+)
 
 sealed interface ImportLibraryResult {
     data class Success(val result: ImportResult) : ImportLibraryResult
@@ -132,5 +191,8 @@ sealed interface ImportLibraryError {
 data class ImportResult(
     val importedCount: Int,
     val failedCount: Int,
-    val failedProjectNames: List<String>
+    val failedProjectNames: List<String>,
+    val importedNotesCount: Int = 0,
+    val failedNotesCount: Int = 0,
+    val failedNoteNames: List<String> = emptyList(),
 )

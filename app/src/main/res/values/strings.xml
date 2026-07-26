@@ -123,6 +123,8 @@
     <string name="settings_import_complete">Import Complete</string>
     <string name="settings_imported_count">Imported %1$d project(s)</string>
     <string name="settings_failed_import_count">Failed to import %1$d project(s)</string>
+    <string name="settings_imported_notes_count">Imported %1$d note(s)</string>
+    <string name="settings_failed_notes_import_count">Failed to import %1$d note(s)</string>
     <string name="library_unknown_project_type">Unknown project type</string>
     <string name="theme_name_dusty_rose">Dusty Rose</string>
     <string name="theme_name_golden_hearth">Golden Earth</string>

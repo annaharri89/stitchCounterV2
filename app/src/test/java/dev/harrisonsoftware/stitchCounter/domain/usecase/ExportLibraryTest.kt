@@ -1,10 +1,13 @@
 package dev.harrisonsoftware.stitchCounter.domain.usecase
 
+import dev.harrisonsoftware.stitchCounter.data.backup.BACKUP_FORMAT_VERSION_2
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupData
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupManagerError
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupManager
 import dev.harrisonsoftware.stitchCounter.data.backup.BackupZipCreationResult
+import dev.harrisonsoftware.stitchCounter.data.local.NoteEntity
 import dev.harrisonsoftware.stitchCounter.data.local.ProjectEntity
+import dev.harrisonsoftware.stitchCounter.data.repo.NoteRepository
 import dev.harrisonsoftware.stitchCounter.data.repo.ProjectRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.ContentUri
 import io.mockk.every
@@ -21,6 +24,7 @@ import org.junit.Test
 class ExportLibraryTest {
 
     private lateinit var projectRepository: ProjectRepository
+    private lateinit var noteRepository: NoteRepository
     private lateinit var backupManager: BackupManager
     private lateinit var exportLibrary: ExportLibrary
 
@@ -29,8 +33,10 @@ class ExportLibraryTest {
     @Before
     fun setUp() {
         projectRepository = mockk()
+        noteRepository = mockk()
         backupManager = mockk()
-        exportLibrary = ExportLibrary(projectRepository, backupManager, appVersion)
+        every { noteRepository.observeNotes() } returns flowOf(emptyList())
+        exportLibrary = ExportLibrary(projectRepository, noteRepository, backupManager, appVersion)
     }
 
     private fun sampleEntity(id: Int = 1, title: String = "Scarf") = ProjectEntity(
@@ -49,6 +55,15 @@ class ExportLibraryTest {
         completedAt = null,
         totalStitchesEver = 50,
     )
+
+    private fun sampleNoteEntity(id: Int = 1, title: String = "Yarn note", body: String = "Use merino") =
+        NoteEntity(
+            id = id,
+            title = title,
+            body = body,
+            createdAt = 2_000_000L,
+            updatedAt = 2_000_000L,
+        )
 
     @Test
     fun `export maps projects and passes correct data to backupManager`() = runTest {
@@ -70,8 +85,34 @@ class ExportLibraryTest {
         assertEquals("Scarf", captured.projects[0].title)
         assertEquals("Hat", captured.projects[1].title)
         assertEquals(2, captured.metadata.projectCount)
-        assertEquals(1, captured.metadata.version)
+        assertEquals(BACKUP_FORMAT_VERSION_2, captured.metadata.version)
         assertEquals(appVersion, captured.metadata.appVersion)
+        assertEquals(0, captured.notes.size)
+        assertEquals(0, captured.metadata.noteCount)
+    }
+
+    @Test
+    fun `export includes notes in backup data`() = runTest {
+        val notes = listOf(
+            sampleNoteEntity(1, "Yarn note", "Use merino"),
+            sampleNoteEntity(2, "Pattern tweak", ""),
+        )
+        every { projectRepository.observeProjects() } returns flowOf(emptyList())
+        every { noteRepository.observeNotes() } returns flowOf(notes)
+
+        val backupDataSlot = slot<BackupData>()
+        every { backupManager.createBackupZip(capture(backupDataSlot), any()) } returns
+                BackupZipCreationResult.Success(ContentUri("content://exported.zip"))
+
+        exportLibrary()
+
+        val captured = backupDataSlot.captured
+        assertEquals(2, captured.notes.size)
+        assertEquals(2, captured.metadata.noteCount)
+        assertEquals("Yarn note", captured.notes[0].title)
+        assertEquals("Use merino", captured.notes[0].body)
+        assertEquals("", captured.notes[1].body)
+        assertEquals(2_000_000L, captured.notes[0].createdAt)
     }
 
     @Test
@@ -87,6 +128,7 @@ class ExportLibraryTest {
         assertTrue(result is ExportLibraryResult.Success)
         assertEquals(0, backupDataSlot.captured.projects.size)
         assertEquals(0, backupDataSlot.captured.metadata.projectCount)
+        assertEquals(0, backupDataSlot.captured.notes.size)
     }
 
     @Test
@@ -137,5 +179,19 @@ class ExportLibraryTest {
         exportLibrary()
 
         assertEquals("double", backupDataSlot.captured.projects[0].type)
+    }
+
+    @Test
+    fun `export maps row_and_repeat type correctly`() = runTest {
+        val entity = sampleEntity().copy(type = "row_and_repeat")
+        every { projectRepository.observeProjects() } returns flowOf(listOf(entity))
+
+        val backupDataSlot = slot<BackupData>()
+        every { backupManager.createBackupZip(capture(backupDataSlot), any()) } returns
+                BackupZipCreationResult.Success(ContentUri("content://out.zip"))
+
+        exportLibrary()
+
+        assertEquals("row_and_repeat", backupDataSlot.captured.projects[0].type)
     }
 }
