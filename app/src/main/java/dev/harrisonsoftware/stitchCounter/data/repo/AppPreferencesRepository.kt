@@ -49,6 +49,7 @@ class AppPreferencesRepository @Inject constructor(
     private val forceDarkModeKey = booleanPreferencesKey("force_dark_mode")
     private val forceLightModeKey = booleanPreferencesKey("force_light_mode")
     private val forceCounterScreensOnKey = booleanPreferencesKey("force_counter_screens_on")
+    private val counterHapticFeedbackEnabledKey = booleanPreferencesKey("counter_haptic_feedback_enabled")
 
     val forceDarkMode: Flow<Boolean> = context.appDataStore.data.map { preferences ->
         preferences[forceDarkModeKey] ?: false
@@ -60,6 +61,10 @@ class AppPreferencesRepository @Inject constructor(
 
     val forceCounterScreensOn: Flow<Boolean> = context.appDataStore.data.map { preferences ->
         preferences[forceCounterScreensOnKey] ?: true
+    }
+
+    val counterHapticFeedbackEnabled: Flow<Boolean> = context.appDataStore.data.map { preferences ->
+        preferences[counterHapticFeedbackEnabledKey] ?: true
     }
 
     suspend fun setForceDarkMode(enabled: Boolean) {
@@ -89,6 +94,18 @@ class AppPreferencesRepository @Inject constructor(
     internal suspend fun removeStoredForceCounterScreensOnPreference() {
         context.appDataStore.edit { preferences ->
             preferences.remove(forceCounterScreensOnKey)
+        }
+    }
+
+    suspend fun setCounterHapticFeedbackEnabled(enabled: Boolean) {
+        context.appDataStore.edit { preferences ->
+            preferences[counterHapticFeedbackEnabledKey] = enabled
+        }
+    }
+
+    internal suspend fun removeStoredCounterHapticFeedbackEnabledPreference() {
+        context.appDataStore.edit { preferences ->
+            preferences.remove(counterHapticFeedbackEnabledKey)
         }
     }
 

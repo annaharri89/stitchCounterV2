@@ -109,6 +109,8 @@
     <string name="settings_light_mode_subtitle">Always use light mode, regardless of system settings.</string>
     <string name="settings_force_counter_screens_on">Keep Counter Screens Awake</string>
     <string name="settings_force_counter_screens_on_subtitle">Keeps the screen on while you count.</string>
+    <string name="settings_counter_haptic_feedback">Counter Haptic Feedback</string>
+    <string name="settings_counter_haptic_feedback_subtitle">Vibrate when tapping counter plus, minus, and reset buttons.</string>
     <string name="settings_request_feature">Request a Feature</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
     <string name="settings_eula">EULA</string>
