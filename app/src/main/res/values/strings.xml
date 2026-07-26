@@ -39,6 +39,7 @@
     <string name="label_count">Count</string>
     <string name="label_stitches">Stitches</string>
     <string name="label_rows">Rows</string>
+    <string name="label_repeat">Repeat</string>
 
     <!-- Library delete dialog -->
     <string name="delete_project_title">Delete Project?</string>
@@ -200,4 +201,23 @@
     <string name="cd_i_supported_off">I supported toggle, currently off</string>
     <string name="cd_setting_on">On</string>
     <string name="cd_setting_off">Off</string>
+
+    <!-- Row & Repeat counter -->
+    <string name="row_and_repeat_rows_per_repeat_label">Rows per repeat</string>
+    <string name="row_and_repeat_repeat_goal_label">Repeat goal</string>
+    <string name="row_and_repeat_goal_label">Goal</string>
+    <string name="row_and_repeat_repeat_label">Repeat</string>
+    <string name="row_and_repeat_repeat_auto_badge">auto +1 every %1$d rows</string>
+    <string name="row_and_repeat_repeat_goal_value">/ %1$d</string>
+    <string name="row_and_repeat_row_label">Row</string>
+    <string name="row_and_repeat_reset_row">Reset row</string>
+    <string name="cd_reset_row_count">Reset row count</string>
+    <string name="row_and_repeat_reset_row_title">Reset Row?</string>
+    <string name="row_and_repeat_reset_row_message">Are you sure you want to reset the Row counter to 1?</string>
+    <string name="row_and_repeat_reset_all_title">Reset Row &amp; Repeat?</string>
+    <string name="row_and_repeat_reset_all_message">Are you sure you want to reset the Row and Repeat counters?</string>
+    <string name="cd_row_and_repeat_progress">Repeat progress: %1$d of %2$d</string>
+    <string name="row_and_repeat_correct_repeat_button">Tap to correct Repeat count manually</string>
+    <string name="cd_row_and_repeat_correct_repeat_expanded">Manual repeat correction shown</string>
+    <string name="cd_row_and_repeat_correct_repeat_collapsed">Manual repeat correction hidden</string>
 </resources>

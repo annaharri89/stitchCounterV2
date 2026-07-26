@@ -5,5 +5,6 @@ import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 sealed class SheetScreen {
     data class SingleCounter(val projectId: Int? = null) : SheetScreen()
     data class DoubleCounter(val projectId: Int? = null) : SheetScreen()
+    data class RowAndRepeat(val projectId: Int? = null) : SheetScreen()
     data class ProjectDetail(val projectId: Int? = null, val projectType: ProjectType) : SheetScreen()
 }

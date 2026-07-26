@@ -33,7 +33,8 @@ fun IncreaseDecreaseButtons(
     counterLabel: String? = null,
     buttonSpacing: Int = 24,
     buttonShape: RoundedCornerShape = RoundedCornerShape(12.dp),
-    maxHeightFillFraction: Float = 1f
+    maxHeightFillFraction: Float = 1f,
+    fillAvailableHeight: Boolean = false,
 ) {
     val decreaseDescription = if (counterLabel != null) {
         stringResource(R.string.cd_decrease_named_count, counterLabel)
@@ -52,13 +53,24 @@ fun IncreaseDecreaseButtons(
         val buttonSpacingDp = buttonSpacing.dp
         val availableButtonWidth = ((maxWidth - buttonSpacingDp).coerceAtLeast(0.dp)) / 2
         val maximumAllowedHeight = maxHeight * maxHeightFillFraction.coerceIn(0f, 1f)
-        val rowHeight = maximumAllowedHeight.coerceAtMost(availableButtonWidth)
+        val rowHeight = if (fillAvailableHeight) {
+            maximumAllowedHeight
+        } else {
+            maximumAllowedHeight.coerceAtMost(availableButtonWidth)
+        }
 
         Row(
             modifier = Modifier
-                .align(Alignment.Center)
                 .fillMaxWidth()
-                .height(rowHeight),
+                .then(
+                    if (fillAvailableHeight) {
+                        Modifier.fillMaxHeight()
+                    } else {
+                        Modifier
+                            .align(Alignment.Center)
+                            .height(rowHeight)
+                    }
+                ),
             horizontalArrangement = Arrangement.spacedBy(buttonSpacingDp),
             verticalAlignment = Alignment.CenterVertically
         ) {

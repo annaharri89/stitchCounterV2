@@ -9,6 +9,7 @@ object Constants {
     const val LOG_TAG_PROJECT_DETAIL_VIEW_MODEL = "ProjectDetailViewModel"
     const val LOG_TAG_SINGLE_COUNTER_VIEW_MODEL = "SingleCounterViewModel"
     const val LOG_TAG_DOUBLE_COUNTER_VIEW_MODEL = "DoubleCounterViewModel"
+    const val LOG_TAG_ROW_AND_REPEAT_VIEW_MODEL = "RowAndRepeatViewModel"
     const val LOG_TAG_LIBRARY_VIEW_MODEL = "LibraryViewModel"
     const val LOG_TAG_LAUNCHER_ICON_MANAGER = "LauncherIconManager"
     const val LOG_TAG_TIMBER_FILE_LOG_TREE = "SCTimberFileLogTree"
