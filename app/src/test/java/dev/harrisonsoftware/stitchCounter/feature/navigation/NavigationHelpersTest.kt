@@ -5,6 +5,8 @@ import dev.harrisonsoftware.stitchCounter.feature.destinations.LibraryScreenDest
 import dev.harrisonsoftware.stitchCounter.feature.destinations.NotesScreenDestination
 import dev.harrisonsoftware.stitchCounter.feature.destinations.SettingsScreenDestination
 import dev.harrisonsoftware.stitchCounter.feature.destinations.StatsScreenDestination
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.unit.dp
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -78,7 +80,6 @@ class NavigationHelpersTest {
         assertEquals(SheetScreen.ProjectDetail(projectId = 5, projectType = ProjectType.UNKNOWN), screen)
     }
 
-
     @Test
     fun `isCreateNoteSheet returns true for create sheet without note id`() {
         assertEquals(true, isCreateNoteSheet(SheetScreen.CreateNote()))
@@ -99,4 +100,20 @@ class NavigationHelpersTest {
         assertEquals(SheetScreen.CreateNote(noteId = 8), createNoteSheetForNoteId(noteId = 8))
     }
 
+    @Test
+    fun `rootNavigationContentPadding keeps portrait scaffold padding`() {
+        val innerPadding = PaddingValues(top = 24.dp, bottom = 48.dp, start = 0.dp, end = 0.dp)
+
+        assertEquals(innerPadding, rootNavigationContentPadding(isWideLayout = false, innerPadding))
+    }
+
+    @Test
+    fun `rootNavigationContentPadding removes top inset in wide layout`() {
+        val innerPadding = PaddingValues(top = 24.dp, bottom = 48.dp, start = 8.dp, end = 8.dp)
+
+        assertEquals(
+            PaddingValues(top = 0.dp, bottom = 48.dp, start = 8.dp, end = 8.dp),
+            rootNavigationContentPadding(isWideLayout = true, innerPadding)
+        )
+    }
 }

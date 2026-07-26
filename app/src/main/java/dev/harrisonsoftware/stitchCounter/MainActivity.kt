@@ -1,5 +1,6 @@
 package dev.harrisonsoftware.stitchCounter
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -36,13 +37,16 @@ class MainActivity : ComponentActivity() {
     lateinit var launcherIconManager: LauncherIconManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
         super.onCreate(savedInstanceState)
-        
+
         if (savedInstanceState == null) {
             initializeLauncherIcon()
         }
-        
-        enableEdgeToEdge()
+
         setContent {
             val themeViewModel: ThemeViewModel = hiltViewModel()
             val rootNavigationViewModel: RootNavigationViewModel = hiltViewModel()
