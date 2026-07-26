@@ -45,6 +45,7 @@ class DoubleCounterViewModelTest {
         updateDoubleCounterValues = mockk(relaxed = true)
         appPreferencesRepository = mockk()
         every { appPreferencesRepository.forceCounterScreensOn } returns flowOf(false)
+        every { appPreferencesRepository.counterHapticFeedbackEnabled } returns flowOf(true)
         coEvery { appPreferencesRepository.consumeShouldShowCustomAdjustmentTip() } returns false
     }
 
@@ -84,11 +85,46 @@ class DoubleCounterViewModelTest {
     }
 
     @Test
+    fun `initial state defaults counter haptic feedback to enabled`() {
+        val viewModel = createViewModel()
+
+        assertTrue(viewModel.uiState.value.counterHapticFeedbackEnabled)
+    }
+
+    @Test
     fun `init observes keep screen on`() {
         every { appPreferencesRepository.forceCounterScreensOn } returns flowOf(true)
         val viewModel = createViewModel()
 
         assertTrue(viewModel.uiState.value.forceCounterScreensOn)
+    }
+
+    @Test
+    fun `init observes counter haptic feedback enabled when true`() {
+        every { appPreferencesRepository.counterHapticFeedbackEnabled } returns flowOf(true)
+        val viewModel = createViewModel()
+
+        assertTrue(viewModel.uiState.value.counterHapticFeedbackEnabled)
+    }
+
+    @Test
+    fun `init observes counter haptic feedback enabled when false`() {
+        every { appPreferencesRepository.counterHapticFeedbackEnabled } returns flowOf(false)
+        val viewModel = createViewModel()
+
+        assertFalse(viewModel.uiState.value.counterHapticFeedbackEnabled)
+    }
+
+    @Test
+    fun `resetState keeps counter haptic feedback preference`() = runTest {
+        every { appPreferencesRepository.counterHapticFeedbackEnabled } returns flowOf(false)
+        coEvery { getProject(1) } returns sampleProject()
+
+        val viewModel = createViewModel()
+        viewModel.loadProject(1)
+        viewModel.resetState()
+
+        assertFalse(viewModel.uiState.value.counterHapticFeedbackEnabled)
     }
 
     @Test

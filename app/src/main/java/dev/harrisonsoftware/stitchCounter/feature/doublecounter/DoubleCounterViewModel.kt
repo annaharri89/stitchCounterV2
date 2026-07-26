@@ -35,6 +35,7 @@ data class DoubleCounterUiState(
     val totalStitchesEver: Int = 0,
     val shouldShowCustomAdjustmentTip: Boolean = false,
     val forceCounterScreensOn: Boolean = false,
+    val counterHapticFeedbackEnabled: Boolean = true,
     val activeCustomAdjustmentDialogCounterType: CounterType? = null,
     val customAdjustmentDialogInput: String = "",
 ) {
@@ -83,6 +84,7 @@ open class DoubleCounterViewModel @Inject constructor(
 
     init {
         observeForceCounterScreensOn()
+        observeCounterHapticFeedbackEnabled()
         viewModelScope.launch {
             if (appPreferencesRepository.consumeShouldShowCustomAdjustmentTip()) {
                 showCustomAdjustmentTip()
@@ -100,6 +102,16 @@ open class DoubleCounterViewModel @Inject constructor(
         }
     }
 
+    private fun observeCounterHapticFeedbackEnabled() {
+        viewModelScope.launch {
+            appPreferencesRepository.counterHapticFeedbackEnabled.collect { counterHapticFeedbackEnabled ->
+                _uiState.update { currentState ->
+                    currentState.copy(counterHapticFeedbackEnabled = counterHapticFeedbackEnabled)
+                }
+            }
+        }
+    }
+
     fun loadProject(projectId: Int?) {
         viewModelScope.launch {
             if (projectId == null || projectId == 0) {
@@ -110,7 +122,10 @@ open class DoubleCounterViewModel @Inject constructor(
             }
             if (_uiState.value.id != projectId) {
                 _uiState.update { currentState ->
-                    DoubleCounterUiState(forceCounterScreensOn = currentState.forceCounterScreensOn)
+                    DoubleCounterUiState(
+                        forceCounterScreensOn = currentState.forceCounterScreensOn,
+                        counterHapticFeedbackEnabled = currentState.counterHapticFeedbackEnabled,
+                    )
                 }
             }
             val project = getProject(projectId)
@@ -211,6 +226,7 @@ open class DoubleCounterViewModel @Inject constructor(
                         totalRows = project.totalRows,
                         totalStitchesEver = restoredTotalStitchesEver,
                         forceCounterScreensOn = current.forceCounterScreensOn,
+                        counterHapticFeedbackEnabled = current.counterHapticFeedbackEnabled,
                         activeCustomAdjustmentDialogCounterType = current.activeCustomAdjustmentDialogCounterType,
                         customAdjustmentDialogInput = current.customAdjustmentDialogInput
                     )
@@ -322,7 +338,10 @@ open class DoubleCounterViewModel @Inject constructor(
 
     fun resetState() {
         _uiState.update { currentState ->
-            DoubleCounterUiState(forceCounterScreensOn = currentState.forceCounterScreensOn)
+            DoubleCounterUiState(
+                forceCounterScreensOn = currentState.forceCounterScreensOn,
+                counterHapticFeedbackEnabled = currentState.counterHapticFeedbackEnabled,
+            )
         }
         clearSavedState()
     }

@@ -45,6 +45,8 @@ fun IncreaseDecreaseButtons(
     } else {
         stringResource(R.string.cd_increase_count)
     }
+    val onDecrementClick = rememberCounterButtonClickHandler(onDecrement)
+    val onIncrementClick = rememberCounterButtonClickHandler(onIncrement)
 
     BoxWithConstraints(modifier = modifier.fillMaxHeight()) {
         val buttonSpacingDp = buttonSpacing.dp
@@ -70,7 +72,7 @@ fun IncreaseDecreaseButtons(
                     contentColor = MaterialTheme.onQuaternary
                 ),
                 contentPadding = PaddingValues(0.dp),
-                onClick = onDecrement,
+                onClick = onDecrementClick,
                 shape = buttonShape
             ) {
                 ResizableText("-")
@@ -82,7 +84,7 @@ fun IncreaseDecreaseButtons(
                     .fillMaxHeight()
                     .semantics { contentDescription = increaseDescription },
                 contentPadding = PaddingValues(0.dp),
-                onClick = onIncrement,
+                onClick = onIncrementClick,
                 shape = buttonShape
             ) {
                 ResizableText("+")

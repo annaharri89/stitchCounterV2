@@ -25,6 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavGraph
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.AdaptiveLayout
+import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.CounterHapticFeedbackProvider
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.KeepScreenOnEffect
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.ProjectDetailsFAB
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.ResetConfirmationDialog
@@ -98,6 +99,7 @@ fun SingleCounterScreen(
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
+        CounterHapticFeedbackProvider(enabled = state.counterHapticFeedbackEnabled) {
         Box(modifier = Modifier.fillMaxSize()) {
             AdaptiveLayout(
                 isWideLayout = isWideLayout,
@@ -135,6 +137,7 @@ fun SingleCounterScreen(
                     .align(Alignment.BottomCenter)
                     .padding(16.dp)
             )
+        }
         }
     }
 

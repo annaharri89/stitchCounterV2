@@ -16,12 +16,14 @@ import dev.harrisonsoftware.stitchCounter.ui.theme.quaternary
 @Composable
 fun BottomActionButtons(labelText: String = stringResource(R.string.action_reset),
                         onResetAll: () -> Unit) {
+    val onResetAllClick = rememberCounterButtonClickHandler(onResetAll)
+
     Button(
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.quaternary,
             contentColor = MaterialTheme.onQuaternary
         ),
-        onClick = { onResetAll.invoke() },
+        onClick = onResetAllClick,
         modifier = Modifier.fillMaxWidth()
             .imePadding()
     ) {
