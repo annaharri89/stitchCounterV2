@@ -1,5 +1,7 @@
 package dev.harrisonsoftware.stitchCounter.feature.navigation
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.navigation.NavHostController
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.feature.destinations.LibraryScreenDestination
@@ -51,3 +53,17 @@ fun isCreateNoteSheet(sheet: SheetScreen?): Boolean =
 fun createNoteSheetForNoteId(noteId: Int?): SheetScreen.CreateNote =
     SheetScreen.CreateNote(noteId = noteId)
 
+fun rootNavigationContentPadding(
+    isWideLayout: Boolean,
+    innerPadding: PaddingValues
+): PaddingValues {
+    return if (isWideLayout) {
+        PaddingValues(
+            bottom = innerPadding.calculateBottomPadding(),
+            start = innerPadding.calculateLeftPadding(LayoutDirection.Ltr),
+            end = innerPadding.calculateRightPadding(LayoutDirection.Ltr),
+        )
+    } else {
+        innerPadding
+    }
+}

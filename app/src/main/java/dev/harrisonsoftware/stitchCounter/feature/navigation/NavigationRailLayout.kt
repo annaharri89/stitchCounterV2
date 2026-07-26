@@ -12,6 +12,7 @@ import androidx.compose.material3.NavigationRailItemColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.navigationRailWindowInsets
 import dev.harrisonsoftware.stitchCounter.ui.theme.onQuaternary
 import dev.harrisonsoftware.stitchCounter.ui.theme.quaternary
 
@@ -43,7 +44,9 @@ private fun NavigationRailComponent(
     selectedTab: BottomNavTab,
     onTabSelected: (BottomNavTab) -> Unit
 ) {
-    NavigationRail {
+    NavigationRail(
+        windowInsets = navigationRailWindowInsets()
+    ) {
         BottomNavTab.entries.forEach { tab ->
             val tabTitle = stringResource(tab.titleResId)
             NavigationRailItem(

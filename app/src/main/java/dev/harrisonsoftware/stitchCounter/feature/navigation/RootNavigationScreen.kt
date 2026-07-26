@@ -43,7 +43,7 @@ fun RootNavigationScreen(
             }
         }
     ) { innerPadding ->
-        Row(modifier = Modifier.padding(innerPadding)) {
+        Row(modifier = Modifier.padding(rootNavigationContentPadding(isWideLayout, innerPadding))) {
             if (isWideLayout) {
                 NavigationRailLayout(
                     selectedTab = selectedTab,
