@@ -11,6 +11,8 @@ object Constants {
     const val LOG_TAG_DOUBLE_COUNTER_VIEW_MODEL = "DoubleCounterViewModel"
     const val LOG_TAG_ROW_AND_REPEAT_VIEW_MODEL = "RowAndRepeatViewModel"
     const val LOG_TAG_LIBRARY_VIEW_MODEL = "LibraryViewModel"
+    const val LOG_TAG_NOTES_VIEW_MODEL = "NotesViewModel"
+    const val LOG_TAG_CREATE_NOTE_VIEW_MODEL = "CreateNoteViewModel"
     const val LOG_TAG_LAUNCHER_ICON_MANAGER = "LauncherIconManager"
     const val LOG_TAG_TIMBER_FILE_LOG_TREE = "SCTimberFileLogTree"
     const val LOG_TAG_IMAGE_SAVE = "ImageSave"

@@ -7,4 +7,5 @@ sealed class SheetScreen {
     data class DoubleCounter(val projectId: Int? = null) : SheetScreen()
     data class RowAndRepeat(val projectId: Int? = null) : SheetScreen()
     data class ProjectDetail(val projectId: Int? = null, val projectType: ProjectType) : SheetScreen()
+    data class CreateNote(val noteId: Int? = null) : SheetScreen()
 }
