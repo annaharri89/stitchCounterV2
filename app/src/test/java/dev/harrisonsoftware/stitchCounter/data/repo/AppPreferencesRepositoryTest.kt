@@ -30,6 +30,7 @@ class AppPreferencesRepositoryTest {
         repository.setForceDarkMode(false)
         repository.setForceLightMode(false)
         repository.removeStoredForceCounterScreensOnPreference()
+        repository.removeStoredCounterHapticFeedbackEnabledPreference()
     }
 
     @Test
@@ -89,5 +90,20 @@ class AppPreferencesRepositoryTest {
 
         repository.setForceCounterScreensOn(false)
         assertFalse(repository.forceCounterScreensOn.first())
+    }
+
+    @Test
+    fun `counterHapticFeedbackEnabled defaults to true`() = runTest {
+        repository.removeStoredCounterHapticFeedbackEnabledPreference()
+        assertTrue(repository.counterHapticFeedbackEnabled.first())
+    }
+
+    @Test
+    fun `setCounterHapticFeedbackEnabled persists on and off`() = runTest {
+        repository.setCounterHapticFeedbackEnabled(true)
+        assertTrue(repository.counterHapticFeedbackEnabled.first())
+
+        repository.setCounterHapticFeedbackEnabled(false)
+        assertFalse(repository.counterHapticFeedbackEnabled.first())
     }
 }

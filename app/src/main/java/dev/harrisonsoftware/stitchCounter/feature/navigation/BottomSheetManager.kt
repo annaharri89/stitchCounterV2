@@ -32,6 +32,9 @@ import dev.harrisonsoftware.stitchCounter.feature.doublecounter.DoubleCounterScr
 import dev.harrisonsoftware.stitchCounter.feature.doublecounter.DoubleCounterViewModel
 import dev.harrisonsoftware.stitchCounter.feature.projectDetail.ProjectDetailScreenContent
 import dev.harrisonsoftware.stitchCounter.feature.projectDetail.ProjectDetailViewModel
+import dev.harrisonsoftware.stitchCounter.feature.rowandrepeat.RowAndRepeat
+import dev.harrisonsoftware.stitchCounter.feature.rowandrepeat.RowAndRepeatViewModel
+import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.sheetHeaderInsetPadding
 import dev.harrisonsoftware.stitchCounter.feature.singleCounter.SingleCounterScreen
 import dev.harrisonsoftware.stitchCounter.feature.singleCounter.SingleCounterViewModel
 
@@ -61,6 +64,11 @@ internal fun dragEndAction(
     }
     return if (isDismissalAllowed) DragEndAction.DismissSheet else DragEndAction.RequestValidation
 }
+
+internal fun validationPendingAfterHandlingDismissalResult(): Boolean = false
+
+internal fun shouldShowDiscardDialogForDismissalResult(result: DismissalResult): Boolean =
+    result is DismissalResult.ShowDiscardDialog
 
 internal fun shouldAutoNavigateFromNewProject(
     screenProjectId: Int?,
@@ -92,16 +100,18 @@ fun BottomSheetManager(
     currentSheetScreen: SheetScreen?,
     viewModel: RootNavigationViewModel,
     isWideLayout: Boolean,
-    onDismissalResult: (DismissalResult) -> Unit
 ) {
     val isDismissalAllowedState = remember { mutableStateOf(false) }
     val isValidationPending = remember { mutableStateOf(false) }
+    val showDiscardDialog = remember { mutableStateOf(false) }
     val isSheetVisible = currentSheetScreen != null
     val density = LocalDensity.current
 
     var screenHeight by remember { mutableStateOf(0.dp) }
     var shouldRenderSheet by remember { mutableStateOf(false) }
-    val topOffset = 48.dp
+    val topOffset = if (isWideLayout) 24.dp else 48.dp
+    val dragHandleTopPadding = if (isWideLayout) 4.dp else 8.dp
+    val dragHandleBottomPadding = if (isWideLayout) 2.dp else 4.dp
     val dragOffset = remember { mutableStateOf(0.dp) }
     val isDragging = remember { mutableStateOf(false) }
 
@@ -133,15 +143,16 @@ fun BottomSheetManager(
     }
 
     fun handleDismissalResult(result: DismissalResult) {
-        isValidationPending.value = false
+        isValidationPending.value = validationPendingAfterHandlingDismissalResult()
         when (result) {
             is DismissalResult.Allowed -> {
+                showDiscardDialog.value = false
                 isDismissalAllowedState.value = true
                 viewModel.showBottomSheet(null)
             }
 
             is DismissalResult.ShowDiscardDialog -> {
-                onDismissalResult(result)
+                showDiscardDialog.value = shouldShowDiscardDialogForDismissalResult(result)
             }
         }
     }
@@ -154,6 +165,7 @@ fun BottomSheetManager(
         LaunchedEffect(screen) {
             isDismissalAllowedState.value = false
             isValidationPending.value = false
+            showDiscardDialog.value = false
         }
 
         LaunchedEffect(isValidationPending.value, currentSheetScreen) {
@@ -203,7 +215,7 @@ fun BottomSheetManager(
                     .offset(y = sheetOffset.value)
                     .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                     .background(MaterialTheme.colorScheme.surface)
-                    .windowInsetsPadding(WindowInsets.statusBars)
+                    .sheetHeaderInsetPadding(isWideLayout = isWideLayout)
                     .pointerInput(isSheetVisible, isDismissalAllowedState.value, screenHeight) {
                         if (isSheetVisible && screenHeight > 0.dp) {
                             detectVerticalDragGestures(
@@ -274,6 +286,26 @@ fun BottomSheetManager(
                             }
                         }
 
+                        is SheetScreen.RowAndRepeat -> {
+                            val rowAndRepeatViewModel =
+                                hiltViewModel<RowAndRepeatViewModel>()
+
+                            LaunchedEffect(screen.projectId) {
+                                rowAndRepeatViewModel.loadProject(screen.projectId)
+                            }
+
+                            SheetDismissalHandler(
+                                screen = screen,
+                                onAttemptDismissal = { rowAndRepeatViewModel.attemptDismissal() }
+                            )
+
+                            LaunchedEffect(screen) {
+                                rowAndRepeatViewModel.dismissalResult.collect { result ->
+                                    handleDismissalResult(result)
+                                }
+                            }
+                        }
+
                         is SheetScreen.ProjectDetail -> {
                             val projectDetailViewModel =
                                 hiltViewModel<ProjectDetailViewModel>()
@@ -324,6 +356,24 @@ fun BottomSheetManager(
 
                                 lastObservedProjectId.value = currentProjectId
                             }
+
+                            LaunchedEffect(screen) {
+                                projectDetailViewModel.dismissalResult.collect { result ->
+                                    handleDismissalResult(result)
+                                }
+                            }
+                        }
+
+                            SheetDismissalHandler(
+                                screen = screen,
+                                onAttemptDismissal = { createNoteViewModel.attemptDismissal() }
+                            )
+
+                            LaunchedEffect(screen) {
+                                createNoteViewModel.dismissalResult.collect { result ->
+                                    handleDismissalResult(result)
+                                }
+                            }
                         }
                     }
 
@@ -361,7 +411,10 @@ fun BottomSheetManager(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(top = 8.dp, bottom = 4.dp),
+                                        .padding(
+                                            top = dragHandleTopPadding,
+                                            bottom = dragHandleBottomPadding
+                                        ),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Box(
@@ -426,6 +479,30 @@ fun BottomSheetManager(
                                         }
                                     }
 
+                                    is SheetScreen.RowAndRepeat -> {
+                                        val rowAndRepeatViewModel =
+                                            hiltViewModel<RowAndRepeatViewModel>()
+                                        val saveBeforeNavigateScope = rememberCoroutineScope()
+                                        Box(modifier = Modifier.fillMaxSize()) {
+                                            RowAndRepeat(
+                                                projectId = currentScreen.projectId,
+                                                viewModel = rowAndRepeatViewModel,
+                                                isWideLayout = isWideLayout,
+                                                onNavigateToDetail = { projectId ->
+                                                    saveBeforeNavigateScope.launch {
+                                                        rowAndRepeatViewModel.ensureSaved()
+                                                        viewModel.showBottomSheet(
+                                                            SheetScreen.ProjectDetail(
+                                                                projectId = projectId,
+                                                                projectType = ProjectType.ROW_AND_REPEAT
+                                                            )
+                                                        )
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    }
+
                                     is SheetScreen.ProjectDetail -> {
                                         val projectDetailViewModel =
                                             hiltViewModel<ProjectDetailViewModel>()
@@ -435,28 +512,33 @@ fun BottomSheetManager(
                                             projectId = currentScreen.projectId,
                                             projectType = currentScreen.projectType,
                                             viewModel = projectDetailViewModel,
-                                            onNavigateBack = { projectId ->
-                                                projectDetailUiState.project?.type?.let { projectType ->
-                                                    saveBeforeNavigateScope.launch {
-                                                        projectDetailViewModel.ensureSaved()
-                                                        viewModel.showBottomSheet(
-                                                            createSheetScreenForProjectType(
-                                                                projectType,
-                                                                projectId
-                                                            )
-                                                        )
-                                                    }
-                                                }
+                                            isDiscardDialogManagedBySheet = true,
+                                            showDiscardDialog = showDiscardDialog.value,
+                                            onDismissDiscardDialog = { showDiscardDialog.value = false },
+                                            onConfirmDiscard = {
+                                                showDiscardDialog.value = false
+                                                projectDetailViewModel.discardChanges()
+                                                handleDismissalResult(DismissalResult.Allowed)
                                             },
-                                            onDismiss = {
-                                                isDismissalAllowedState.value = true
-                                                viewModel.showBottomSheet(null)
+                                            onNavigateBack = { projectId ->
+                                                saveBeforeNavigateScope.launch {
+                                                    if (projectDetailUiState.loadError == null) {
+                                                        projectDetailViewModel.ensureSaved()
+                                                    }
+                                                    viewModel.showBottomSheet(
+                                                        createSheetScreenForProjectType(
+                                                            currentScreen.projectType,
+                                                            projectId
+                                                        )
+                                                    )
+                                                }
                                             },
                                             onCreateProject = {
                                                 projectDetailViewModel.createProject()
                                             }
                                         )
                                     }
+
                                     }
                                 }
                             }

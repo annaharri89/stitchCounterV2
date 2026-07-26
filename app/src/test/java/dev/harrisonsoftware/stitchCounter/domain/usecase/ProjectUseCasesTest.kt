@@ -44,6 +44,7 @@ class ProjectUseCasesTest {
             title = " ",
             notes = "notes",
             totalRows = 10,
+            rowsPerRepeat = 8,
             projectType = ProjectType.DOUBLE,
             imagePaths = emptyList(),
             completedAt = null,
@@ -52,6 +53,7 @@ class ProjectUseCasesTest {
 
         assertEquals(UpdateProjectDetailResult.InvalidTitle, result)
         coVerify(exactly = 0) { repository.updateProjectDetailValues(any(), any(), any(), any(), any(), any(), any()) }
+        coVerify(exactly = 0) { repository.updateRowAndRepeatProjectDetailValues(any(), any(), any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
@@ -63,6 +65,7 @@ class ProjectUseCasesTest {
             title = "Blanket",
             notes = "notes",
             totalRows = 0,
+            rowsPerRepeat = 8,
             projectType = ProjectType.DOUBLE,
             imagePaths = emptyList(),
             completedAt = null,
@@ -71,10 +74,11 @@ class ProjectUseCasesTest {
 
         assertEquals(UpdateProjectDetailResult.InvalidTotalRows, result)
         coVerify(exactly = 0) { repository.updateProjectDetailValues(any(), any(), any(), any(), any(), any(), any()) }
+        coVerify(exactly = 0) { repository.updateRowAndRepeatProjectDetailValues(any(), any(), any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
-    fun `update project detail returns success and updates repository for valid input`() = runTest {
+    fun `update project detail returns success and updates repository for valid double counter input`() = runTest {
         val updateProjectDetailValues = UpdateProjectDetailValues(repository)
 
         val result = updateProjectDetailValues(
@@ -82,6 +86,7 @@ class ProjectUseCasesTest {
             title = "Sweater",
             notes = "notes",
             totalRows = 40,
+            rowsPerRepeat = 8,
             projectType = ProjectType.DOUBLE,
             imagePaths = listOf("image.jpg"),
             completedAt = null,
@@ -100,5 +105,63 @@ class ProjectUseCasesTest {
                 updatedAt = 123L
             )
         }
+        coVerify(exactly = 0) {
+            repository.updateRowAndRepeatProjectDetailValues(any(), any(), any(), any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `update project detail returns success and updates row and repeat detail repository for valid input`() = runTest {
+        val updateProjectDetailValues = UpdateProjectDetailValues(repository)
+
+        val result = updateProjectDetailValues(
+            id = 2,
+            title = "Cable Scarf",
+            notes = "notes",
+            totalRows = 20,
+            rowsPerRepeat = 8,
+            projectType = ProjectType.ROW_AND_REPEAT,
+            imagePaths = listOf("image.jpg"),
+            completedAt = null,
+            updatedAt = 456L
+        )
+
+        assertEquals(UpdateProjectDetailResult.Success, result)
+        coVerify(exactly = 0) {
+            repository.updateProjectDetailValues(any(), any(), any(), any(), any(), any(), any())
+        }
+        coVerify(exactly = 1) {
+            repository.updateRowAndRepeatProjectDetailValues(
+                id = 2,
+                title = "Cable Scarf",
+                notes = "notes",
+                repeatGoal = 20,
+                rowsPerRepeat = 8,
+                imagePaths = listOf("image.jpg"),
+                completedAt = null,
+                updatedAt = 456L
+            )
+        }
+    }
+
+    @Test
+    fun `update project detail returns invalid rows per repeat for row and repeat project`() = runTest {
+        val updateProjectDetailValues = UpdateProjectDetailValues(repository)
+
+        val result = updateProjectDetailValues(
+            id = 1,
+            title = "Shawl",
+            notes = "notes",
+            totalRows = 20,
+            rowsPerRepeat = 0,
+            projectType = ProjectType.ROW_AND_REPEAT,
+            imagePaths = emptyList(),
+            completedAt = null,
+            updatedAt = 123L
+        )
+
+        assertEquals(UpdateProjectDetailResult.InvalidRowsPerRepeat, result)
+        coVerify(exactly = 0) { repository.updateProjectDetailValues(any(), any(), any(), any(), any(), any(), any()) }
+        coVerify(exactly = 0) { repository.updateRowAndRepeatProjectDetailValues(any(), any(), any(), any(), any(), any(), any(), any()) }
     }
 }

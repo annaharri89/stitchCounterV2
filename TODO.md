@@ -26,4 +26,7 @@
 ## 🔗 External Integrations
 - [ ] See if you can integrate with ravelry.com in anyway (sdk?)
 
+## 🛠️ Technical cleanup
+- [ ] Dedupe counter loads when opening from library (single, double, row & repeat): remove redundant `loadProject` in `BottomSheetManager`, keep one load in the screen composable, and gate `ON_RESUME` reload so it runs after returning from pause (e.g. project detail) rather than on initial open
+
 ---

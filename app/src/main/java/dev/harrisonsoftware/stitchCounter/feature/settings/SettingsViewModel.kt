@@ -54,6 +54,7 @@ class SettingsViewModel @Inject constructor(
         observeForceDarkMode()
         observeForceLightMode()
         observeForceCounterScreensOn()
+        observeCounterHapticFeedbackEnabled()
     }
 
     private fun observeTheme() {
@@ -106,6 +107,16 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    private fun observeCounterHapticFeedbackEnabled() {
+        viewModelScope.launch {
+            appPreferencesRepository.counterHapticFeedbackEnabled.collect { counterHapticFeedbackEnabled ->
+                _uiState.update { currentState ->
+                    currentState.copy(counterHapticFeedbackEnabled = counterHapticFeedbackEnabled)
+                }
+            }
+        }
+    }
+
     fun onForceDarkModeChanged(enabled: Boolean) {
         viewModelScope.launch {
             appPreferencesRepository.setForceDarkMode(enabled)
@@ -121,6 +132,12 @@ class SettingsViewModel @Inject constructor(
     fun onForceCounterScreensOnChanged(enabled: Boolean) {
         viewModelScope.launch {
             appPreferencesRepository.setForceCounterScreensOn(enabled)
+        }
+    }
+
+    fun onCounterHapticFeedbackEnabledChanged(enabled: Boolean) {
+        viewModelScope.launch {
+            appPreferencesRepository.setCounterHapticFeedbackEnabled(enabled)
         }
     }
 
@@ -283,6 +300,7 @@ data class SettingsUiState(
     val forceDarkMode: Boolean = false,
     val forceLightMode: Boolean = false,
     val forceCounterScreensOn: Boolean = false,
+    val counterHapticFeedbackEnabled: Boolean = true,
     val isExporting: Boolean = false,
     val exportSuccess: Boolean = false,
     val exportError: SettingsUiText? = null,

@@ -1,9 +1,11 @@
 package dev.harrisonsoftware.stitchCounter.feature.doublecounter
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.harrisonsoftware.stitchCounter.Constants
+import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.data.repo.AppPreferencesRepository
 import dev.harrisonsoftware.stitchCounter.domain.model.AdjustmentAmount
 import dev.harrisonsoftware.stitchCounter.domain.model.CounterState
@@ -35,8 +37,10 @@ data class DoubleCounterUiState(
     val totalStitchesEver: Int = 0,
     val shouldShowCustomAdjustmentTip: Boolean = false,
     val forceCounterScreensOn: Boolean = false,
+    val counterHapticFeedbackEnabled: Boolean = true,
     val activeCustomAdjustmentDialogCounterType: CounterType? = null,
     val customAdjustmentDialogInput: String = "",
+    @StringRes val loadError: Int? = null,
 ) {
     fun customAdjustmentDialogStateFor(counterType: CounterType) = CustomAdjustmentDialogState(
         isVisible = activeCustomAdjustmentDialogCounterType == counterType,
@@ -83,6 +87,7 @@ open class DoubleCounterViewModel @Inject constructor(
 
     init {
         observeForceCounterScreensOn()
+        observeCounterHapticFeedbackEnabled()
         viewModelScope.launch {
             if (appPreferencesRepository.consumeShouldShowCustomAdjustmentTip()) {
                 showCustomAdjustmentTip()
@@ -100,6 +105,16 @@ open class DoubleCounterViewModel @Inject constructor(
         }
     }
 
+    private fun observeCounterHapticFeedbackEnabled() {
+        viewModelScope.launch {
+            appPreferencesRepository.counterHapticFeedbackEnabled.collect { counterHapticFeedbackEnabled ->
+                _uiState.update { currentState ->
+                    currentState.copy(counterHapticFeedbackEnabled = counterHapticFeedbackEnabled)
+                }
+            }
+        }
+    }
+
     fun loadProject(projectId: Int?) {
         viewModelScope.launch {
             if (projectId == null || projectId == 0) {
@@ -110,7 +125,10 @@ open class DoubleCounterViewModel @Inject constructor(
             }
             if (_uiState.value.id != projectId) {
                 _uiState.update { currentState ->
-                    DoubleCounterUiState(forceCounterScreensOn = currentState.forceCounterScreensOn)
+                    DoubleCounterUiState(
+                        forceCounterScreensOn = currentState.forceCounterScreensOn,
+                        counterHapticFeedbackEnabled = currentState.counterHapticFeedbackEnabled,
+                    )
                 }
             }
             val project = getProject(projectId)
@@ -211,6 +229,7 @@ open class DoubleCounterViewModel @Inject constructor(
                         totalRows = project.totalRows,
                         totalStitchesEver = restoredTotalStitchesEver,
                         forceCounterScreensOn = current.forceCounterScreensOn,
+                        counterHapticFeedbackEnabled = current.counterHapticFeedbackEnabled,
                         activeCustomAdjustmentDialogCounterType = current.activeCustomAdjustmentDialogCounterType,
                         customAdjustmentDialogInput = current.customAdjustmentDialogInput
                     )
@@ -225,6 +244,9 @@ open class DoubleCounterViewModel @Inject constructor(
             } else {
                 Timber.tag(Constants.LOG_TAG_DOUBLE_COUNTER_VIEW_MODEL)
                     .w("event=project_load_missing projectId=$projectId")
+                _uiState.update { currentState ->
+                    currentState.copy(loadError = R.string.error_project_not_found)
+                }
             }
         }
     }
@@ -322,7 +344,10 @@ open class DoubleCounterViewModel @Inject constructor(
 
     fun resetState() {
         _uiState.update { currentState ->
-            DoubleCounterUiState(forceCounterScreensOn = currentState.forceCounterScreensOn)
+            DoubleCounterUiState(
+                forceCounterScreensOn = currentState.forceCounterScreensOn,
+                counterHapticFeedbackEnabled = currentState.counterHapticFeedbackEnabled,
+            )
         }
         clearSavedState()
     }

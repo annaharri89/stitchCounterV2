@@ -57,6 +57,7 @@ fun CounterView(
     increaseDecreaseButtonsHeightFillFraction: Float = 1f
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
+    val onResetClick = rememberCounterButtonClickHandler(onReset)
     val countDescription = if (label != null) {
         stringResource(R.string.cd_named_current_count, label, count)
     } else {
@@ -135,7 +136,7 @@ fun CounterView(
                         containerColor = MaterialTheme.quaternary,
                         contentColor = MaterialTheme.onQuaternary
                     ),
-                    onClick = { onReset() },
+                    onClick = onResetClick,
                     modifier = Modifier.padding(end = 4.dp)
                 ) {
                     Text(stringResource(R.string.action_reset))

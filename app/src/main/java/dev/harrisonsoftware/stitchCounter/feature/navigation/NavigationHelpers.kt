@@ -38,4 +38,6 @@ inline fun <reified T : Direction> navigateToDestination(
 fun createSheetScreenForProjectType(projectType: ProjectType, projectId: Int?): SheetScreen = when (projectType) {
     ProjectType.SINGLE -> SheetScreen.SingleCounter(projectId)
     ProjectType.DOUBLE -> SheetScreen.DoubleCounter(projectId)
+    ProjectType.ROW_AND_REPEAT -> SheetScreen.RowAndRepeat(projectId)
+    ProjectType.UNKNOWN -> SheetScreen.ProjectDetail(projectId = projectId, projectType = ProjectType.UNKNOWN)
 }

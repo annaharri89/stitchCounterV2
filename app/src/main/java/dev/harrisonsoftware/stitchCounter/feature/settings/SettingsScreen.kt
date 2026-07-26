@@ -169,7 +169,9 @@ fun SettingsScreen(
                                 forceLightMode = uiState.forceLightMode,
                                 onForceLightModeChange = viewModel::onForceLightModeChanged,
                                 forceCounterScreensOn = uiState.forceCounterScreensOn,
-                                onForceCounterScreensOnChange = viewModel::onForceCounterScreensOnChanged
+                                onForceCounterScreensOnChange = viewModel::onForceCounterScreensOnChanged,
+                                counterHapticFeedbackEnabled = uiState.counterHapticFeedbackEnabled,
+                                onCounterHapticFeedbackEnabledChange = viewModel::onCounterHapticFeedbackEnabledChanged
                             )
                         }
                         SettingsScreenSection.BACKUP_RESTORE -> {

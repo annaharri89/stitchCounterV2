@@ -25,7 +25,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavGraph
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.AdaptiveLayout
+import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.CounterHapticFeedbackProvider
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.KeepScreenOnEffect
+import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.LoadFailureContent
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.ProjectDetailsFAB
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.ResetConfirmationDialog
 import com.ramcosta.composedestinations.annotation.Destination
@@ -63,6 +65,7 @@ fun DoubleCounterScreen(
     }
 
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val loadError = state.loadError
     KeepScreenOnEffect(enabled = state.forceCounterScreensOn)
     
     val context = LocalContext.current
@@ -103,6 +106,13 @@ fun DoubleCounterScreen(
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
+        if (loadError != null) {
+            LoadFailureContent(
+                messageResId = loadError,
+                onClose = { viewModel.attemptDismissal() },
+            )
+        } else {
+        CounterHapticFeedbackProvider(enabled = state.counterHapticFeedbackEnabled) {
         Box(modifier = Modifier.fillMaxSize()) {
             AdaptiveLayout(
                 isWideLayout = isWideLayout,
@@ -140,6 +150,8 @@ fun DoubleCounterScreen(
                     .align(Alignment.BottomCenter)
                     .padding(16.dp)
             )
+        }
+        }
         }
     }
 

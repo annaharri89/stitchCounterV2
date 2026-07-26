@@ -30,7 +30,9 @@ internal fun SettingsCard(
     forceLightMode: Boolean,
     onForceLightModeChange: (Boolean) -> Unit,
     forceCounterScreensOn: Boolean,
-    onForceCounterScreensOnChange: (Boolean) -> Unit
+    onForceCounterScreensOnChange: (Boolean) -> Unit,
+    counterHapticFeedbackEnabled: Boolean,
+    onCounterHapticFeedbackEnabledChange: (Boolean) -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -58,6 +60,12 @@ internal fun SettingsCard(
                 subtitleRes = R.string.settings_force_counter_screens_on_subtitle,
                 checked = forceCounterScreensOn,
                 onCheckedChange = onForceCounterScreensOnChange
+            )
+            SettingsSwitchRow(
+                titleRes = R.string.settings_counter_haptic_feedback,
+                subtitleRes = R.string.settings_counter_haptic_feedback_subtitle,
+                checked = counterHapticFeedbackEnabled,
+                onCheckedChange = onCounterHapticFeedbackEnabledChange
             )
         }
     }

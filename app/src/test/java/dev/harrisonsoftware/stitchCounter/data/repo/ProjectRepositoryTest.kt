@@ -112,6 +112,32 @@ class ProjectRepositoryTest {
     }
 
     @Test
+    fun `updateRowAndRepeatProjectDetailValues delegates to dao`() = runTest {
+        repository.updateRowAndRepeatProjectDetailValues(
+            id = 1,
+            title = "t",
+            notes = "n",
+            repeatGoal = 20,
+            rowsPerRepeat = 8,
+            imagePaths = listOf("a"),
+            completedAt = null,
+            updatedAt = 99L,
+        )
+        coVerify {
+            projectDao.updateRowAndRepeatProjectDetailValues(
+                id = 1,
+                title = "t",
+                notes = "n",
+                repeatGoal = 20,
+                rowsPerRepeat = 8,
+                imagePaths = listOf("a"),
+                completedAt = null,
+                updatedAt = 99L,
+            )
+        }
+    }
+
+    @Test
     fun `updateSingleCounterValues delegates to dao`() = runTest {
         repository.updateSingleCounterValues(
             id = 2,

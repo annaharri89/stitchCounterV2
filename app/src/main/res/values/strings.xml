@@ -39,6 +39,7 @@
     <string name="label_count">Count</string>
     <string name="label_stitches">Stitches</string>
     <string name="label_rows">Rows</string>
+    <string name="label_repeat">Repeat</string>
 
     <!-- Library delete dialog -->
     <string name="delete_project_title">Delete Project?</string>
@@ -60,10 +61,13 @@
     <string name="dialog_discard_changes">Discard Changes?</string>
     <string name="dialog_title_required_message">Project title is required. Do you want to discard this project?</string>
     <string name="dialog_discard_changes_message">You have unsaved changes. Are you sure you want to discard them?</string>
+    <string name="error_project_not_found">This project was deleted or could not be found.</string>
     <string name="error_title_required">Title is required</string>
     <string name="error_total_rows_greater_than_zero">Total rows must be greater than 0</string>
     <string name="error_total_rows_required">Total rows is required</string>
     <string name="error_total_rows_required_and_greater">Total rows is required and must be greater than 0</string>
+    <string name="error_rows_per_repeat_required_and_greater">Rows per repeat is required and must be greater than 0</string>
+    <string name="error_repeat_goal_required_and_greater">Repeat goal is required and must be greater than 0</string>
 
     <!-- Project images -->
     <string name="project_photos_header">Project Photos</string>
@@ -109,6 +113,8 @@
     <string name="settings_light_mode_subtitle">Always use light mode, regardless of system settings.</string>
     <string name="settings_force_counter_screens_on">Keep Counter Screens Awake</string>
     <string name="settings_force_counter_screens_on_subtitle">Keeps the screen on while you count.</string>
+    <string name="settings_counter_haptic_feedback">Counter Haptic Feedback</string>
+    <string name="settings_counter_haptic_feedback_subtitle">Vibrate when tapping counter plus, minus, and reset buttons.</string>
     <string name="settings_request_feature">Request a Feature</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
     <string name="settings_eula">EULA</string>
@@ -117,6 +123,7 @@
     <string name="settings_import_complete">Import Complete</string>
     <string name="settings_imported_count">Imported %1$d project(s)</string>
     <string name="settings_failed_import_count">Failed to import %1$d project(s)</string>
+    <string name="library_unknown_project_type">Unknown project type</string>
     <string name="theme_name_dusty_rose">Dusty Rose</string>
     <string name="theme_name_golden_hearth">Golden Earth</string>
     <string name="theme_name_sea_cottage">Sea Cottage</string>
@@ -136,6 +143,7 @@
     <string name="new_project_dialog_title">New Project</string>
     <string name="new_project_single_counter">New Single Counter</string>
     <string name="new_project_double_counter">New Double Counter</string>
+    <string name="new_project_row_and_repeat">New Row and Repeat Counter</string>
     <string name="cd_create_new_project">Create new project</string>
 
     <!-- Navigation tabs -->
@@ -197,4 +205,23 @@
     <string name="cd_i_supported_off">I supported toggle, currently off</string>
     <string name="cd_setting_on">On</string>
     <string name="cd_setting_off">Off</string>
+
+    <!-- Row & Repeat counter -->
+    <string name="row_and_repeat_rows_per_repeat_label">Rows per repeat</string>
+    <string name="row_and_repeat_repeat_goal_label">Repeat goal</string>
+    <string name="row_and_repeat_goal_label">Goal</string>
+    <string name="row_and_repeat_repeat_label">Repeat</string>
+    <string name="row_and_repeat_repeat_auto_badge">auto +1 every %1$d rows</string>
+    <string name="row_and_repeat_repeat_goal_value">/ %1$d</string>
+    <string name="row_and_repeat_row_label">Row</string>
+    <string name="row_and_repeat_reset_row">Reset row</string>
+    <string name="cd_reset_row_count">Reset row count</string>
+    <string name="row_and_repeat_reset_row_title">Reset Row?</string>
+    <string name="row_and_repeat_reset_row_message">Are you sure you want to reset the Row counter to 1?</string>
+    <string name="row_and_repeat_reset_all_title">Reset Row &amp; Repeat?</string>
+    <string name="row_and_repeat_reset_all_message">Are you sure you want to reset the Row and Repeat counters?</string>
+    <string name="cd_row_and_repeat_progress">Repeat progress: %1$d of %2$d</string>
+    <string name="row_and_repeat_correct_repeat_button">Tap to correct Repeat count manually</string>
+    <string name="cd_row_and_repeat_correct_repeat_expanded">Manual repeat correction shown</string>
+    <string name="cd_row_and_repeat_correct_repeat_collapsed">Manual repeat correction hidden</string>
 </resources>

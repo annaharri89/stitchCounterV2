@@ -62,6 +62,7 @@ class SettingsViewModelTest {
         every { appPreferencesRepository.forceDarkMode } returns flowOf(false)
         every { appPreferencesRepository.forceLightMode } returns flowOf(false)
         every { appPreferencesRepository.forceCounterScreensOn } returns flowOf(false)
+        every { appPreferencesRepository.counterHapticFeedbackEnabled } returns flowOf(true)
         every { themeManager.getThemeColors(any()) } returns emptyList()
     }
 
@@ -99,6 +100,7 @@ class SettingsViewModelTest {
         assertFalse(state.forceDarkMode)
         assertFalse(state.forceLightMode)
         assertFalse(state.forceCounterScreensOn)
+        assertTrue(state.counterHapticFeedbackEnabled)
     }
 
     @Test
@@ -131,6 +133,22 @@ class SettingsViewModelTest {
         val viewModel = createViewModel()
 
         assertTrue(viewModel.uiState.value.forceCounterScreensOn)
+    }
+
+    @Test
+    fun `init observes counter haptic feedback enabled when true`() {
+        every { appPreferencesRepository.counterHapticFeedbackEnabled } returns flowOf(true)
+        val viewModel = createViewModel()
+
+        assertTrue(viewModel.uiState.value.counterHapticFeedbackEnabled)
+    }
+
+    @Test
+    fun `init observes counter haptic feedback enabled when false`() {
+        every { appPreferencesRepository.counterHapticFeedbackEnabled } returns flowOf(false)
+        val viewModel = createViewModel()
+
+        assertFalse(viewModel.uiState.value.counterHapticFeedbackEnabled)
     }
 
     @Test
@@ -185,6 +203,24 @@ class SettingsViewModelTest {
         viewModel.onForceCounterScreensOnChanged(false)
 
         coVerify(exactly = 1) { appPreferencesRepository.setForceCounterScreensOn(false) }
+    }
+
+    @Test
+    fun `onCounterHapticFeedbackEnabledChanged calls setCounterHapticFeedbackEnabled when true`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onCounterHapticFeedbackEnabledChanged(true)
+
+        coVerify(exactly = 1) { appPreferencesRepository.setCounterHapticFeedbackEnabled(true) }
+    }
+
+    @Test
+    fun `onCounterHapticFeedbackEnabledChanged calls setCounterHapticFeedbackEnabled when false`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onCounterHapticFeedbackEnabledChanged(false)
+
+        coVerify(exactly = 1) { appPreferencesRepository.setCounterHapticFeedbackEnabled(false) }
     }
 
     @Test

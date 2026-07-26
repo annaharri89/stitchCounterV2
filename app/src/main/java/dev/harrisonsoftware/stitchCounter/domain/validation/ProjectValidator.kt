@@ -7,5 +7,10 @@ object ProjectValidator {
     fun isTitleValid(title: String): Boolean = title.trim().isNotBlank()
 
     fun areTotalRowsValidForType(totalRows: Int, projectType: ProjectType): Boolean =
-        projectType != ProjectType.DOUBLE || totalRows > 0
+        when (projectType) {
+            ProjectType.DOUBLE, ProjectType.ROW_AND_REPEAT -> totalRows > 0
+            ProjectType.SINGLE, ProjectType.UNKNOWN -> true
+        }
+
+    fun areRowsPerRepeatValid(rowsPerRepeat: Int): Boolean = rowsPerRepeat > 0
 }

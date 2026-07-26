@@ -125,6 +125,29 @@ class UpdateDoubleCounterValues @Inject constructor(
 }
 
 @Singleton
+class UpdateRowAndRepeatValues @Inject constructor(
+    private val repo: ProjectRepository
+) {
+    suspend operator fun invoke(
+        id: Int,
+        repeatCount: Int,
+        rowCount: Int,
+        rowsPerRepeat: Int,
+        repeatGoal: Int,
+        clearCompletedAt: Boolean = false,
+        updatedAt: Long
+    ) = repo.updateRowAndRepeatValues(
+        id = id,
+        repeatCount = repeatCount,
+        rowCount = rowCount,
+        rowsPerRepeat = rowsPerRepeat,
+        repeatGoal = repeatGoal,
+        clearCompletedAt = clearCompletedAt,
+        updatedAt = updatedAt
+    )
+}
+
+@Singleton
 class UpdateProjectDetailValues @Inject constructor(
     private val repo: ProjectRepository
 ) {
@@ -133,6 +156,7 @@ class UpdateProjectDetailValues @Inject constructor(
         title: String,
         notes: String,
         totalRows: Int,
+        rowsPerRepeat: Int,
         projectType: ProjectType,
         imagePaths: List<String>,
         completedAt: Long?,
@@ -144,7 +168,31 @@ class UpdateProjectDetailValues @Inject constructor(
         if (!ProjectValidator.areTotalRowsValidForType(totalRows, projectType)) {
             return UpdateProjectDetailResult.InvalidTotalRows
         }
-        repo.updateProjectDetailValues(id, title, notes, totalRows, imagePaths, completedAt, updatedAt)
+        if (projectType == ProjectType.ROW_AND_REPEAT && !ProjectValidator.areRowsPerRepeatValid(rowsPerRepeat)) {
+            return UpdateProjectDetailResult.InvalidRowsPerRepeat
+        }
+        if (projectType == ProjectType.ROW_AND_REPEAT) {
+            repo.updateRowAndRepeatProjectDetailValues(
+                id = id,
+                title = title,
+                notes = notes,
+                repeatGoal = totalRows,
+                rowsPerRepeat = rowsPerRepeat,
+                imagePaths = imagePaths,
+                completedAt = completedAt,
+                updatedAt = updatedAt,
+            )
+        } else {
+            repo.updateProjectDetailValues(
+                id = id,
+                title = title,
+                notes = notes,
+                totalRows = totalRows,
+                imagePaths = imagePaths,
+                completedAt = completedAt,
+                updatedAt = updatedAt,
+            )
+        }
         return UpdateProjectDetailResult.Success
     }
 }
@@ -153,6 +201,7 @@ sealed interface UpdateProjectDetailResult {
     data object Success : UpdateProjectDetailResult
     data object InvalidTitle : UpdateProjectDetailResult
     data object InvalidTotalRows : UpdateProjectDetailResult
+    data object InvalidRowsPerRepeat : UpdateProjectDetailResult
 }
 
 private fun deleteProjectImageFiles(
