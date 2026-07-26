@@ -5,12 +5,13 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [ProjectEntity::class],
-    version =  1,
+    entities = [ProjectEntity::class, NoteEntity::class],
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun projectDao(): ProjectDao
+    abstract fun noteDao(): NoteDao
 }
 
