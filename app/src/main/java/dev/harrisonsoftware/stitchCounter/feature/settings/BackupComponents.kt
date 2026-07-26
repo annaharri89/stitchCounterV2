@@ -127,17 +127,38 @@ internal fun ImportResultDialog(
         title = { Text(stringResource(R.string.settings_import_complete)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(R.string.settings_imported_count, result.importedCount))
-                if (result.failedCount > 0) {
-                    Text(
-                        stringResource(R.string.settings_failed_import_count, result.failedCount),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                    if (result.failedProjectNames.isNotEmpty()) {
-                        Text(
-                            result.failedProjectNames.joinToString("\n"),
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                buildImportResultSections(result).forEach { section ->
+                    when (section.type) {
+                        ImportResultSectionType.PROJECTS_IMPORTED -> {
+                            Text(stringResource(R.string.settings_imported_count, section.count))
+                        }
+                        ImportResultSectionType.PROJECTS_FAILED -> {
+                            Text(
+                                stringResource(R.string.settings_failed_import_count, section.count),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            if (section.itemNames.isNotEmpty()) {
+                                Text(
+                                    section.itemNames.joinToString("\n"),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+                        ImportResultSectionType.NOTES_IMPORTED -> {
+                            Text(stringResource(R.string.settings_imported_notes_count, section.count))
+                        }
+                        ImportResultSectionType.NOTES_FAILED -> {
+                            Text(
+                                stringResource(R.string.settings_failed_notes_import_count, section.count),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            if (section.itemNames.isNotEmpty()) {
+                                Text(
+                                    section.itemNames.joinToString("\n"),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
                     }
                 }
             }

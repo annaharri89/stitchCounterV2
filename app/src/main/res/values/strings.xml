@@ -61,6 +61,7 @@
     <string name="dialog_discard_changes">Discard Changes?</string>
     <string name="dialog_title_required_message">Project title is required. Do you want to discard this project?</string>
     <string name="dialog_discard_changes_message">You have unsaved changes. Are you sure you want to discard them?</string>
+    <string name="error_note_not_found">This note was deleted or could not be found.</string>
     <string name="error_project_not_found">This project was deleted or could not be found.</string>
     <string name="error_title_required">Title is required</string>
     <string name="error_total_rows_greater_than_zero">Total rows must be greater than 0</string>
@@ -123,6 +124,8 @@
     <string name="settings_import_complete">Import Complete</string>
     <string name="settings_imported_count">Imported %1$d project(s)</string>
     <string name="settings_failed_import_count">Failed to import %1$d project(s)</string>
+    <string name="settings_imported_notes_count">Imported %1$d note(s)</string>
+    <string name="settings_failed_notes_import_count">Failed to import %1$d note(s)</string>
     <string name="library_unknown_project_type">Unknown project type</string>
     <string name="theme_name_dusty_rose">Dusty Rose</string>
     <string name="theme_name_golden_hearth">Golden Earth</string>
@@ -148,8 +151,27 @@
 
     <!-- Navigation tabs -->
     <string name="nav_library">Library</string>
+    <string name="nav_notes">Notes</string>
     <string name="nav_stats">Stats</string>
     <string name="nav_settings">Settings</string>
+
+
+    <!-- Notes -->
+    <string name="notes_empty_title">No notes yet</string>
+    <string name="notes_empty_message">Tap + to create your first note</string>
+    <string name="cd_empty_notes">No notes</string>
+    <string name="cd_create_new_note">Create new note</string>
+    <string name="cd_note_row">Note: %1$s</string>
+    <string name="cd_edit_note">Edit note: %1$s</string>
+    <string name="create_note_title">New Note</string>
+    <string name="edit_note_title">Edit Note</string>
+    <string name="label_note_title">Title</string>
+    <string name="placeholder_note_title">Note title</string>
+    <string name="placeholder_note_body">Jot something down…</string>
+    <string name="cd_note_body">Note body</string>
+    <string name="delete_note_title">Delete Note?</string>
+    <string name="delete_note_message">Are you sure you want to delete this note? This action cannot be undone.</string>
+    <string name="cd_delete_note">Delete note</string>
 
     <!-- Stats -->
     <string name="stats_coming_soon_title">Coming Soon</string>

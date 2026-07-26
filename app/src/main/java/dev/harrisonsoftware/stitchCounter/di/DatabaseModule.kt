@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import dev.harrisonsoftware.stitchCounter.data.local.AppDatabase
 import dev.harrisonsoftware.stitchCounter.data.local.DatabaseMigrations
+import dev.harrisonsoftware.stitchCounter.data.local.NoteDao
 import dev.harrisonsoftware.stitchCounter.data.local.ProjectDao
 import dagger.Module
 import dagger.Provides
@@ -23,10 +24,16 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "StitchCounter.db"
-        ).build()
+        )
+            .addMigrations(*DatabaseMigrations.ALL)
+            .build()
 
     @Provides
     @Singleton
     fun provideProjectDao(db: AppDatabase): ProjectDao = db.projectDao()
+
+    @Provides
+    @Singleton
+    fun provideNoteDao(db: AppDatabase): NoteDao = db.noteDao()
 }
 

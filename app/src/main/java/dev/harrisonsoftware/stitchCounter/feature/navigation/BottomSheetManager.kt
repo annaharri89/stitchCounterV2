@@ -32,6 +32,8 @@ import dev.harrisonsoftware.stitchCounter.feature.doublecounter.DoubleCounterScr
 import dev.harrisonsoftware.stitchCounter.feature.doublecounter.DoubleCounterViewModel
 import dev.harrisonsoftware.stitchCounter.feature.projectDetail.ProjectDetailScreenContent
 import dev.harrisonsoftware.stitchCounter.feature.projectDetail.ProjectDetailViewModel
+import dev.harrisonsoftware.stitchCounter.feature.notes.CreateNoteScreenContent
+import dev.harrisonsoftware.stitchCounter.feature.notes.CreateNoteViewModel
 import dev.harrisonsoftware.stitchCounter.feature.rowandrepeat.RowAndRepeat
 import dev.harrisonsoftware.stitchCounter.feature.rowandrepeat.RowAndRepeatViewModel
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.sheetHeaderInsetPadding
@@ -364,6 +366,13 @@ fun BottomSheetManager(
                             }
                         }
 
+                        is SheetScreen.CreateNote -> {
+                            val createNoteViewModel = hiltViewModel<CreateNoteViewModel>()
+
+                            LaunchedEffect(screen.noteId) {
+                                createNoteViewModel.loadNote(screen.noteId)
+                            }
+
                             SheetDismissalHandler(
                                 screen = screen,
                                 onAttemptDismissal = { createNoteViewModel.attemptDismissal() }
@@ -539,6 +548,18 @@ fun BottomSheetManager(
                                         )
                                     }
 
+                                    is SheetScreen.CreateNote -> {
+                                        val createNoteViewModel = hiltViewModel<CreateNoteViewModel>()
+                                        CreateNoteScreenContent(
+                                            viewModel = createNoteViewModel,
+                                            showDiscardDialog = showDiscardDialog.value,
+                                            onDismissDiscardDialog = { showDiscardDialog.value = false },
+                                            onConfirmDiscard = {
+                                                showDiscardDialog.value = false
+                                                createNoteViewModel.confirmDiscard()
+                                            },
+                                        )
+                                    }
                                     }
                                 }
                             }

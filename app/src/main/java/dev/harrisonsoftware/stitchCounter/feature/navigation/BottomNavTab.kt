@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Note
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import dev.harrisonsoftware.stitchCounter.R
@@ -13,6 +14,7 @@ enum class BottomNavTab(
     val icon: ImageVector
 ) {
     LIBRARY(R.string.nav_library, Icons.Default.List),
+    NOTES(R.string.nav_notes, Icons.Default.Note),
     STATS(R.string.nav_stats, Icons.Default.BarChart),
     SETTINGS(R.string.nav_settings, Icons.Default.Settings)
 }

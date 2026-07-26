@@ -75,6 +75,43 @@ class BackupManagerTest {
     }
 
     @Test
+    fun `extractBackupZip parses version 1 backup without notes field`() {
+        val json = """{"metadata":{"version":1,"export_date":1,"app_version":"1","project_count":0},"projects":[]}"""
+        val inputUri = "content://legacy-backup"
+        fakeUriStreamProvider.inputStreams[inputUri] = zipBytesForEntries(
+            "backup.json" to json.toByteArray()
+        )
+
+        val result = backupManager.extractBackupZip(ContentUri(inputUri))
+
+        assertTrue(result is BackupZipExtractionResult.Success)
+        result as BackupZipExtractionResult.Success
+        assertEquals(emptyList<BackupNote>(), result.extraction.backupData.notes)
+    }
+
+    @Test
+    fun `extractBackupZip parses version 2 backup with notes`() {
+        val json = """
+            {
+              "metadata":{"version":2,"export_date":1,"app_version":"2","project_count":0,"note_count":1},
+              "projects":[],
+              "notes":[{"id":1,"title":"Yarn note","body":"Use merino","created_at":2,"updated_at":3}]
+            }
+        """.trimIndent()
+        val inputUri = "content://notes-backup"
+        fakeUriStreamProvider.inputStreams[inputUri] = zipBytesForEntries(
+            "backup.json" to json.toByteArray()
+        )
+
+        val result = backupManager.extractBackupZip(ContentUri(inputUri))
+
+        assertTrue(result is BackupZipExtractionResult.Success)
+        result as BackupZipExtractionResult.Success
+        assertEquals(1, result.extraction.backupData.notes.size)
+        assertEquals("Yarn note", result.extraction.backupData.notes[0].title)
+    }
+
+    @Test
     fun `createBackupZip writes backup json and existing project image`() {
         val imageRelativePath = "project_images/sample.jpg"
         val sourceImage = File(filesDir, imageRelativePath).apply {
