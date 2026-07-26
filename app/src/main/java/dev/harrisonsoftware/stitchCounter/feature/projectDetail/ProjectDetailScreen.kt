@@ -52,6 +52,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.harrisonsoftware.stitchCounter.R
 import dev.harrisonsoftware.stitchCounter.domain.model.ProjectType
 import dev.harrisonsoftware.stitchCounter.feature.navigation.RootNavGraph
+import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.LoadFailureContent
 import dev.harrisonsoftware.stitchCounter.feature.sharedComposables.RowProgressWithLabel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -81,12 +82,24 @@ fun ProjectDetailContent(
     }
 
     val scrollState = rememberScrollState()
-    val isNewProject = uiState.project?.id == null || uiState.project.id == 0
+    val existingProjectId = uiState.project?.id?.takeIf { it > 0 }
+    val isNewProject = existingProjectId == null
     val isDoubleCounter = uiState.projectType == ProjectType.DOUBLE
+    val isRowAndRepeat = uiState.projectType == ProjectType.ROW_AND_REPEAT
     val keyboardController = LocalSoftwareKeyboardController.current
     val totalRowsFocusRequester = remember { FocusRequester() }
+    val rowsPerRepeatFocusRequester = remember { FocusRequester() }
+    val repeatGoalFocusRequester = remember { FocusRequester() }
     val projectNotCreated = onCreateProject != null && isNewProject
 
+    val loadError = uiState.loadError
+
+    if (loadError != null) {
+        LoadFailureContent(
+            messageResId = loadError,
+            onClose = { viewModel.attemptDismissal() },
+        )
+    } else {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -101,8 +114,8 @@ fun ProjectDetailContent(
             ProjectDetailTopBar(
                 isNewProject = isNewProject,
                 onCloseClick = if (isNewProject) { { viewModel.attemptDismissal() } } else null,
-                onBackClick = if (!isNewProject && onNavigateBack != null) {
-                    { onNavigateBack(uiState.project.id) }
+                onBackClick = if (existingProjectId != null && onNavigateBack != null) {
+                    { onNavigateBack(existingProjectId) }
                 } else null
             )
 
@@ -116,12 +129,13 @@ fun ProjectDetailContent(
                 isError = uiState.titleError != null,
                 supportingText = uiState.titleError?.let { errorResId -> { Text(stringResource(errorResId)) } },
                 keyboardOptions = KeyboardOptions(
-                    imeAction = if (isDoubleCounter) ImeAction.Next else ImeAction.Done
+                    imeAction = if (isDoubleCounter || isRowAndRepeat) ImeAction.Next else ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(
                     onNext = {
-                        if (isDoubleCounter) {
-                            totalRowsFocusRequester.requestFocus()
+                        when {
+                            isDoubleCounter -> totalRowsFocusRequester.requestFocus()
+                            isRowAndRepeat -> rowsPerRepeatFocusRequester.requestFocus()
                         }
                     },
                     onDone = {
@@ -151,6 +165,20 @@ fun ProjectDetailContent(
                             keyboardController?.hide()
                         }
                     )
+                )
+            }
+
+            if (isRowAndRepeat) {
+                ProjectDetailRowAndRepeatFields(
+                    rowsPerRepeat = uiState.rowsPerRepeat,
+                    repeatGoal = uiState.totalRows,
+                    rowsPerRepeatError = uiState.rowsPerRepeatError,
+                    repeatGoalError = uiState.totalRowsError,
+                    rowsPerRepeatFocusRequester = rowsPerRepeatFocusRequester,
+                    repeatGoalFocusRequester = repeatGoalFocusRequester,
+                    keyboardController = keyboardController,
+                    onRowsPerRepeatChange = viewModel::updateRowsPerRepeat,
+                    onRepeatGoalChange = viewModel::updateTotalRows,
                 )
             }
 
@@ -221,8 +249,14 @@ fun ProjectDetailContent(
         }
 
         if (projectNotCreated) {
-            val isFormValid = uiState.title.isNotBlank() && 
-                (!isDoubleCounter || (uiState.totalRows.toIntOrNull() ?: 0) > 0)
+            val isFormValid = uiState.title.isNotBlank() && when {
+                isDoubleCounter -> (uiState.totalRows.toIntOrNull() ?: 0) > 0
+                isRowAndRepeat -> {
+                    (uiState.rowsPerRepeat.toIntOrNull() ?: 0) > 0 &&
+                        (uiState.totalRows.toIntOrNull() ?: 0) > 0
+                }
+                else -> true
+            }
             Button(
                 onClick = onCreateProject,
                 modifier = Modifier
@@ -233,6 +267,7 @@ fun ProjectDetailContent(
                 Text(stringResource(R.string.action_create_project))
             }
         }
+    }
     }
 
     if (showDiscardDialog) {
@@ -290,11 +325,20 @@ fun ProjectDetailScreenContent(
     viewModel: ProjectDetailViewModel = hiltViewModel(),
     onNavigateBack: ((Int) -> Unit)? = null,
     onDismiss: (() -> Unit)? = null,
-    onCreateProject: (() -> Unit)? = null
+    onCreateProject: (() -> Unit)? = null,
+    isDiscardDialogManagedBySheet: Boolean = false,
+    showDiscardDialog: Boolean = false,
+    onDismissDiscardDialog: () -> Unit = {},
+    onConfirmDiscard: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val showDiscardDialog = remember { mutableStateOf(false) }
+    val internalShowDiscardDialog = remember { mutableStateOf(false) }
+    val resolvedShowDiscardDialog = if (isDiscardDialogManagedBySheet) {
+        showDiscardDialog
+    } else {
+        internalShowDiscardDialog.value
+    }
 
     LaunchedEffect(projectId, projectType) {
         if (projectId != null && projectId > 0) {
@@ -304,20 +348,22 @@ fun ProjectDetailScreenContent(
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.dismissalResult.collect { result ->
-            when (result) {
-                is dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult.Allowed -> {
-                    onDismiss?.invoke()
-                }
-                is dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult.ShowDiscardDialog -> {
-                    showDiscardDialog.value = true
+    if (!isDiscardDialogManagedBySheet) {
+        LaunchedEffect(Unit) {
+            viewModel.dismissalResult.collect { result ->
+                when (result) {
+                    is dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult.Allowed -> {
+                        onDismiss?.invoke()
+                    }
+                    is dev.harrisonsoftware.stitchCounter.domain.model.DismissalResult.ShowDiscardDialog -> {
+                        internalShowDiscardDialog.value = true
+                    }
                 }
             }
         }
     }
 
-    if (onDismiss != null) {
+    if (onDismiss != null || isDiscardDialogManagedBySheet) {
         BackHandler {
             viewModel.attemptDismissal()
         }
@@ -327,12 +373,21 @@ fun ProjectDetailScreenContent(
         uiState = uiState,
         viewModel = viewModel,
         context = context,
-        showDiscardDialog = showDiscardDialog.value,
-        onDismissDiscardDialog = { showDiscardDialog.value = false },
-        onDiscard = {
-            viewModel.discardChanges()
-            showDiscardDialog.value = false
-            onDismiss?.invoke()
+        showDiscardDialog = resolvedShowDiscardDialog,
+        onDismissDiscardDialog = if (isDiscardDialogManagedBySheet) {
+            onDismissDiscardDialog
+        } else {
+            { internalShowDiscardDialog.value = false }
+        },
+        onDiscard = if (isDiscardDialogManagedBySheet) {
+            onConfirmDiscard
+        } else {
+            {
+                viewModel.discardChanges()
+                internalShowDiscardDialog.value = false
+                onDismiss?.invoke()
+                Unit
+            }
         },
         onCreateProject = onCreateProject,
         onNavigateBack = onNavigateBack

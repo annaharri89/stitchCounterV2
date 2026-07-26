@@ -66,6 +66,8 @@
     <string name="error_total_rows_greater_than_zero">Total rows must be greater than 0</string>
     <string name="error_total_rows_required">Total rows is required</string>
     <string name="error_total_rows_required_and_greater">Total rows is required and must be greater than 0</string>
+    <string name="error_rows_per_repeat_required_and_greater">Rows per repeat is required and must be greater than 0</string>
+    <string name="error_repeat_goal_required_and_greater">Repeat goal is required and must be greater than 0</string>
 
     <!-- Project images -->
     <string name="project_photos_header">Project Photos</string>

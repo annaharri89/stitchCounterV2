@@ -15,6 +15,8 @@ import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateProjectDetailResu
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpdateProjectDetailValues
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpsertProjectResult
 import dev.harrisonsoftware.stitchCounter.domain.usecase.UpsertProject
+import dev.harrisonsoftware.stitchCounter.feature.rowandrepeat.RowAndRepeatProjectValues
+import dev.harrisonsoftware.stitchCounter.feature.rowandrepeat.RowAndRepeatUiState
 import android.content.Context
 import android.net.Uri
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -40,12 +42,15 @@ data class ProjectDetailUiState(
     val notes: String = "",
     val projectType: ProjectType = ProjectType.SINGLE,
     val totalRows: String = "",
+    val rowsPerRepeat: String = "",
     val imagePaths: List<String> = emptyList(),
     val isCompleted: Boolean = false,
     val isLoading: Boolean = false,
     val hasUnsavedChanges: Boolean = false,
     @StringRes val titleError: Int? = null,
-    @StringRes val totalRowsError: Int? = null
+    @StringRes val totalRowsError: Int? = null,
+    @StringRes val rowsPerRepeatError: Int? = null,
+    @StringRes val loadError: Int? = null,
 )
 
 @HiltViewModel
@@ -68,6 +73,7 @@ class ProjectDetailViewModel @Inject constructor(
         private const val SAVED_STATE_KEY_NOTES = "detail_notes"
         private const val SAVED_STATE_KEY_PROJECT_TYPE = "detail_project_type"
         private const val SAVED_STATE_KEY_TOTAL_ROWS = "detail_total_rows"
+        private const val SAVED_STATE_KEY_ROWS_PER_REPEAT = "detail_rows_per_repeat"
         private const val SAVED_STATE_KEY_IS_COMPLETED = "detail_is_completed"
         private const val SAVED_STATE_KEY_IMAGE_PATHS = "detail_image_paths"
         private const val AUTO_SAVE_DELAY_MS = 1000L
@@ -83,12 +89,13 @@ class ProjectDetailViewModel @Inject constructor(
     private var originalTitle: String = ""
     private var originalNotes: String = ""
     private var originalTotalRows: String = ""
+    private var originalRowsPerRepeat: String = ""
     private var originalImagePaths: List<String> = emptyList()
     private var originalIsCompleted: Boolean = false
 
     fun loadProject(projectId: Int?, projectType: ProjectType) {
         viewModelScope.launch {
-            _uiState.update { currentState -> currentState.copy(isLoading = true) }
+            _uiState.update { currentState -> currentState.copy(isLoading = true, loadError = null) }
 
             if (projectId == null || projectId == 0) {
                 Timber.tag(Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL).i("event=project_load mode=new projectType=$projectType")
@@ -100,38 +107,64 @@ class ProjectDetailViewModel @Inject constructor(
                 val restoredTitle = savedStateHandle.get<String>(SAVED_STATE_KEY_TITLE)
                 val restoredNotes = savedStateHandle.get<String>(SAVED_STATE_KEY_NOTES)
                 val restoredTotalRows = savedStateHandle.get<String>(SAVED_STATE_KEY_TOTAL_ROWS)
+                val restoredRowsPerRepeat = savedStateHandle.get<String>(SAVED_STATE_KEY_ROWS_PER_REPEAT)
                 val restoredIsCompleted = savedStateHandle.get<Boolean>(SAVED_STATE_KEY_IS_COMPLETED)
                 val restoredImagePaths = savedStateHandle.get<ArrayList<String>>(SAVED_STATE_KEY_IMAGE_PATHS)
                 val hasSavedNewProjectState = restoredTitle != null
 
-                val newProject = Project(
-                    id = 0,
-                    type = projectType,
-                    title = "",
-                    stitchCounterNumber = 0,
-                    stitchAdjustment = 1,
-                    rowCounterNumber = 0,
-                    rowAdjustment = 1,
-                    totalRows = 0
-                )
+                val newProject = when (projectType) {
+                    ProjectType.ROW_AND_REPEAT -> Project(
+                        id = 0,
+                        type = projectType,
+                        title = "",
+                        stitchCounterNumber = 0,
+                        stitchAdjustment = 1,
+                        rowCounterNumber = RowAndRepeatUiState.ROW_COUNT_MIN,
+                        rowAdjustment = RowAndRepeatUiState.DEFAULT_ROWS_PER_REPEAT,
+                        totalRows = RowAndRepeatUiState.DEFAULT_REPEAT_GOAL
+                    )
+                    else -> Project(
+                        id = 0,
+                        type = projectType,
+                        title = "",
+                        stitchCounterNumber = 0,
+                        stitchAdjustment = 1,
+                        rowCounterNumber = 0,
+                        rowAdjustment = 1,
+                        totalRows = 0
+                    )
+                }
+                val defaultRepeatGoal = RowAndRepeatUiState.DEFAULT_REPEAT_GOAL.toString()
+                val defaultRowsPerRepeat = RowAndRepeatUiState.DEFAULT_ROWS_PER_REPEAT.toString()
                 _uiState.update { currentState ->
                     currentState.copy(
                         project = newProject,
                         title = if (hasSavedNewProjectState) restoredTitle ?: "" else "",
                         notes = if (hasSavedNewProjectState) restoredNotes ?: "" else "",
                         projectType = projectType,
-                        totalRows = if (hasSavedNewProjectState) restoredTotalRows ?: "" else "",
+                        totalRows = when {
+                            !hasSavedNewProjectState && projectType == ProjectType.ROW_AND_REPEAT -> defaultRepeatGoal
+                            hasSavedNewProjectState -> restoredTotalRows ?: ""
+                            else -> ""
+                        },
+                        rowsPerRepeat = when {
+                            !hasSavedNewProjectState && projectType == ProjectType.ROW_AND_REPEAT -> defaultRowsPerRepeat
+                            hasSavedNewProjectState -> restoredRowsPerRepeat ?: ""
+                            else -> ""
+                        },
                         imagePaths = if (hasSavedNewProjectState) restoredImagePaths?.toList() ?: emptyList() else emptyList(),
                         isCompleted = if (hasSavedNewProjectState) restoredIsCompleted ?: false else false,
                         isLoading = false,
                         hasUnsavedChanges = hasSavedNewProjectState,
                         titleError = null,
-                        totalRowsError = null
+                        totalRowsError = null,
+                        rowsPerRepeatError = null,
                     )
                 }
                 originalTitle = ""
                 originalNotes = ""
                 originalTotalRows = ""
+                originalRowsPerRepeat = ""
                 originalImagePaths = emptyList()
                 originalIsCompleted = false
                 return@launch
@@ -142,20 +175,32 @@ class ProjectDetailViewModel @Inject constructor(
                 restoreExistingProjectState(project)
             } else {
                 Timber.tag(Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL).w("event=project_load_missing projectId=$projectId")
-                _uiState.update { currentState -> currentState.copy(isLoading = false) }
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        project = null,
+                        isLoading = false,
+                        loadError = R.string.error_project_not_found,
+                    )
+                }
             }
         }
     }
 
     fun loadProjectById(projectId: Int) {
         viewModelScope.launch {
-            _uiState.update { currentState -> currentState.copy(isLoading = true) }
+            _uiState.update { currentState -> currentState.copy(isLoading = true, loadError = null) }
             val project = getProject(projectId)
             if (project != null) {
                 restoreExistingProjectState(project)
             } else {
                 Timber.tag(Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL).w("event=project_load_missing projectId=$projectId source=by_id")
-                _uiState.update { currentState -> currentState.copy(isLoading = false) }
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        project = null,
+                        isLoading = false,
+                        loadError = R.string.error_project_not_found,
+                    )
+                }
             }
         }
     }
@@ -174,12 +219,8 @@ class ProjectDetailViewModel @Inject constructor(
         } else {
             project.notes
         }
-        val restoredTotalRows = if (restoreFromSavedState) {
-            savedStateHandle.get<String>(SAVED_STATE_KEY_TOTAL_ROWS)
-                ?: if (project.totalRows > 0) project.totalRows.toString() else ""
-        } else {
-            if (project.totalRows > 0) project.totalRows.toString() else ""
-        }
+        val restoredTotalRows = RowAndRepeatProjectValues.repeatGoalInputFromStoredValue(project.totalRows)
+        val restoredRowsPerRepeat = RowAndRepeatProjectValues.rowsPerRepeatInputFromStoredValue(project.rowAdjustment)
         val restoredIsCompleted = if (restoreFromSavedState) {
             savedStateHandle.get<Boolean>(SAVED_STATE_KEY_IS_COMPLETED) ?: (project.completedAt != null)
         } else {
@@ -194,14 +235,14 @@ class ProjectDetailViewModel @Inject constructor(
 
         originalTitle = project.title
         originalNotes = project.notes
-        originalTotalRows = if (project.totalRows > 0) project.totalRows.toString() else ""
+        originalTotalRows = RowAndRepeatProjectValues.repeatGoalInputFromStoredValue(project.totalRows)
+        originalRowsPerRepeat = RowAndRepeatProjectValues.rowsPerRepeatInputFromStoredValue(project.rowAdjustment)
         originalImagePaths = project.imagePaths
         originalIsCompleted = project.completedAt != null
 
         val hasChangesFromSavedState = restoreFromSavedState && (
             restoredTitle != originalTitle
                 || restoredNotes != originalNotes
-                || restoredTotalRows != originalTotalRows
                 || restoredIsCompleted != originalIsCompleted
                 || restoredImagePaths != originalImagePaths
         )
@@ -213,14 +254,19 @@ class ProjectDetailViewModel @Inject constructor(
                 notes = restoredNotes,
                 projectType = project.type,
                 totalRows = restoredTotalRows,
+                rowsPerRepeat = restoredRowsPerRepeat,
                 imagePaths = restoredImagePaths,
                 isCompleted = restoredIsCompleted,
                 isLoading = false,
                 hasUnsavedChanges = hasChangesFromSavedState,
                 titleError = null,
-                totalRowsError = null
+                totalRowsError = null,
+                rowsPerRepeatError = null,
             )
         }
+
+        savedStateHandle[SAVED_STATE_KEY_TOTAL_ROWS] = restoredTotalRows
+        savedStateHandle[SAVED_STATE_KEY_ROWS_PER_REPEAT] = restoredRowsPerRepeat
 
         if (hasChangesFromSavedState) {
             Timber.tag(Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL)
@@ -233,12 +279,14 @@ class ProjectDetailViewModel @Inject constructor(
         title: String = _uiState.value.title,
         notes: String = _uiState.value.notes,
         totalRows: String = _uiState.value.totalRows,
+        rowsPerRepeat: String = _uiState.value.rowsPerRepeat,
         imagePaths: List<String> = _uiState.value.imagePaths,
         isCompleted: Boolean = _uiState.value.isCompleted
     ): Boolean =
         title != originalTitle
                 || notes != originalNotes
                 || totalRows != originalTotalRows
+                || rowsPerRepeat != originalRowsPerRepeat
                 || imagePaths != originalImagePaths
                 || isCompleted != originalIsCompleted
 
@@ -268,19 +316,45 @@ class ProjectDetailViewModel @Inject constructor(
     fun updateTotalRows(newTotalRows: String) {
         val state = _uiState.value
         val totalRowsValue = newTotalRows.toIntOrNull() ?: 0
-        val isDoubleCounter = state.projectType == ProjectType.DOUBLE
-        val totalRowsError = if (isDoubleCounter && newTotalRows.isNotBlank() && !ProjectValidator.areTotalRowsValidForType(totalRowsValue, state.projectType)) {
-            R.string.error_total_rows_greater_than_zero
-        } else if (isDoubleCounter && newTotalRows.isBlank()) {
-            R.string.error_total_rows_required
-        } else {
-            null
+        val totalRowsError = when (state.projectType) {
+            ProjectType.DOUBLE -> when {
+                newTotalRows.isBlank() -> R.string.error_total_rows_required
+                !ProjectValidator.areTotalRowsValidForType(totalRowsValue, state.projectType) ->
+                    R.string.error_total_rows_greater_than_zero
+                else -> null
+            }
+            ProjectType.ROW_AND_REPEAT -> when {
+                newTotalRows.isBlank() -> R.string.error_repeat_goal_required_and_greater
+                !ProjectValidator.areTotalRowsValidForType(totalRowsValue, state.projectType) ->
+                    R.string.error_repeat_goal_required_and_greater
+                else -> null
+            }
+            else -> null
         }
         _uiState.update { currentState ->
             currentState.copy(
                 totalRows = newTotalRows,
                 hasUnsavedChanges = hasChanges(totalRows = newTotalRows),
                 totalRowsError = totalRowsError
+            )
+        }
+        persistToSavedState()
+        triggerAutoSave()
+    }
+
+    fun updateRowsPerRepeat(newRowsPerRepeat: String) {
+        val rowsPerRepeatValue = newRowsPerRepeat.toIntOrNull() ?: 0
+        val rowsPerRepeatError = when {
+            newRowsPerRepeat.isBlank() -> R.string.error_rows_per_repeat_required_and_greater
+            !ProjectValidator.areRowsPerRepeatValid(rowsPerRepeatValue) ->
+                R.string.error_rows_per_repeat_required_and_greater
+            else -> null
+        }
+        _uiState.update { currentState ->
+            currentState.copy(
+                rowsPerRepeat = newRowsPerRepeat,
+                hasUnsavedChanges = hasChanges(rowsPerRepeat = newRowsPerRepeat),
+                rowsPerRepeatError = rowsPerRepeatError
             )
         }
         persistToSavedState()
@@ -329,7 +403,8 @@ class ProjectDetailViewModel @Inject constructor(
         val state = _uiState.value
         val staleProject = state.project
         val projectId = staleProject?.id ?: 0
-        val totalRowsValue = state.totalRows.toIntOrNull() ?: 0
+        val totalRowsValue = resolveTotalRowsValue(state)
+        val rowsPerRepeatValue = resolveRowsPerRepeatValue(state)
         val now = System.currentTimeMillis()
         val completedAt = if (state.isCompleted) (staleProject?.completedAt ?: now) else null
 
@@ -339,6 +414,7 @@ class ProjectDetailViewModel @Inject constructor(
                 title = state.title,
                 notes = state.notes,
                 totalRows = totalRowsValue,
+                rowsPerRepeat = rowsPerRepeatValue,
                 projectType = state.projectType,
                 imagePaths = state.imagePaths,
                 completedAt = completedAt,
@@ -354,15 +430,19 @@ class ProjectDetailViewModel @Inject constructor(
                 originalTitle = state.title
                 originalNotes = state.notes
                 originalTotalRows = state.totalRows
+                originalRowsPerRepeat = state.rowsPerRepeat
                 originalImagePaths = state.imagePaths
                 originalIsCompleted = state.isCompleted
                 _uiState.update { currentState ->
                     currentState.copy(
                         project = freshProject,
+                        totalRows = RowAndRepeatProjectValues.repeatGoalInputFromStoredValue(freshProject.totalRows),
+                        rowsPerRepeat = RowAndRepeatProjectValues.rowsPerRepeatInputFromStoredValue(freshProject.rowAdjustment),
                         imagePaths = freshProject.imagePaths,
                         hasUnsavedChanges = false,
                         titleError = null,
-                        totalRowsError = null
+                        totalRowsError = null,
+                        rowsPerRepeatError = null,
                     )
                 }
             }
@@ -378,8 +458,14 @@ class ProjectDetailViewModel @Inject constructor(
                 notes = state.notes,
                 stitchCounterNumber = baseProject?.stitchCounterNumber ?: 0,
                 stitchAdjustment = baseProject?.stitchAdjustment ?: 1,
-                rowCounterNumber = baseProject?.rowCounterNumber ?: 0,
-                rowAdjustment = baseProject?.rowAdjustment ?: 1,
+                rowCounterNumber = when (state.projectType) {
+                    ProjectType.ROW_AND_REPEAT -> RowAndRepeatUiState.ROW_COUNT_MIN
+                    else -> baseProject?.rowCounterNumber ?: 0
+                },
+                rowAdjustment = when (state.projectType) {
+                    ProjectType.ROW_AND_REPEAT -> rowsPerRepeatValue
+                    else -> baseProject?.rowAdjustment ?: 1
+                },
                 totalRows = totalRowsValue,
                 imagePaths = state.imagePaths,
                 createdAt = now,
@@ -404,6 +490,7 @@ class ProjectDetailViewModel @Inject constructor(
                 originalTitle = state.title
                 originalNotes = state.notes
                 originalTotalRows = state.totalRows
+                originalRowsPerRepeat = state.rowsPerRepeat
                 originalImagePaths = updatedProject.imagePaths
                 originalIsCompleted = state.isCompleted
                 _uiState.update { currentState ->
@@ -412,7 +499,8 @@ class ProjectDetailViewModel @Inject constructor(
                         imagePaths = updatedProject.imagePaths,
                         hasUnsavedChanges = false,
                         titleError = null,
-                        totalRowsError = null
+                        totalRowsError = null,
+                        rowsPerRepeatError = null,
                     )
                 }
                 persistToSavedState()
@@ -437,6 +525,11 @@ class ProjectDetailViewModel @Inject constructor(
         viewModelScope.launch {
             autoSaveJob?.cancel()
             val state = _uiState.value
+
+            if (state.loadError != null) {
+                _dismissalResult.send(DismissalResult.Allowed)
+                return@launch
+            }
 
             if (!ProjectValidator.isTitleValid(state.title)) {
                 Timber.tag(Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL).w("event=dismissal_blocked reason=invalid_title")
@@ -464,11 +557,13 @@ class ProjectDetailViewModel @Inject constructor(
                 title = originalTitle,
                 notes = originalNotes,
                 totalRows = originalTotalRows,
+                rowsPerRepeat = originalRowsPerRepeat,
                 imagePaths = originalImagePaths,
                 isCompleted = originalIsCompleted,
                 hasUnsavedChanges = false,
                 titleError = null,
-                totalRowsError = null
+                totalRowsError = null,
+                rowsPerRepeatError = null,
             )
         }
         clearSavedState()
@@ -525,12 +620,29 @@ class ProjectDetailViewModel @Inject constructor(
                 return@launch
             }
 
-            val totalRowsValue = state.totalRows.toIntOrNull() ?: 0
+            val totalRowsValue = resolveTotalRowsValue(state)
             if (!ProjectValidator.areTotalRowsValidForType(totalRowsValue, state.projectType)) {
                 Timber.tag(Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL)
                     .w("event=create_blocked_validation reason=invalid_total_rows projectType=${state.projectType}")
                 _uiState.update { currentState ->
-                    currentState.copy(totalRowsError = R.string.error_total_rows_required_and_greater)
+                    currentState.copy(
+                        totalRowsError = when (state.projectType) {
+                            ProjectType.ROW_AND_REPEAT -> R.string.error_repeat_goal_required_and_greater
+                            else -> R.string.error_total_rows_required_and_greater
+                        }
+                    )
+                }
+                return@launch
+            }
+
+            val rowsPerRepeatValue = resolveRowsPerRepeatValue(state)
+            if (state.projectType == ProjectType.ROW_AND_REPEAT &&
+                !ProjectValidator.areRowsPerRepeatValid(rowsPerRepeatValue)
+            ) {
+                Timber.tag(Constants.LOG_TAG_PROJECT_DETAIL_VIEW_MODEL)
+                    .w("event=create_blocked_validation reason=invalid_rows_per_repeat projectType=${state.projectType}")
+                _uiState.update { currentState ->
+                    currentState.copy(rowsPerRepeatError = R.string.error_rows_per_repeat_required_and_greater)
                 }
                 return@launch
             }
@@ -544,8 +656,14 @@ class ProjectDetailViewModel @Inject constructor(
                 notes = state.notes,
                 stitchCounterNumber = existingProject?.stitchCounterNumber ?: 0,
                 stitchAdjustment = existingProject?.stitchAdjustment ?: 1,
-                rowCounterNumber = existingProject?.rowCounterNumber ?: 0,
-                rowAdjustment = existingProject?.rowAdjustment ?: 1,
+                rowCounterNumber = when (state.projectType) {
+                    ProjectType.ROW_AND_REPEAT -> RowAndRepeatUiState.ROW_COUNT_MIN
+                    else -> existingProject?.rowCounterNumber ?: 0
+                },
+                rowAdjustment = when (state.projectType) {
+                    ProjectType.ROW_AND_REPEAT -> rowsPerRepeatValue
+                    else -> existingProject?.rowAdjustment ?: 1
+                },
                 totalRows = totalRowsValue,
                 imagePaths = state.imagePaths,
                 createdAt = now,
@@ -570,6 +688,7 @@ class ProjectDetailViewModel @Inject constructor(
                 originalTitle = state.title
                 originalNotes = state.notes
                 originalTotalRows = state.totalRows
+                originalRowsPerRepeat = state.rowsPerRepeat
                 originalImagePaths = updatedProject.imagePaths
                 _uiState.update { currentState ->
                     currentState.copy(
@@ -577,7 +696,8 @@ class ProjectDetailViewModel @Inject constructor(
                         imagePaths = updatedProject.imagePaths,
                         hasUnsavedChanges = false,
                         titleError = null,
-                        totalRowsError = null
+                        totalRowsError = null,
+                        rowsPerRepeatError = null,
                     )
                 }
                 persistToSavedState()
@@ -598,9 +718,24 @@ class ProjectDetailViewModel @Inject constructor(
     }
 
     private fun canPersistState(state: ProjectDetailUiState): Boolean {
-        val totalRowsValue = state.totalRows.toIntOrNull() ?: 0
+        val totalRowsValue = resolveTotalRowsValue(state)
+        val rowsPerRepeatValue = resolveRowsPerRepeatValue(state)
         return ProjectValidator.isTitleValid(state.title)
                 && ProjectValidator.areTotalRowsValidForType(totalRowsValue, state.projectType)
+                && (state.projectType != ProjectType.ROW_AND_REPEAT ||
+                ProjectValidator.areRowsPerRepeatValid(rowsPerRepeatValue))
+    }
+
+    private fun resolveTotalRowsValue(state: ProjectDetailUiState): Int = when (state.projectType) {
+        ProjectType.ROW_AND_REPEAT -> state.totalRows.toIntOrNull()
+            ?: RowAndRepeatUiState.DEFAULT_REPEAT_GOAL
+        ProjectType.SINGLE, ProjectType.DOUBLE, ProjectType.UNKNOWN -> state.totalRows.toIntOrNull() ?: 0
+    }
+
+    private fun resolveRowsPerRepeatValue(state: ProjectDetailUiState): Int = when (state.projectType) {
+        ProjectType.ROW_AND_REPEAT -> state.rowsPerRepeat.toIntOrNull()
+            ?: RowAndRepeatProjectValues.rowsPerRepeatFromStoredValue(state.project?.rowAdjustment ?: 1)
+        else -> state.project?.rowAdjustment ?: 1
     }
 
     private fun applyUpdateProjectDetailResult(result: UpdateProjectDetailResult): Boolean {
@@ -614,7 +749,18 @@ class ProjectDetailViewModel @Inject constructor(
             }
             UpdateProjectDetailResult.InvalidTotalRows -> {
                 _uiState.update { currentState ->
-                    currentState.copy(totalRowsError = R.string.error_total_rows_required_and_greater)
+                    currentState.copy(
+                        totalRowsError = when (currentState.projectType) {
+                            ProjectType.ROW_AND_REPEAT -> R.string.error_repeat_goal_required_and_greater
+                            else -> R.string.error_total_rows_required_and_greater
+                        }
+                    )
+                }
+                false
+            }
+            UpdateProjectDetailResult.InvalidRowsPerRepeat -> {
+                _uiState.update { currentState ->
+                    currentState.copy(rowsPerRepeatError = R.string.error_rows_per_repeat_required_and_greater)
                 }
                 false
             }
@@ -628,6 +774,7 @@ class ProjectDetailViewModel @Inject constructor(
         savedStateHandle[SAVED_STATE_KEY_NOTES] = state.notes
         savedStateHandle[SAVED_STATE_KEY_PROJECT_TYPE] = state.projectType.name
         savedStateHandle[SAVED_STATE_KEY_TOTAL_ROWS] = state.totalRows
+        savedStateHandle[SAVED_STATE_KEY_ROWS_PER_REPEAT] = state.rowsPerRepeat
         savedStateHandle[SAVED_STATE_KEY_IS_COMPLETED] = state.isCompleted
         savedStateHandle[SAVED_STATE_KEY_IMAGE_PATHS] = ArrayList(state.imagePaths)
     }
@@ -638,6 +785,7 @@ class ProjectDetailViewModel @Inject constructor(
         savedStateHandle.remove<String>(SAVED_STATE_KEY_NOTES)
         savedStateHandle.remove<String>(SAVED_STATE_KEY_PROJECT_TYPE)
         savedStateHandle.remove<String>(SAVED_STATE_KEY_TOTAL_ROWS)
+        savedStateHandle.remove<String>(SAVED_STATE_KEY_ROWS_PER_REPEAT)
         savedStateHandle.remove<Boolean>(SAVED_STATE_KEY_IS_COMPLETED)
         savedStateHandle.remove<ArrayList<String>>(SAVED_STATE_KEY_IMAGE_PATHS)
     }

@@ -52,6 +52,7 @@ class ProjectDetailViewModelTest {
                 title = any(),
                 notes = any(),
                 totalRows = any(),
+                rowsPerRepeat = any(),
                 projectType = any(),
                 imagePaths = any(),
                 completedAt = any(),
@@ -123,6 +124,31 @@ class ProjectDetailViewModelTest {
         val state = viewModel.uiState.value
         assertEquals(0, state.project!!.id)
         assertFalse(state.isLoading)
+    }
+
+    @Test
+    fun `loadProjectById with missing project sets load error`() = runTest {
+        coEvery { getProject(99) } returns null
+        val viewModel = createViewModel()
+
+        viewModel.loadProjectById(99)
+
+        val state = viewModel.uiState.value
+        assertEquals(R.string.error_project_not_found, state.loadError)
+        assertNull(state.project)
+        assertFalse(state.isLoading)
+    }
+
+    @Test
+    fun `attemptDismissal with load error sends Allowed`() = runTest {
+        coEvery { getProject(99) } returns null
+        val viewModel = createViewModel()
+        viewModel.loadProjectById(99)
+
+        viewModel.dismissalResult.test {
+            viewModel.attemptDismissal()
+            assertEquals(DismissalResult.Allowed, awaitItem())
+        }
     }
 
     @Test
@@ -274,6 +300,7 @@ class ProjectDetailViewModelTest {
                 title = any(),
                 notes = any(),
                 totalRows = any(),
+                rowsPerRepeat = any(),
                 projectType = any(),
                 imagePaths = any(),
                 completedAt = any(),
@@ -356,6 +383,7 @@ class ProjectDetailViewModelTest {
                 title = any(),
                 notes = any(),
                 totalRows = any(),
+                rowsPerRepeat = any(),
                 projectType = any(),
                 imagePaths = any(),
                 completedAt = any(),
@@ -477,5 +505,63 @@ class ProjectDetailViewModelTest {
         viewModel.loadProject(1, ProjectType.SINGLE)
 
         assertEquals("", viewModel.uiState.value.totalRows)
+    }
+
+    @Test
+    fun `loadProject for row and repeat populates rows per repeat and repeat goal`() = runTest {
+        val project = sampleProject().copy(
+            type = ProjectType.ROW_AND_REPEAT,
+            rowAdjustment = 12,
+            totalRows = 30,
+        )
+        coEvery { getProject(1) } returns project
+
+        val viewModel = createViewModel()
+        viewModel.loadProjectById(1)
+
+        assertEquals("12", viewModel.uiState.value.rowsPerRepeat)
+        assertEquals("30", viewModel.uiState.value.totalRows)
+    }
+
+    @Test
+    fun `loadProject for new row and repeat pre-fills default settings`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.loadProject(null, ProjectType.ROW_AND_REPEAT)
+
+        assertEquals("8", viewModel.uiState.value.rowsPerRepeat)
+        assertEquals("20", viewModel.uiState.value.totalRows)
+    }
+
+    @Test
+    fun `loadProjectById prefers database row and repeat settings over stale saved state`() = runTest {
+        val project = sampleProject().copy(
+            type = ProjectType.ROW_AND_REPEAT,
+            rowAdjustment = 8,
+            totalRows = 26,
+        )
+        coEvery { getProject(1) } returns project
+
+        val viewModel = createViewModel()
+        savedStateHandle["detail_project_id"] = 1
+        savedStateHandle["detail_total_rows"] = "25"
+        savedStateHandle["detail_rows_per_repeat"] = "8"
+
+        viewModel.loadProjectById(1)
+
+        assertEquals("26", viewModel.uiState.value.totalRows)
+        assertEquals("8", viewModel.uiState.value.rowsPerRepeat)
+    }
+
+    @Test
+    fun `updateRowsPerRepeat marks state as changed`() = runTest {
+        val project = sampleProject().copy(type = ProjectType.ROW_AND_REPEAT, rowAdjustment = 8, totalRows = 20)
+        coEvery { getProject(1) } returns project
+
+        val viewModel = createViewModel()
+        viewModel.loadProjectById(1)
+        viewModel.updateRowsPerRepeat("10")
+
+        assertEquals("10", viewModel.uiState.value.rowsPerRepeat)
+        assertTrue(viewModel.uiState.value.hasUnsavedChanges)
     }
 }
