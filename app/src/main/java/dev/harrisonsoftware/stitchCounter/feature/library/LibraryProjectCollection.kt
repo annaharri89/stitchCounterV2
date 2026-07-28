@@ -27,6 +27,11 @@ import androidx.compose.ui.unit.dp
 import dev.harrisonsoftware.stitchCounter.domain.model.Project
 import dev.harrisonsoftware.stitchCounter.feature.navigation.SheetScreen
 
+internal fun shouldEqualizeLibraryProjectHeights(isLandscape: Boolean): Boolean = isLandscape
+
+internal fun tallestLibraryProjectHeightRememberKey(isMultiSelectMode: Boolean): Boolean =
+    isMultiSelectMode
+
 @Composable
 internal fun LibraryProjectCollection(
     projects: List<Project>,
@@ -44,7 +49,9 @@ internal fun LibraryProjectCollection(
     val density = LocalDensity.current
     val lazyListState = rememberLazyListState()
     val lazyGridState = rememberLazyGridState()
-    var tallestProjectHeightPx by remember(projects, isMultiSelectMode) { mutableIntStateOf(0) }
+    var tallestProjectHeightPx by remember(tallestLibraryProjectHeightRememberKey(isMultiSelectMode)) {
+        mutableIntStateOf(0)
+    }
     var projectCountWhenSheetOpened by remember { mutableIntStateOf(-1) }
     var sheetWasOpenedDuringSession by remember { mutableStateOf(false) }
 
@@ -79,13 +86,17 @@ internal fun LibraryProjectCollection(
         }
     }
 
-    val equalHeightModifier = Modifier
-        .heightIn(min = with(density) { tallestProjectHeightPx.toDp() })
-        .onSizeChanged { size ->
-            if (size.height > tallestProjectHeightPx) {
-                tallestProjectHeightPx = size.height
+    val equalHeightModifier = if (shouldEqualizeLibraryProjectHeights(isLandscape)) {
+        Modifier
+            .heightIn(min = with(density) { tallestProjectHeightPx.toDp() })
+            .onSizeChanged { size ->
+                if (size.height > tallestProjectHeightPx) {
+                    tallestProjectHeightPx = size.height
+                }
             }
-        }
+    } else {
+        Modifier
+    }
 
     if (isLandscape) {
         LazyVerticalGrid(
