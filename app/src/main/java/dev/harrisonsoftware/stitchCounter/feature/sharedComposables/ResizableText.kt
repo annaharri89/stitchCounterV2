@@ -22,6 +22,7 @@ import kotlin.math.min
 fun ResizableText(
     text: String,
     modifier: Modifier = Modifier,
+    sizingReferenceText: String? = null,
     heightRatio: Float = 0.8f,
     widthRatio: Float = 0.4f,
     minFontSize: Float = 48f,
@@ -29,6 +30,8 @@ fun ResizableText(
     fontWeight: FontWeight = FontWeight.Bold,
     textAlign: TextAlign = TextAlign.Center
 ) {
+    val textForSizing = sizingReferenceText ?: text
+
     BoxWithConstraints(
         modifier = modifier
     ) {
@@ -55,7 +58,7 @@ fun ResizableText(
         
         val absoluteMinFontSize = minFontSize * 0.5f
         
-        val fontSize = remember(text, maxTextWidth, maxTextHeight, initialFontSize, minFontSize, maxFontSize, fontWeight, baseTypography) {
+        val fontSize = remember(textForSizing, maxTextWidth, maxTextHeight, initialFontSize, minFontSize, maxFontSize, fontWeight, baseTypography) {
             var currentSize = initialFontSize
             val baseStyle = TextStyle(
                 fontSize = baseTypography.fontSize,
@@ -75,7 +78,7 @@ fun ResizableText(
                 val textStyle = baseStyle.copy(fontSize = testSize.sp)
                 
                 val textLayoutResult = textMeasurer.measure(
-                    text = text,
+                    text = textForSizing,
                     style = textStyle,
                     constraints = Constraints(maxWidth = Int.MAX_VALUE)
                 )
@@ -97,7 +100,7 @@ fun ResizableText(
                 val textStyle = baseStyle.copy(fontSize = currentSize.sp)
                 
                 val textLayoutResult = textMeasurer.measure(
-                    text = text,
+                    text = textForSizing,
                     style = textStyle,
                     constraints = Constraints(maxWidth = Int.MAX_VALUE)
                 )

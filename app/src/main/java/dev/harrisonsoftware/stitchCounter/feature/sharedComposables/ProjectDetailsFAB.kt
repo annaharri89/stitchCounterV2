@@ -16,19 +16,23 @@ import dev.harrisonsoftware.stitchCounter.R
 @Composable
 fun ProjectDetailsFAB(
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    compact: Boolean = false,
 ) {
+    val fabSize = if (compact) 32.dp else 40.dp
+    val iconSize = if (compact) 16.dp else 20.dp
+    val startPadding = if (compact) 8.dp else 16.dp
     FloatingActionButton(
         onClick = onClick,
         modifier = modifier
-            .padding(start = 16.dp)
-            .size(40.dp),
+            .padding(start = startPadding)
+            .size(fabSize),
         containerColor = MaterialTheme.colorScheme.primaryContainer
     ) {
         Icon(
             imageVector = Icons.Default.Info,
             contentDescription = stringResource(R.string.cd_project_details),
-            modifier = Modifier.size(20.dp)
+            modifier = Modifier.size(iconSize)
         )
     }
 }
