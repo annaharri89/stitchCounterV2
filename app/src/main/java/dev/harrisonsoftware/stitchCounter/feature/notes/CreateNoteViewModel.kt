@@ -54,7 +54,13 @@ class CreateNoteViewModel @Inject constructor(
     fun loadNote(noteId: Int?) {
         viewModelScope.launch {
             if (noteId == null) {
+                if (shouldPreserveCreateDraft(_uiState.value)) {
+                    return@launch
+                }
                 resetToCreateMode()
+                return@launch
+            }
+            if (shouldPreserveEditDraft(_uiState.value, noteId)) {
                 return@launch
             }
             _uiState.update { currentState ->
@@ -128,6 +134,7 @@ class CreateNoteViewModel @Inject constructor(
     }
 
     fun confirmDiscard() {
+        resetToCreateMode()
         viewModelScope.launch { _dismissalResult.send(DismissalResult.Allowed) }
     }
 
@@ -196,6 +203,15 @@ class CreateNoteViewModel @Inject constructor(
         originalBody = ""
         _uiState.value = CreateNoteUiState()
     }
+
+    private fun shouldPreserveCreateDraft(currentState: CreateNoteUiState): Boolean =
+        !currentState.isEditMode && !currentState.isSaved && currentState.loadError == null
+
+    private fun shouldPreserveEditDraft(currentState: CreateNoteUiState, noteId: Int): Boolean =
+        currentState.noteId == noteId &&
+            !currentState.isSaved &&
+            currentState.loadError == null &&
+            !currentState.isLoading
 
     private fun hasUnsavedChanges(currentState: CreateNoteUiState): Boolean {
         if (currentState.isEditMode) {

@@ -244,6 +244,7 @@
     <string name="row_and_repeat_reset_all_message">Are you sure you want to reset the Row and Repeat counters?</string>
     <string name="cd_row_and_repeat_progress">Repeat progress: %1$d of %2$d</string>
     <string name="row_and_repeat_correct_repeat_button">Tap to correct Repeat count manually</string>
+    <string name="row_and_repeat_hide_correct_repeat_button">Hide manual Repeat correction</string>
     <string name="cd_row_and_repeat_correct_repeat_expanded">Manual repeat correction shown</string>
     <string name="cd_row_and_repeat_correct_repeat_collapsed">Manual repeat correction hidden</string>
 </resources>

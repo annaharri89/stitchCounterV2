@@ -62,7 +62,7 @@ class CreateNoteViewModelTest {
     )
 
     @Test
-    fun `loadNote with null resets to empty create form`() = runTest {
+    fun `loadNote with null preserves create draft across relaunch`() = runTest {
         val viewModel = createViewModel()
         viewModel.updateTitle("Draft title")
         viewModel.updateBody("Draft body")
@@ -71,11 +71,61 @@ class CreateNoteViewModelTest {
 
         val state = viewModel.uiState.value
         assertNull(state.noteId)
-        assertEquals("", state.title)
-        assertEquals("", state.body)
+        assertEquals("Draft title", state.title)
+        assertEquals("Draft body", state.body)
         assertFalse(state.isEditMode)
         assertFalse(state.isLoading)
         assertFalse(state.isSaved)
+    }
+
+    @Test
+    fun `loadNote with null resets after edit mode`() = runTest {
+        coEvery { getNote(7) } returns sampleNote
+        val viewModel = createViewModel()
+        viewModel.loadNote(7)
+        viewModel.updateTitle("Edited title")
+
+        viewModel.loadNote(null)
+
+        val state = viewModel.uiState.value
+        assertNull(state.noteId)
+        assertEquals("", state.title)
+        assertEquals("", state.body)
+        assertFalse(state.isEditMode)
+    }
+
+    @Test
+    fun `loadNote with same id preserves edit draft across relaunch`() = runTest {
+        coEvery { getNote(7) } returns sampleNote
+        val viewModel = createViewModel()
+        viewModel.loadNote(7)
+        viewModel.updateTitle("Edited title")
+        viewModel.updateBody("Edited body")
+
+        viewModel.loadNote(7)
+
+        val state = viewModel.uiState.value
+        assertEquals(7, state.noteId)
+        assertEquals("Edited title", state.title)
+        assertEquals("Edited body", state.body)
+        coVerify(exactly = 1) { getNote(7) }
+    }
+
+    @Test
+    fun `confirmDiscard clears create draft before allowing dismissal`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.updateTitle("Draft title")
+        viewModel.updateBody("Draft body")
+
+        viewModel.dismissalResult.test {
+            viewModel.confirmDiscard()
+            assertEquals(DismissalResult.Allowed, awaitItem())
+        }
+
+        val state = viewModel.uiState.value
+        assertEquals("", state.title)
+        assertEquals("", state.body)
+        assertNull(state.noteId)
     }
 
     @Test
@@ -249,6 +299,43 @@ class CreateNoteViewModelTest {
             viewModel.confirmDiscard()
             assertEquals(DismissalResult.Allowed, awaitItem())
         }
+    }
+
+    @Test
+    fun `loadNote with null after save resets create form`() = runTest {
+        coEvery { createNote("Title", "Body", any()) } returns CreateNoteResult.Success(1L)
+        val viewModel = createViewModel()
+        viewModel.updateTitle("Title")
+        viewModel.updateBody("Body")
+        viewModel.saveNote()
+
+        viewModel.loadNote(null)
+
+        val state = viewModel.uiState.value
+        assertEquals("", state.title)
+        assertEquals("", state.body)
+        assertNull(state.noteId)
+        assertFalse(state.isSaved)
+    }
+
+    @Test
+    fun `loadNote with id after save reloads note from repository`() = runTest {
+        coEvery { getNote(7) } returns sampleNote
+        coEvery { updateNote(7, "New title", "New body", any()) } returns UpdateNoteResult.Success
+        val viewModel = createViewModel()
+        viewModel.loadNote(7)
+        viewModel.updateTitle("New title")
+        viewModel.updateBody("New body")
+        viewModel.saveNote()
+
+        viewModel.loadNote(7)
+
+        val state = viewModel.uiState.value
+        assertEquals(7, state.noteId)
+        assertEquals("Existing title", state.title)
+        assertEquals("Existing body", state.body)
+        assertFalse(state.isSaved)
+        coVerify(exactly = 2) { getNote(7) }
     }
 
     @Test

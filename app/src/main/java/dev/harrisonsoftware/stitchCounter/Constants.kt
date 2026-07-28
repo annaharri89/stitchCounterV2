@@ -16,6 +16,7 @@ object Constants {
     const val LOG_TAG_LAUNCHER_ICON_MANAGER = "LauncherIconManager"
     const val LOG_TAG_TIMBER_FILE_LOG_TREE = "SCTimberFileLogTree"
     const val LOG_TAG_IMAGE_SAVE = "ImageSave"
+    const val LOG_TAG_COUNTER_HAPTIC = "CounterHaptic"
     const val PRIVACY_POLICY_URL = "https://harrisonsoftware.dev/stitch-counter-v2/privacy-policy"
     const val EULA_URL = "https://harrisonsoftware.dev/stitch-counter-v2/eula"
     const val KOFI_URL = "https://ko-fi.com/annaharri"

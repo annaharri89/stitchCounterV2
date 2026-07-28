@@ -17,6 +17,7 @@ fun CounterTopBar(
     modifier: Modifier = Modifier,
     title: String,
     topBarContent: (@Composable () -> Unit)? = null,
+    compact: Boolean = false,
 ) {
     if (title.isNotEmpty() || topBarContent != null) {
         Row(
@@ -28,7 +29,11 @@ fun CounterTopBar(
             if (title.isNotEmpty()) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = if (compact) {
+                        MaterialTheme.typography.titleSmall
+                    } else {
+                        MaterialTheme.typography.titleMedium
+                    },
                     modifier = Modifier.weight(1f)
                 )
             } else {

@@ -378,7 +378,11 @@ private fun DashedCorrectionButton(
 ) {
     val strokeColor = MaterialTheme.colorScheme.outline
     val shape = RoundedCornerShape(50)
-    val label = stringResource(R.string.row_and_repeat_correct_repeat_button)
+    val label = if (isExpanded) {
+        stringResource(R.string.row_and_repeat_hide_correct_repeat_button)
+    } else {
+        stringResource(R.string.row_and_repeat_correct_repeat_button)
+    }
     val expandedStateDescription =
         stringResource(R.string.cd_row_and_repeat_correct_repeat_expanded)
     val collapsedStateDescription =
