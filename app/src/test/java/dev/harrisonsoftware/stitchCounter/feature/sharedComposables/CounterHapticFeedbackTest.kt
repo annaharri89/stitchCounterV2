@@ -1,6 +1,6 @@
 package dev.harrisonsoftware.stitchCounter.feature.sharedComposables
 
-import android.view.HapticFeedbackConstants
+import android.content.Context
 import android.view.View
 import io.mockk.every
 import io.mockk.mockk
@@ -11,22 +11,34 @@ import org.junit.Test
 class CounterHapticFeedbackTest {
 
     @Test
-    fun `performCounterButtonHapticFeedback triggers context click when enabled`() {
+    fun `performCounterButtonHapticFeedback uses vibrator click when enabled`() {
         val view = mockk<View>(relaxed = true)
-        every { view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK) } returns true
+        val context = mockk<Context>(relaxed = true)
+        every { view.context } returns context
+        var clickVibrationCount = 0
 
-        performCounterButtonHapticFeedback(view, enabled = true)
+        performCounterButtonHapticFeedback(
+            view = view,
+            enabled = true,
+            clickVibration = { clickVibrationCount++ },
+        )
 
-        verify(exactly = 1) { view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK) }
+        assertEquals(1, clickVibrationCount)
     }
 
     @Test
     fun `performCounterButtonHapticFeedback does nothing when disabled`() {
         val view = mockk<View>(relaxed = true)
+        var clickVibrationCount = 0
 
-        performCounterButtonHapticFeedback(view, enabled = false)
+        performCounterButtonHapticFeedback(
+            view = view,
+            enabled = false,
+            clickVibration = { clickVibrationCount++ },
+        )
 
-        verify(exactly = 0) { view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK) }
+        assertEquals(0, clickVibrationCount)
+        verify(exactly = 0) { view.context }
     }
 
     @Test
